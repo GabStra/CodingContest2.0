@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package rpc;
+
+service Cpp{
+    rpc RunCpp(CppRequest) returns (CppResponse) {}
+}
+
+message CppRequest{
+    string id =1;
+    string code = 2;
+    string input= 3;
+}
+
+message CppResponse{
+    string id =1;
+    string console = 2;
+    string output= 3;
+    bool timeout=4;
+    string error=5;
+}
