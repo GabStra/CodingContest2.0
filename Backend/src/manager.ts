@@ -3,6 +3,7 @@ import axios from "axios";
 
 import { ChannelCredentials, createChannel, createClient } from "nice-grpc";
 import { CppClient, CppDefinition } from "../../Shared/compiled_proto/cpp";
+import { millisecFromProcessHrTime } from "./utils";
 
 export interface ContainerStatus {
   cpu: {
@@ -28,44 +29,40 @@ export interface IContainerData {
   id: string;
   port: number;
   isReady: boolean;
-  status: ContainerStatus | null;
   isHealthy: boolean;
   client: CppClient;
-  getLoad(): number;
+  LastExecutionHrTime: [number, number];
+  inQueue: boolean;
+  isFree: boolean;
+  getTime(): number;
 }
 
 export class ContainerData implements IContainerData {
   id: string;
   port: number;
   isReady: boolean;
-  status: ContainerStatus | null;
   isHealthy: boolean;
   client: CppClient;
-  constructor(
-    id: string,
-    port: number,
-    isReady: boolean,
-    status: ContainerStatus | null,
-    isHealthy: boolean
-  ) {
+  LastExecutionHrTime: [number, number];
+
+  inQueue: boolean;
+  isFree: boolean;
+  constructor(id: string, port: number, isReady: boolean, isHealthy: boolean) {
     this.id = id;
     this.port = port;
     this.isReady = isReady;
-    this.status = status;
     this.isHealthy = isHealthy;
+    this.LastExecutionHrTime = [0, 0];
+    this.inQueue = false;
+    this.isFree = true;
     const channel = createChannel(
       "0.0.0.0:" + port,
       ChannelCredentials.createInsecure()
     );
     this.client = createClient(CppDefinition, channel);
   }
-
-  getLoad(): number {
-    if (!this.status) return 99999;
-    let load =
-      Number(this.isHealthy) + this.status.mem.free + this.status.cpu.loadAvg5;
-    if (this.status.isRunning) load += 100;
-    return load;
+  getTime(): number {
+    return millisecFromProcessHrTime(this.LastExecutionHrTime);
   }
 }
 
@@ -81,7 +78,6 @@ async function HealthCheckContainer(containerData: ContainerData) {
   );
 
   containerData.isHealthy = response.status === 200;
-  containerData.status = response?.data;
 }
 
 export async function HealthCheck() {
@@ -135,7 +131,7 @@ export async function initDocker(containers: number, memory: number) {
     });
 
     ContainersData.push(
-      new ContainerData(container.id, Number(hostPort), true, null, true)
+      new ContainerData(container.id, Number(hostPort), true, true)
     );
     container.start();
   }
