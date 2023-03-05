@@ -4,24 +4,27 @@ import { CppRequest, CppResponse } from "../../Shared/compiled_proto/cpp";
 
 const FILE_NAME = "app.cpp";
 
-export async function compileCpp(request: CppRequest) {
+export async function compileCpp(request: CppRequest, signal: AbortSignal) {
   await fs.writeFile("app.cpp", request.code);
-  const { stdout, stderr } = await exec(`g++ ${FILE_NAME}`);
+  const { stdout, stderr } = await exec(`g++ ${FILE_NAME}`, { signal: signal });
   return stdout;
 }
 
-export async function executeProgram(request: CppRequest) {
+export async function executeProgram(request: CppRequest, signal: AbortSignal) {
   await fs.writeFile("input.txt", request.input);
-  const { stdout, stderr } = await exec(`./a.out`);
+  const { stdout, stderr } = await exec(`./a.out`, { signal: signal });
   return stdout;
 }
 
-export async function runCpp(request: CppRequest): Promise<CppResponse> {
+export async function runCpp(
+  request: CppRequest,
+  signal: AbortSignal
+): Promise<CppResponse> {
   try {
     // const controller = new AbortController();
     // const { signal } = controller;
-    await compileCpp(request);
-    let programOutput = await executeProgram(request);
+    await compileCpp(request, signal);
+    let programOutput = await executeProgram(request, signal);
     return {
       id: request.id,
       console: programOutput,

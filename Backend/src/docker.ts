@@ -1,5 +1,6 @@
 import Dockerode from "dockerode";
 import { ContainerData } from "./docker/classes";
+import { WaitForMs } from "./utils";
 
 export const Containers: ContainerData[] = [];
 
@@ -7,8 +8,10 @@ export async function ClearContainers(dockerClient: Dockerode) {
   await new Promise((resolve, reject) => {
     dockerClient.listContainers(function (err, containers) {
       try {
-        containers!.forEach(function (containerInfo) {
+        containers!.forEach(async (containerInfo) => {
           dockerClient.getContainer(containerInfo.Id).kill();
+          await WaitForMs(2000);
+          dockerClient.getContainer(containerInfo.Id).remove();
         });
         resolve(1);
       } catch (err) {
@@ -27,7 +30,6 @@ export async function CreateContainer(
 ) {
   let hostPort = String(containerPort);
   return await dockerClient.createContainer({
-    name: containerName,
     Image: imageName,
     HostConfig: {
       Memory: memory,

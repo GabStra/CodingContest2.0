@@ -1,7 +1,7 @@
 import { ServerCredentials } from "@grpc/grpc-js";
 import dotenv from "dotenv";
 dotenv.config();
-import { ChannelOptions, createServer } from "nice-grpc";
+import { CallContext, ChannelOptions, createServer } from "nice-grpc";
 import {
   CppRequest,
   CppResponse,
@@ -14,11 +14,13 @@ import { runCpp } from "./logic";
 
 async function main() {
   const cppServiceImpl: CppServiceImplementation = {
-    async runCpp(request: CppRequest): Promise<DeepPartial<CppResponse>> {
+    async runCpp(
+      request: CppRequest,
+      context: CallContext
+    ): Promise<DeepPartial<CppResponse>> {
       let start = process.hrtime();
-      let response = await runCpp(request);
+      let response = await runCpp(request, context.signal);
       let elapsed = process.hrtime(start)[0];
-      console.log("Executed in:", elapsed + "s ", "Output:", !!response.output);
       return response;
     },
   };

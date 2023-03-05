@@ -3,13 +3,12 @@ import { ContainerData } from "../classes";
 
 export enum WorkerMessageType {
   UpdateContainer,
-  ReceiveTaskResult,
-  ReceiveNewTask,
-  SendNewTask,
-  SendLog,
+  TaskResult,
+  NewTask,
+  Log,
   SetContainersData,
-  SendCppResponse,
   StopTask,
+  Error,
 }
 export interface WorkerMessage {
   type: WorkerMessageType;
@@ -18,4 +17,5 @@ export interface WorkerMessage {
   log: string;
   containers: ContainerData[];
   cppResponse: CppResponse;
+  error: any;
 }

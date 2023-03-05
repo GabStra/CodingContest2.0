@@ -19,6 +19,13 @@ async function OnUpdateContainer(container: ContainerData) {
   containersLock.release();
 }
 
+async function OnStopTask(cppRequest: CppRequest) {
+  worker.postMessage({
+    type: WorkerMessageType.StopTask,
+    cppRequest: cppRequest,
+  } as WorkerMessage);
+}
+
 async function ScheduleTask() {
   await taskLock.acquire();
   let stop = cppRequests.length === 0;
@@ -43,7 +50,7 @@ async function ScheduleTask() {
   ContainersData[index].isBusy = true;
   let cppRequest = cppRequests.shift();
   worker.postMessage({
-    type: WorkerMessageType.SendNewTask,
+    type: WorkerMessageType.NewTask,
     cppRequest: cppRequest,
     container: container,
   } as WorkerMessage);
@@ -61,9 +68,11 @@ const cppRequests: CppRequest[] = [];
 async function main() {
   parentPort!.on("message", async (msg: WorkerMessage) => {
     switch (msg.type) {
-      case WorkerMessageType.SendNewTask:
-        //console.log("RECEIVED", msg.task.id);
+      case WorkerMessageType.NewTask:
         await OnReceiveNewTask(msg.cppRequest);
+        return;
+      case WorkerMessageType.StopTask:
+        await OnStopTask(msg.cppRequest);
         return;
     }
   });
@@ -78,7 +87,10 @@ async function main() {
       case WorkerMessageType.SetContainersData:
         ContainersData = msg.containers;
         return;
-      case WorkerMessageType.SendCppResponse:
+      case WorkerMessageType.TaskResult:
+        parentPort!.postMessage(msg);
+        return;
+      case WorkerMessageType.Error:
         parentPort!.postMessage(msg);
         return;
     }

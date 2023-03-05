@@ -37,7 +37,7 @@ function SendUpdateContainerMessage(container: ContainerData) {
 
 function SendCppResponseMessage(cppResponse: CppResponse) {
   parentPort!.postMessage({
-    type: WorkerMessageType.SendCppResponse,
+    type: WorkerMessageType.TaskResult,
     cppResponse: cppResponse,
   } as WorkerMessage);
 }
@@ -107,9 +107,21 @@ async function main() {
 
   parentPort!.on("message", async (msg: WorkerMessage) => {
     switch (msg.type) {
-      case WorkerMessageType.SendNewTask:
-        let cppResponse = await ProcessTask(msg.cppRequest, msg.container);
-        SendCppResponseMessage(cppResponse);
+      case WorkerMessageType.NewTask:
+        try {
+          let cppResponse = await ProcessTask(msg.cppRequest, msg.container);
+          SendCppResponseMessage(cppResponse);
+        } catch (error: unknown) {
+          console.log(error);
+          parentPort!.postMessage({
+            type: WorkerMessageType.Error,
+            cppRequest: {
+              id: msg.cppRequest.id,
+            },
+            error: error,
+          } as WorkerMessage);
+        }
+
         return;
       case WorkerMessageType.StopTask:
         StopTask(msg.cppRequest.id);
