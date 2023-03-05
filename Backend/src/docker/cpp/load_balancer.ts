@@ -68,7 +68,6 @@ async function main() {
     }
   });
 
-  console.log("HELLO BALANCER");
   worker = new Worker("./dist/Backend/src/docker/cpp/scheduler.js");
 
   worker.on("message", async (msg: WorkerMessage) => {

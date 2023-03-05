@@ -20,12 +20,14 @@ export async function ClearContainers(dockerClient: Dockerode) {
 
 export async function CreateContainer(
   dockerClient: Dockerode,
+  containerName: string,
   imageName: string,
   containerPort: number,
   memory: number
 ) {
   let hostPort = String(containerPort);
   return await dockerClient.createContainer({
+    name: containerName,
     Image: imageName,
     HostConfig: {
       Memory: memory,
@@ -44,7 +46,7 @@ export async function CreateContainer(
   });
 }
 
-export async function CreateDocker(url: string | undefined, port: number) {
+export function CreateDocker(url: string | undefined, port: number) {
   return new Dockerode({
     host: url ?? "0.0.0.0",
     port: port,

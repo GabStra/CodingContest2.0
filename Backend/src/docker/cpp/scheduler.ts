@@ -61,8 +61,7 @@ async function StopTask(id: string) {
 
 async function main() {
   try {
-    console.log("HELLO SCHEDULER");
-    let dockerClient = await CreateDockerClient(
+    let dockerClient = CreateDockerClient(
       process.env.DOCKER_URL,
       Number(process.env.DOCKER_PORT)
     );
@@ -74,6 +73,7 @@ async function main() {
       let port = Number(process.env.CPP_CONTAINER_PORT_START) + i;
       let container = await CreateContainer(
         dockerClient,
+        "cpp-" + i,
         process.env.CPP_IMAGE_NAME!,
         port,
         Number(process.env.CPP_CONTAINER_MEMORY)

@@ -23,7 +23,7 @@ export function initWorker() {
   });
 }
 
-export function GetCppRouter() {
+export function CppRouter() {
   const emitter = new EventEmitter();
   const responseByTaskId = new Map<string, CppResponse>();
 
@@ -31,7 +31,6 @@ export function GetCppRouter() {
   worker.on("message", async (msg: WorkerMessage) => {
     switch (msg.type) {
       case WorkerMessageType.SendCppResponse:
-        console.log(msg.cppResponse);
         responseByTaskId.set(msg.cppResponse.id, msg.cppResponse);
         emitter.emit(msg.cppResponse.id);
     }
@@ -42,8 +41,7 @@ export function GetCppRouter() {
 
   router.post("/run-cpp", async (req, res, next) => {
     let cppRequest: CppRequest = req.body;
-    console.log("START");
-    let id = 0;
+
     let base = await fs.readFile("app.cpp", "utf8");
     let code = await fs.readFile(fileNames[0], "utf8");
     let source = base.replace("{code}", code);
@@ -61,6 +59,7 @@ export function GetCppRouter() {
     console.log(cpp.id);
     await waitFor(cpp.id, emitter);
     res.send(responseByTaskId.get(cpp.id));
+    responseByTaskId.delete(cpp.id);
   });
 
   return router;
