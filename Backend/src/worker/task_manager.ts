@@ -85,15 +85,19 @@ class TaskManager {
       switch (msg.type) {
         case LoadBalancerMessageType.NewTask:
           try {
+            let cppResponse = await this.processTask(
+              msg.cppRequest,
+              msg.containerId
+            );
+            console.log(cppResponse);
             this.servicePort?.postMessage({
               type: TaskManagerMessageType.TaskResult,
-              cppResponse: await this.processTask(
-                msg.cppRequest,
-                msg.containerId
-              ),
+              cppResponse: cppResponse,
             } as TaskManagerMessage);
           } catch (error) {
+            console.log(error);
             if (isAbortError(error)) {
+              //TEST
             }
 
             this.servicePort?.postMessage({

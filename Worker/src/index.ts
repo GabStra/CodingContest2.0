@@ -8,8 +8,12 @@ import {
   CppServiceImplementation,
   DeepPartial,
   CppDefinition,
+  HealthRequest,
+  HealthResponse,
+  CppResponse_TaskStatus,
+  CppResponse_TaskType,
 } from "../../Shared/compiled_proto/cpp";
-
+import VitalSigns from "vitalsigns";
 import { runCpp } from "./logic";
 
 const cppServiceImpl: CppServiceImplementation = {
@@ -17,10 +21,16 @@ const cppServiceImpl: CppServiceImplementation = {
     request: CppRequest,
     context: CallContext
   ): Promise<DeepPartial<CppResponse>> {
-    let start = process.hrtime();
-    let response = await runCpp(request, context.signal);
-    let elapsed = process.hrtime(start)[0];
-    return response;
+    return await runCpp(request, context.signal);
+  },
+
+  async isHealthy(
+    request: HealthRequest,
+    context: CallContext
+  ): Promise<DeepPartial<HealthResponse>> {
+    return {
+      isHealthy: vitalSigns.isHealthy(),
+    } as HealthResponse;
   },
 };
 
@@ -30,4 +40,9 @@ async function main() {
   await server.listen("0.0.0.0:80", ServerCredentials.createInsecure());
 }
 
+let vitalSigns = new VitalSigns();
+vitalSigns.monitor("cpu");
+vitalSigns.monitor("tick");
+vitalSigns.unhealthyWhen("cpu", "loadAvg15").greaterThan(90);
+vitalSigns.unhealthyWhen("tick", "maxMs").greaterThan(500);
 main();

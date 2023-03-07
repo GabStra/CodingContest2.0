@@ -12,10 +12,103 @@ export interface CppRequest {
 
 export interface CppResponse {
   id: string;
-  console: string;
+  stdout: string;
+  stderr: string;
   output: string;
-  timeout: boolean;
-  error: string;
+  taskType: CppResponse_TaskType;
+  taskStatus: CppResponse_TaskStatus;
+}
+
+export enum CppResponse_TaskType {
+  COMPILE = 0,
+  RUN = 1,
+  UNRECOGNIZED = -1,
+}
+
+export function cppResponse_TaskTypeFromJSON(object: any): CppResponse_TaskType {
+  switch (object) {
+    case 0:
+    case "COMPILE":
+      return CppResponse_TaskType.COMPILE;
+    case 1:
+    case "RUN":
+      return CppResponse_TaskType.RUN;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return CppResponse_TaskType.UNRECOGNIZED;
+  }
+}
+
+export function cppResponse_TaskTypeToJSON(object: CppResponse_TaskType): string {
+  switch (object) {
+    case CppResponse_TaskType.COMPILE:
+      return "COMPILE";
+    case CppResponse_TaskType.RUN:
+      return "RUN";
+    case CppResponse_TaskType.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+export enum CppResponse_TaskStatus {
+  SUCCEDED = 0,
+  ABORTED = 1,
+  TIMEOUT = 2,
+  ERROR = 3,
+  FAILED = 4,
+  UNRECOGNIZED = -1,
+}
+
+export function cppResponse_TaskStatusFromJSON(object: any): CppResponse_TaskStatus {
+  switch (object) {
+    case 0:
+    case "SUCCEDED":
+      return CppResponse_TaskStatus.SUCCEDED;
+    case 1:
+    case "ABORTED":
+      return CppResponse_TaskStatus.ABORTED;
+    case 2:
+    case "TIMEOUT":
+      return CppResponse_TaskStatus.TIMEOUT;
+    case 3:
+    case "ERROR":
+      return CppResponse_TaskStatus.ERROR;
+    case 4:
+    case "FAILED":
+      return CppResponse_TaskStatus.FAILED;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return CppResponse_TaskStatus.UNRECOGNIZED;
+  }
+}
+
+export function cppResponse_TaskStatusToJSON(object: CppResponse_TaskStatus): string {
+  switch (object) {
+    case CppResponse_TaskStatus.SUCCEDED:
+      return "SUCCEDED";
+    case CppResponse_TaskStatus.ABORTED:
+      return "ABORTED";
+    case CppResponse_TaskStatus.TIMEOUT:
+      return "TIMEOUT";
+    case CppResponse_TaskStatus.ERROR:
+      return "ERROR";
+    case CppResponse_TaskStatus.FAILED:
+      return "FAILED";
+    case CppResponse_TaskStatus.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+export interface HealthRequest {
+}
+
+export interface HealthResponse {
+  isHealthy: boolean;
+  errorCounter: number;
 }
 
 function createBaseCppRequest(): CppRequest {
@@ -90,7 +183,7 @@ export const CppRequest = {
 };
 
 function createBaseCppResponse(): CppResponse {
-  return { id: "", console: "", output: "", timeout: false, error: "" };
+  return { id: "", stdout: "", stderr: "", output: "", taskType: 0, taskStatus: 0 };
 }
 
 export const CppResponse = {
@@ -98,17 +191,20 @@ export const CppResponse = {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
-    if (message.console !== "") {
-      writer.uint32(18).string(message.console);
+    if (message.stdout !== "") {
+      writer.uint32(18).string(message.stdout);
+    }
+    if (message.stderr !== "") {
+      writer.uint32(26).string(message.stderr);
     }
     if (message.output !== "") {
-      writer.uint32(26).string(message.output);
+      writer.uint32(34).string(message.output);
     }
-    if (message.timeout === true) {
-      writer.uint32(32).bool(message.timeout);
+    if (message.taskType !== 0) {
+      writer.uint32(40).int32(message.taskType);
     }
-    if (message.error !== "") {
-      writer.uint32(42).string(message.error);
+    if (message.taskStatus !== 0) {
+      writer.uint32(48).int32(message.taskStatus);
     }
     return writer;
   },
@@ -124,16 +220,19 @@ export const CppResponse = {
           message.id = reader.string();
           break;
         case 2:
-          message.console = reader.string();
+          message.stdout = reader.string();
           break;
         case 3:
-          message.output = reader.string();
+          message.stderr = reader.string();
           break;
         case 4:
-          message.timeout = reader.bool();
+          message.output = reader.string();
           break;
         case 5:
-          message.error = reader.string();
+          message.taskType = reader.int32() as any;
+          break;
+        case 6:
+          message.taskStatus = reader.int32() as any;
           break;
         default:
           reader.skipType(tag & 7);
@@ -146,20 +245,22 @@ export const CppResponse = {
   fromJSON(object: any): CppResponse {
     return {
       id: isSet(object.id) ? String(object.id) : "",
-      console: isSet(object.console) ? String(object.console) : "",
+      stdout: isSet(object.stdout) ? String(object.stdout) : "",
+      stderr: isSet(object.stderr) ? String(object.stderr) : "",
       output: isSet(object.output) ? String(object.output) : "",
-      timeout: isSet(object.timeout) ? Boolean(object.timeout) : false,
-      error: isSet(object.error) ? String(object.error) : "",
+      taskType: isSet(object.taskType) ? cppResponse_TaskTypeFromJSON(object.taskType) : 0,
+      taskStatus: isSet(object.taskStatus) ? cppResponse_TaskStatusFromJSON(object.taskStatus) : 0,
     };
   },
 
   toJSON(message: CppResponse): unknown {
     const obj: any = {};
     message.id !== undefined && (obj.id = message.id);
-    message.console !== undefined && (obj.console = message.console);
+    message.stdout !== undefined && (obj.stdout = message.stdout);
+    message.stderr !== undefined && (obj.stderr = message.stderr);
     message.output !== undefined && (obj.output = message.output);
-    message.timeout !== undefined && (obj.timeout = message.timeout);
-    message.error !== undefined && (obj.error = message.error);
+    message.taskType !== undefined && (obj.taskType = cppResponse_TaskTypeToJSON(message.taskType));
+    message.taskStatus !== undefined && (obj.taskStatus = cppResponse_TaskStatusToJSON(message.taskStatus));
     return obj;
   },
 
@@ -170,10 +271,116 @@ export const CppResponse = {
   fromPartial(object: DeepPartial<CppResponse>): CppResponse {
     const message = createBaseCppResponse();
     message.id = object.id ?? "";
-    message.console = object.console ?? "";
+    message.stdout = object.stdout ?? "";
+    message.stderr = object.stderr ?? "";
     message.output = object.output ?? "";
-    message.timeout = object.timeout ?? false;
-    message.error = object.error ?? "";
+    message.taskType = object.taskType ?? 0;
+    message.taskStatus = object.taskStatus ?? 0;
+    return message;
+  },
+};
+
+function createBaseHealthRequest(): HealthRequest {
+  return {};
+}
+
+export const HealthRequest = {
+  encode(_: HealthRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): HealthRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHealthRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): HealthRequest {
+    return {};
+  },
+
+  toJSON(_: HealthRequest): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create(base?: DeepPartial<HealthRequest>): HealthRequest {
+    return HealthRequest.fromPartial(base ?? {});
+  },
+
+  fromPartial(_: DeepPartial<HealthRequest>): HealthRequest {
+    const message = createBaseHealthRequest();
+    return message;
+  },
+};
+
+function createBaseHealthResponse(): HealthResponse {
+  return { isHealthy: false, errorCounter: 0 };
+}
+
+export const HealthResponse = {
+  encode(message: HealthResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.isHealthy === true) {
+      writer.uint32(8).bool(message.isHealthy);
+    }
+    if (message.errorCounter !== 0) {
+      writer.uint32(16).int32(message.errorCounter);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): HealthResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHealthResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.isHealthy = reader.bool();
+          break;
+        case 2:
+          message.errorCounter = reader.int32();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): HealthResponse {
+    return {
+      isHealthy: isSet(object.isHealthy) ? Boolean(object.isHealthy) : false,
+      errorCounter: isSet(object.errorCounter) ? Number(object.errorCounter) : 0,
+    };
+  },
+
+  toJSON(message: HealthResponse): unknown {
+    const obj: any = {};
+    message.isHealthy !== undefined && (obj.isHealthy = message.isHealthy);
+    message.errorCounter !== undefined && (obj.errorCounter = Math.round(message.errorCounter));
+    return obj;
+  },
+
+  create(base?: DeepPartial<HealthResponse>): HealthResponse {
+    return HealthResponse.fromPartial(base ?? {});
+  },
+
+  fromPartial(object: DeepPartial<HealthResponse>): HealthResponse {
+    const message = createBaseHealthResponse();
+    message.isHealthy = object.isHealthy ?? false;
+    message.errorCounter = object.errorCounter ?? 0;
     return message;
   },
 };
@@ -191,15 +398,25 @@ export const CppDefinition = {
       responseStream: false,
       options: {},
     },
+    isHealthy: {
+      name: "IsHealthy",
+      requestType: HealthRequest,
+      requestStream: false,
+      responseType: HealthResponse,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
 export interface CppServiceImplementation<CallContextExt = {}> {
   runCpp(request: CppRequest, context: CallContext & CallContextExt): Promise<DeepPartial<CppResponse>>;
+  isHealthy(request: HealthRequest, context: CallContext & CallContextExt): Promise<DeepPartial<HealthResponse>>;
 }
 
 export interface CppClient<CallOptionsExt = {}> {
   runCpp(request: DeepPartial<CppRequest>, options?: CallOptions & CallOptionsExt): Promise<CppResponse>;
+  isHealthy(request: DeepPartial<HealthRequest>, options?: CallOptions & CallOptionsExt): Promise<HealthResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

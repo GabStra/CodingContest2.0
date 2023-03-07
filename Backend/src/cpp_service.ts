@@ -18,11 +18,6 @@ import {
   TaskStatus,
 } from "./message/load_balancer";
 
-export interface TaskOutcome {
-  status: TaskManagerMessageType;
-  cppResponse?: CppResponse;
-}
-
 export class CppService {
   private taskResultEmitter: EventEmitter2;
   private checkTaskStatusEmitter: EventEmitter2;
@@ -135,10 +130,7 @@ export class CppService {
       if (msg.type === TaskManagerMessageType.TaskAbort) {
         this.taskAbortEmitter.emit(msg.taskId);
       } else {
-        this.taskResultEmitter.emit(msg.cppResponse.id, {
-          status: msg.type,
-          cppResponse: msg.cppResponse,
-        } as TaskOutcome);
+        this.taskResultEmitter.emit(msg.cppResponse.id, msg.cppResponse);
       }
     });
   }
@@ -158,20 +150,7 @@ export class CppService {
     } as CppServiceMessage);
 
     let emitterOutcome = await this.taskResultEmitter.waitFor(cpp.id);
-
-    try {
-      let taskOutcome = emitterOutcome[0] as TaskOutcome;
-      switch (taskOutcome.status) {
-        case TaskManagerMessageType.TaskResult:
-          let cppResponse = taskOutcome.cppResponse;
-          return cppResponse;
-        case TaskManagerMessageType.TaskResult:
-          //TODO
-          break;
-      }
-    } catch {
-      return;
-    }
+    return emitterOutcome[0] as CppResponse;
   }
 
   async checkTask(taskId: string) {
@@ -194,7 +173,6 @@ export class CppService {
     } as CppServiceMessage);
 
     await this.taskAbortEmitter.waitFor(taskId, 10000);
-    this.taskResultEmitter.emit(taskId);
     return true;
   }
 }

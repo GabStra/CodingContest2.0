@@ -19,7 +19,6 @@ import {
   TaskManagerMessageType,
 } from "../message/task_manager";
 dotenv.config();
-
 class DockerManager {
   dockerode: Dockerode;
   taskManagerPort: MessagePort | null = null;

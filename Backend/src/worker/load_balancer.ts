@@ -48,7 +48,9 @@ class LoadBalancer {
     if (stop) return;
 
     await this.containersLock.acquire();
+
     let anyAvailableContainer = this.containersStatus.some((c) => !c.isBusy);
+    console.log(anyAvailableContainer);
     if (!anyAvailableContainer) {
       this.containersLock.release();
       return;
@@ -61,7 +63,8 @@ class LoadBalancer {
 
     await this.taskLock.acquire();
     let container = availableContainers[0];
-    container.isBusy = true;
+    let index = this.containersStatus.findIndex((c) => c.id === container.id);
+    this.containersStatus[index].isBusy = true;
     let cppRequest = this.cppRequests.shift();
     this.taskManagerPort?.postMessage({
       type: LoadBalancerMessageType.NewTask,
@@ -137,16 +140,11 @@ class LoadBalancer {
       }
     });
   }
-
-  hasAllPorts() {
-    return !(!this.servicePort || !this.dockerPort || !this.taskManagerPort);
-  }
 }
 
 async function main() {
   const loadBalancer = new LoadBalancer();
   parentPort?.on("message", async (msg: PortMessage) => {
-    //console.log(Recipient[msg.recipient]);
     switch (msg.recipient) {
       case Recipient.CppService:
         loadBalancer.setServicePort(msg.port);
