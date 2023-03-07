@@ -92,7 +92,7 @@ class TaskManager {
                 msg.containerId
               ),
             } as TaskManagerMessage);
-          } catch (error: unknown) {
+          } catch (error) {
             if (isAbortError(error)) {
             }
 

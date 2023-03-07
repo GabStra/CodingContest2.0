@@ -73,7 +73,7 @@ class DockerManager {
       }
     });
   }
-
+  //pi
   setLoadBalancerPort(port: MessagePort) {
     this.loadBalancerPort = port;
   }
@@ -93,6 +93,7 @@ async function main() {
   });
 
   await dockerManager.ClearContainers();
+  await WaitForMs(2000);
   await dockerManager.initContainers();
 
   while (true) {

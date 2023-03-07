@@ -52,8 +52,6 @@ export class CppService {
     const cppServiceLoadBalancerChannel = new MessageChannel();
     const cppServiceTaskManagerChannel = new MessageChannel();
 
-    console.log("HELLO");
-
     // SET LOAD BALANCER <-> TASK MANAGER
     this.loadBalancerWorker.postMessage(
       {

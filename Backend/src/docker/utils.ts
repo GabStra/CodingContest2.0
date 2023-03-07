@@ -33,6 +33,7 @@ export async function ClearContainers(dockerClient: Dockerode) {
   containerInfo.forEach(async (containerInfo) => {
     let container = await dockerClient.getContainer(containerInfo.Id);
     await container.kill();
+    await WaitForMs(2000);
     await container.remove();
   });
 }
