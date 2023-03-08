@@ -104,7 +104,6 @@ export async function runCpp(
       output: await fs.readFile("output.txt", "utf8"),
     } as CppResponse;
   } catch (error) {
-    console.log(error);
     return await ManageError(
       request.id,
       CppResponse_TaskType.RUN,

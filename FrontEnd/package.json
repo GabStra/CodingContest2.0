@@ -9,8 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@codemirror/lang-cpp": "^6.0.2",
+    "@codemirror/theme-one-dark": "^6.1.1",
     "ant-design-vue": "^3.2.15",
+    "codemirror": "^6.0.1",
+    "pinia": "^2.0.33",
+    "typed-rest-client": "^1.8.9",
     "vue": "^3.2.45",
+    "vue-codemirror": "^6.1.1",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
