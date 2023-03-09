@@ -1,11 +1,21 @@
-<script lang="ts">
-import { defineComponent } from "vue";
-
-export default defineComponent({});
-</script>
 <template>
-  <a-layout class="layout">
-    <a-layout-content style="padding: 50px"> </a-layout-content>
-    <a-layout-footer style="text-align: center"> Home </a-layout-footer>
+  <a-layout class="container" has-sider>
+    <a-layout-sider>
+      <a-menu theme="dark" mode="inline"> </a-menu>
+    </a-layout-sider>
+    <a-layout>
+      <a-layout-content :style="{ margin: '24px 16px 0', overflow: 'initial' }">
+        <router-view />
+      </a-layout-content>
+      <a-layout-footer :style="{ textAlign: 'center' }">
+        Coding Contest 2.0
+      </a-layout-footer>
+    </a-layout>
   </a-layout>
 </template>
+<style scoped>
+.container {
+  width: 100%;
+  height: 100%;
+}
+</style>

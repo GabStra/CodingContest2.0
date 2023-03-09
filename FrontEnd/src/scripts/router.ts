@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import HomePage from "../Pages/Home.vue";
-import LoginPage from "../Pages/Login.vue";
+import Home from "../pages/Home.vue";
+import Login from "../pages/Login.vue";
+import Exercise from "../pages/Exercise.vue";
 
 const enum Urls {
   HOME = "/home",
@@ -14,24 +15,25 @@ const enum Routes {
   ERROR = "error",
 }
 
-const AllToHome = {
-  path: "/",
-  redirect: "/login",
-};
-
 const HomeRoute: RouteRecordRaw = {
   path: Urls.HOME,
   name: Routes.HOME,
-  component: HomePage,
+  component: Home,
+  children: [
+    {
+      path: "/exercise",
+      component: Exercise,
+    },
+  ],
 };
 
 const LoginRoute: RouteRecordRaw = {
   path: Urls.LOGIN,
   name: Routes.LOGIN,
-  component: LoginPage,
+  component: Login,
 };
 
-const routes: RouteRecordRaw[] = [HomeRoute, LoginRoute, AllToHome];
+const routes: RouteRecordRaw[] = [HomeRoute, LoginRoute];
 
 const router = createRouter({
   history: createWebHistory(),

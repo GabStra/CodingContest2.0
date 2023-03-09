@@ -95,7 +95,6 @@ class TaskManager {
               cppResponse: cppResponse,
             } as TaskManagerMessage);
           } catch (error) {
-            console.log(error);
             if (isAbortError(error)) {
               //TEST
             }

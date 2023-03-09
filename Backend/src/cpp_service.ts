@@ -1,5 +1,9 @@
 import { MessageChannel, Worker, MessagePort } from "worker_threads";
-import { CppRequest, CppResponse } from "../../Shared/compiled_proto/cpp";
+import {
+  CppRequest,
+  CppResponse,
+  CppResponse_TaskStatus,
+} from "../../Shared/compiled_proto/cpp";
 import { PortMessage, Recipient } from "./message/port_sharing";
 import {
   TaskManagerMessage,
@@ -129,6 +133,10 @@ export class CppService {
     this.taskManagerPort.on("message", async (msg: TaskManagerMessage) => {
       if (msg.type === TaskManagerMessageType.TaskAbort) {
         this.taskAbortEmitter.emit(msg.taskId);
+        this.taskResultEmitter.emit(msg.taskId, {
+          id: msg.taskId,
+          taskStatus: CppResponse_TaskStatus.ABORTED,
+        } as CppResponse);
       } else {
         this.taskResultEmitter.emit(msg.cppResponse.id, msg.cppResponse);
       }
