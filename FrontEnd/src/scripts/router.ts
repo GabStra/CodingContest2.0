@@ -33,7 +33,12 @@ const LoginRoute: RouteRecordRaw = {
   component: Login,
 };
 
-const routes: RouteRecordRaw[] = [HomeRoute, LoginRoute];
+const RedirectRoute: RouteRecordRaw = {
+  path: "/:pathMatch(.*)*",
+  redirect: Urls.LOGIN,
+};
+
+const routes: RouteRecordRaw[] = [HomeRoute, LoginRoute, RedirectRoute];
 
 const router = createRouter({
   history: createWebHistory(),

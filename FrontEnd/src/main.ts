@@ -9,6 +9,8 @@ import axios from "axios";
 import VueAxios from "vue-axios";
 import VueCodemirror from "vue-codemirror";
 import { minimalSetup } from "codemirror";
+
+import test from "../"
 const app = createApp(App);
 app.use(Antd);
 app.use(router);

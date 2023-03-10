@@ -144,13 +144,13 @@ export class CppService {
   }
 
   async runCpp(cppRequest: CppRequest) {
-    let base = await fs.readFile("app.cpp", "utf8");
+    let base = await fs.readFile("static/app.cpp", "utf8");
     let source = base.replace("{code}", cppRequest.code);
 
     let cpp: CppRequest = {
       id: cppRequest.id,
       code: source,
-      input: await fs.readFile("input.txt", "utf8"),
+      input: await fs.readFile("static/input.txt", "utf8"),
     };
     this.loadBalancerPort.postMessage({
       type: CppServiceMessageType.StartTask,
