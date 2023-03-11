@@ -1,4 +1,12 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { TblAdmin } from "./TblAdmin";
 
 @Index("userEmail", ["userEmail"], { unique: true })
 @Entity("tbl_users", { schema: "codingcontest2" })
@@ -33,4 +41,8 @@ export class TblUsers {
 
   @Column("varchar", { name: "newmail", nullable: true, length: 100 })
   newmail: string | null;
+
+  @OneToOne(() => TblAdmin, (admin) => admin.userId)
+  @JoinColumn({ name: "userID", referencedColumnName: "userId" })
+  admin: TblAdmin;
 }

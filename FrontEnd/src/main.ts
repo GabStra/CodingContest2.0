@@ -9,8 +9,14 @@ import axios from "axios";
 import VueAxios from "vue-axios";
 import VueCodemirror from "vue-codemirror";
 import { minimalSetup } from "codemirror";
+import { Api } from "./scripts/api";
 
-import test from "../"
+declare module "vue" {
+  interface ComponentCustomProperties {
+    $api: Api;
+  }
+}
+
 const app = createApp(App);
 app.use(Antd);
 app.use(router);
@@ -21,4 +27,6 @@ app.use(VueCodemirror, {
   // keep the global default extensions empty
   extensions: [minimalSetup],
 });
+app.config.globalProperties.$api = new Api();
+
 app.mount("#app");

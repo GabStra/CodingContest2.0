@@ -29,9 +29,7 @@ export default defineComponent({
         const values = await (
           this.$refs.loginForm as FormInstance
         ).validateFields();
-        await axios.post("http://localhost:60000/login", this.loginData, {
-          withCredentials: true,
-        });
+        await this.$api.login(this.loginData);
         console.log("Success:", values);
       } catch (errorInfo) {
         console.log("Failed:", errorInfo);
