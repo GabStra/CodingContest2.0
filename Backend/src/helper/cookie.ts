@@ -124,3 +124,31 @@ export function createRefreshTokenCookies(
 
   return jwt;
 }
+
+export function isAllowedRequestToken(req, keyv) {
+  try {
+    if (!hasRefreshToken(req)) return false;
+    let jwt = buildRefreshToken(req);
+    let payload = jwt_decode(jwt) as RefreshTokenPayload;
+    if (keyv.has(payload.userId)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function isAllowedAccessToken(req, keyv) {
+  try {
+    let jwt = buildRefreshToken(req);
+    let payload = jwt_decode(jwt) as RefreshTokenPayload;
+    if (keyv.has(payload.userId)) return false;
+    return true;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+}
+
+function jwt_decode(jwt: string): RefreshTokenPayload {
+  throw new Error("Function not implemented.");
+}
