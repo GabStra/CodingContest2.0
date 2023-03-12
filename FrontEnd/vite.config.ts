@@ -9,6 +9,7 @@ export default defineConfig({
       less: {
         modifyVars: {
           "primary-color": "#0aa679",
+          "font-size-base": "16px",
         },
         javascriptEnabled: true,
       },

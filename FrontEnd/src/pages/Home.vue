@@ -9,26 +9,46 @@ export default defineComponent({
 </script>
 
 <template>
-  <a-layout class="container" has-sider>
-    <a-layout-sider>
-      <a-menu theme="dark" mode="inline"> </a-menu>
-    </a-layout-sider>
+  <a-layout class="container">
+    <a-layout-header>
+      <a-menu mode="horizontal">
+        <a-sub-menu key="sub1">
+          <template #title>
+            <span>
+              <span>I miei corsi</span>
+            </span>
+          </template>
+          <a-menu-item key="3">Tom</a-menu-item>
+          <a-menu-item key="4">Bill</a-menu-item>
+          <a-menu-item key="5">Alex</a-menu-item>
+        </a-sub-menu>
+        <a-menu-item key="1">
+          <user-outlined />
+          <span class="nav-text">Impostazioni</span>
+        </a-menu-item>
+      </a-menu></a-layout-header
+    >
     <a-layout>
-      <a-layout-content :style="{ margin: '24px 16px 0', overflow: 'initial' }">
-        <a-button
-          type="primary"
-          @click="() => router.push({ name: ROUTE.LOGIN })"
-          >vai a login</a-button
-        >
-        <router-view @addAlert="(alert: any) => $emit('addAlert', alert)" />
+      <a-layout-content>
+        <div class="content">
+          <router-view @addAlert="(alert: any) => $emit('addAlert', alert)" />
+        </div>
       </a-layout-content>
-      <a-layout-footer :style="{ textAlign: 'center' }">
-        Coding Contest 2.0
-      </a-layout-footer>
     </a-layout>
+    <a-layout-footer>
+      Coding Contest 2.0 | Icona di
+      <a href="https://freeicons.io/profile/75801">Hilmy Abiyyu Asad</a> su
+      <a href="https://freeicons.io">freeicons.io</a>
+    </a-layout-footer>
   </a-layout>
 </template>
+
 <style scoped>
+.content {
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+}
 .container {
   width: 100%;
   height: 100%;

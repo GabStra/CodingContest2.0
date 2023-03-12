@@ -18,7 +18,7 @@ export default defineComponent({
   },
   data() {
     return {
-      currentMode: MODE.REGISTRATION,
+      currentMode: MODE.LOGIN,
     };
   },
 });
@@ -26,6 +26,7 @@ export default defineComponent({
 <template>
   <div class="container">
     <div class="form">
+      Coding Contest 2.0
       <Transition>
         <template v-if="currentMode === MODE.LOGIN">
           <LoginForm @addAlert="(alert) => $emit('addAlert', alert)" />

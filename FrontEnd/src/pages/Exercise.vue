@@ -263,7 +263,6 @@ export default defineComponent({
 
   .editor {
     height: 80%;
-    gap: 10px;
     display: flex;
     flex-direction: column;
   }

@@ -58,6 +58,8 @@ router.post("/login", async function (req: Request, res: Response) {
     res.status(200);
     res.send({
       userId: userData.userId,
+      userName: userData.userName,
+      avatar: userData.avatar,
       role: role,
     } as UserData);
   } catch {
