@@ -42,5 +42,4 @@ export function parseValidationErrorsToMap(
     errorMessage = errorMessage?.replace(element.property, "");
     map.set(element.property, errorMessage);
   });
-  console.log(map);
 }

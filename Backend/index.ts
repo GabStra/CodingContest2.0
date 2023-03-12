@@ -23,7 +23,7 @@ var certificate = fs.readFileSync(
 
 //RETRY22
 
-app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
+app.use(cors({ credentials: true, origin: "http://localhost:5174" }));
 app.use(cookieParser());
 app.use(express.json());
 
@@ -32,7 +32,7 @@ app.use(express.json());
 //     strict: true,
 //     allowSafe: true,
 //     // the origin of the server
-//     origin: "http://localhost:5173",
+//     origin: "http://localhost:5174",
 //   })
 // );
 

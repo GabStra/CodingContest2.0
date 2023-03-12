@@ -1,5 +1,7 @@
 import { defineStore } from "pinia";
+import { UserData } from "shared/models/userData";
 
-export const useUserStore = defineStore("user", {
-  state: () => ({ accessToken: null, refreshToken: null }),
+export const useSessionStore = defineStore("session", {
+  state: () => ({ userData: null as UserData | null }),
+  persist: true,
 });

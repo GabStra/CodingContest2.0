@@ -1,8 +1,4 @@
-import {
-  ChildProcessPromise,
-  ErrorWithOutput,
-  exec,
-} from "promisify-child-process";
+import { exec } from "promisify-child-process";
 import fs from "fs/promises";
 import {
   CppRequest,
@@ -10,8 +6,6 @@ import {
   CppResponse_TaskStatus,
   CppResponse_TaskType,
 } from "shared/compiled_proto/cpp";
-import { stdout } from "process";
-import { ChildProcess } from "child_process";
 
 const FILE_NAME = "app.cpp";
 

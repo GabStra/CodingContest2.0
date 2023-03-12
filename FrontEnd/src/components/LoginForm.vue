@@ -1,5 +1,4 @@
 <script lang="ts">
-import { FormInstance } from "ant-design-vue";
 import { defineComponent } from "vue";
 import { Login } from "shared/view_models/login";
 import {
@@ -7,22 +6,43 @@ import {
   VALIDATION_LANGUAGE,
   parseValidationErrorsToMap,
 } from "shared/helper/validator";
-
+import { mapStores } from "pinia";
+import { useSessionStore } from "../scripts/store";
+import { ALERT_TYPE } from "../models/alert";
+import { router, ROUTE } from "../scripts/router";
 export default defineComponent({
+  emit: ["onSuccess", "onError"],
   data() {
     return {
       loginData: new Login(),
       errors: new Map<string, string>(),
+      isLoading: false,
     };
+  },
+  computed: {
+    ...mapStores(useSessionStore),
   },
   methods: {
     handleSubmit: async function () {
       try {
+        this.isLoading = true;
         let errors = await validate(this.loginData, VALIDATION_LANGUAGE.IT);
         parseValidationErrorsToMap(this.errors, errors);
-        if (errors.length === 0) await this.$api.login(this.loginData);
+        if (errors.length === 0) {
+          this.sessionStore.userData = await this.$api.login(this.loginData);
+          this.$emit("addAlert", {
+            type: ALERT_TYPE.SUCCESS,
+            message: "Login riuscito",
+          });
+          router.push({ name: ROUTE.HOME });
+        }
       } catch (errorInfo) {
-        console.log("Failed:", errorInfo);
+        this.$emit("addAlert", {
+          type: ALERT_TYPE.ERROR,
+          message: "Richiesta fallita",
+        });
+      } finally {
+        this.isLoading = false;
       }
     },
   },
@@ -56,18 +76,10 @@ export default defineComponent({
       </a-form-item>
 
       <a-form-item :wrapper-col="{ span: 16 }">
-        <a-button type="primary" html-type="submit" @click="handleSubmit"
+        <a-button type="primary" @click="handleSubmit" :loading="isLoading"
           >Accedi</a-button
         >
       </a-form-item>
     </a-form>
-    <a-divider />
-    <a href="">Registrati</a>
   </div>
 </template>
-
-<style scoped>
-.form {
-  width: 300px;
-}
-</style>

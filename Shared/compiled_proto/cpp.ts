@@ -25,7 +25,9 @@ export enum CppResponse_TaskType {
   UNRECOGNIZED = -1,
 }
 
-export function cppResponse_TaskTypeFromJSON(object: any): CppResponse_TaskType {
+export function cppResponse_TaskTypeFromJSON(
+  object: any
+): CppResponse_TaskType {
   switch (object) {
     case 0:
     case "COMPILE":
@@ -40,7 +42,9 @@ export function cppResponse_TaskTypeFromJSON(object: any): CppResponse_TaskType 
   }
 }
 
-export function cppResponse_TaskTypeToJSON(object: CppResponse_TaskType): string {
+export function cppResponse_TaskTypeToJSON(
+  object: CppResponse_TaskType
+): string {
   switch (object) {
     case CppResponse_TaskType.COMPILE:
       return "COMPILE";
@@ -61,7 +65,9 @@ export enum CppResponse_TaskStatus {
   UNRECOGNIZED = -1,
 }
 
-export function cppResponse_TaskStatusFromJSON(object: any): CppResponse_TaskStatus {
+export function cppResponse_TaskStatusFromJSON(
+  object: any
+): CppResponse_TaskStatus {
   switch (object) {
     case 0:
     case "SUCCEDED":
@@ -85,7 +91,9 @@ export function cppResponse_TaskStatusFromJSON(object: any): CppResponse_TaskSta
   }
 }
 
-export function cppResponse_TaskStatusToJSON(object: CppResponse_TaskStatus): string {
+export function cppResponse_TaskStatusToJSON(
+  object: CppResponse_TaskStatus
+): string {
   switch (object) {
     case CppResponse_TaskStatus.SUCCEDED:
       return "SUCCEDED";
@@ -103,8 +111,7 @@ export function cppResponse_TaskStatusToJSON(object: CppResponse_TaskStatus): st
   }
 }
 
-export interface HealthRequest {
-}
+export interface HealthRequest {}
 
 export interface HealthResponse {
   isHealthy: boolean;
@@ -116,7 +123,10 @@ function createBaseCppRequest(): CppRequest {
 }
 
 export const CppRequest = {
-  encode(message: CppRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: CppRequest,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
@@ -183,11 +193,21 @@ export const CppRequest = {
 };
 
 function createBaseCppResponse(): CppResponse {
-  return { id: "", stdout: "", stderr: "", output: "", taskType: 0, taskStatus: 0 };
+  return {
+    id: "",
+    stdout: "",
+    stderr: "",
+    output: "",
+    taskType: 0,
+    taskStatus: 0,
+  };
 }
 
 export const CppResponse = {
-  encode(message: CppResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: CppResponse,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
@@ -248,8 +268,12 @@ export const CppResponse = {
       stdout: isSet(object.stdout) ? String(object.stdout) : "",
       stderr: isSet(object.stderr) ? String(object.stderr) : "",
       output: isSet(object.output) ? String(object.output) : "",
-      taskType: isSet(object.taskType) ? cppResponse_TaskTypeFromJSON(object.taskType) : 0,
-      taskStatus: isSet(object.taskStatus) ? cppResponse_TaskStatusFromJSON(object.taskStatus) : 0,
+      taskType: isSet(object.taskType)
+        ? cppResponse_TaskTypeFromJSON(object.taskType)
+        : 0,
+      taskStatus: isSet(object.taskStatus)
+        ? cppResponse_TaskStatusFromJSON(object.taskStatus)
+        : 0,
     };
   },
 
@@ -259,8 +283,10 @@ export const CppResponse = {
     message.stdout !== undefined && (obj.stdout = message.stdout);
     message.stderr !== undefined && (obj.stderr = message.stderr);
     message.output !== undefined && (obj.output = message.output);
-    message.taskType !== undefined && (obj.taskType = cppResponse_TaskTypeToJSON(message.taskType));
-    message.taskStatus !== undefined && (obj.taskStatus = cppResponse_TaskStatusToJSON(message.taskStatus));
+    message.taskType !== undefined &&
+      (obj.taskType = cppResponse_TaskTypeToJSON(message.taskType));
+    message.taskStatus !== undefined &&
+      (obj.taskStatus = cppResponse_TaskStatusToJSON(message.taskStatus));
     return obj;
   },
 
@@ -285,7 +311,10 @@ function createBaseHealthRequest(): HealthRequest {
 }
 
 export const HealthRequest = {
-  encode(_: HealthRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    _: HealthRequest,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     return writer;
   },
 
@@ -328,7 +357,10 @@ function createBaseHealthResponse(): HealthResponse {
 }
 
 export const HealthResponse = {
-  encode(message: HealthResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: HealthResponse,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     if (message.isHealthy === true) {
       writer.uint32(8).bool(message.isHealthy);
     }
@@ -362,14 +394,17 @@ export const HealthResponse = {
   fromJSON(object: any): HealthResponse {
     return {
       isHealthy: isSet(object.isHealthy) ? Boolean(object.isHealthy) : false,
-      errorCounter: isSet(object.errorCounter) ? Number(object.errorCounter) : 0,
+      errorCounter: isSet(object.errorCounter)
+        ? Number(object.errorCounter)
+        : 0,
     };
   },
 
   toJSON(message: HealthResponse): unknown {
     const obj: any = {};
     message.isHealthy !== undefined && (obj.isHealthy = message.isHealthy);
-    message.errorCounter !== undefined && (obj.errorCounter = Math.round(message.errorCounter));
+    message.errorCounter !== undefined &&
+      (obj.errorCounter = Math.round(message.errorCounter));
     return obj;
   },
 
@@ -410,20 +445,44 @@ export const CppDefinition = {
 } as const;
 
 export interface CppServiceImplementation<CallContextExt = {}> {
-  runCpp(request: CppRequest, context: CallContext & CallContextExt): Promise<DeepPartial<CppResponse>>;
-  isHealthy(request: HealthRequest, context: CallContext & CallContextExt): Promise<DeepPartial<HealthResponse>>;
+  runCpp(
+    request: CppRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<CppResponse>>;
+  isHealthy(
+    request: HealthRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<HealthResponse>>;
 }
 
 export interface CppClient<CallOptionsExt = {}> {
-  runCpp(request: DeepPartial<CppRequest>, options?: CallOptions & CallOptionsExt): Promise<CppResponse>;
-  isHealthy(request: DeepPartial<HealthRequest>, options?: CallOptions & CallOptionsExt): Promise<HealthResponse>;
+  runCpp(
+    request: DeepPartial<CppRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<CppResponse>;
+  isHealthy(
+    request: DeepPartial<HealthRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<HealthResponse>;
 }
 
-type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
+type Builtin =
+  | Date
+  | Function
+  | Uint8Array
+  | string
+  | number
+  | boolean
+  | undefined;
 
-export type DeepPartial<T> = T extends Builtin ? T
-  : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
-  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
+export type DeepPartial<T> = T extends Builtin
+  ? T
+  : T extends Array<infer U>
+  ? Array<DeepPartial<U>>
+  : T extends ReadonlyArray<infer U>
+  ? ReadonlyArray<DeepPartial<U>>
+  : T extends {}
+  ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
 
 function isSet(value: any): boolean {

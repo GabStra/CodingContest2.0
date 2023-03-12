@@ -173,14 +173,19 @@ export default defineComponent({
       </a-button>
     </div>
     <div class="editor">
-      <codemirror
-        :modelValue="top"
-        :style="{ height: 'auto', overflow: 'scroll' }"
-        :extensions="extensionsTop"
-        :indent-with-tab="true"
-        :tab-size="4"
-        @change="(value) => (top = value)"
-      />
+      <div class="editor_container">
+        <div class="overlay_element"></div>
+        <codemirror
+          :modelValue="top"
+          class="editor_element"
+          :style="{ overflow: 'scroll' }"
+          :extensions="extensionsTop"
+          :indent-with-tab="true"
+          :tab-size="4"
+          @change="(value) => (top = value)"
+        />
+      </div>
+
       <codemirror
         :modelValue="code"
         :style="{ flex: '1', overflow: 'scroll' }"
@@ -194,29 +199,53 @@ export default defineComponent({
           }
         "
       />
-      <codemirror
-        :modelValue="bottom"
-        :key="refresh"
-        :style="{ height: 'auto', overflow: 'scroll' }"
-        :extensions="extensionsBottom"
-        :indent-with-tab="true"
-        :tab-size="4"
-        @change="(value) => (bottom = value)"
-      />
-    </div>
-    <div class="console">
-      <a-textarea
-        readonly
-        :value="console"
-        :style="{ resize: 'none', height: '100%' }"
-        placeholder=""
-        :autoSize="false"
-      />
+      <div class="editor_container">
+        <div class="overlay_element"></div>
+        <codemirror
+          :modelValue="bottom"
+          class="editor_element"
+          :key="refresh"
+          :style="{ overflow: 'scroll' }"
+          :extensions="extensionsBottom"
+          :indent-with-tab="true"
+          :tab-size="4"
+          @change="(value) => (bottom = value)"
+        />
+      </div>
+      <div class="console">
+        <a-textarea
+          readonly
+          :value="console"
+          :style="{ resize: 'none', height: '100%' }"
+          :autoSize="false"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
+.editor_container {
+  position: relative;
+  height: auto;
+  overflow: scroll;
+}
+.overlay_element {
+  background: gray;
+  opacity: 0.5;
+  width: 100%;
+  height: 100%;
+  z-index: 500;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.editor_element {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
 .container {
   display: flex;
   flex-direction: column;
@@ -239,7 +268,7 @@ export default defineComponent({
     flex-direction: column;
   }
   .console {
-    flex: 1;
+    height: auto;
   }
 
   .ant-input:focus {

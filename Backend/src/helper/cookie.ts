@@ -81,7 +81,7 @@ export function createAccessTokenCookies(
 
   res.cookie(ACCESS_TOKEN_SIGNATURE, header + "." + signature, {
     sameSite: true,
-    httpOnly: false,
+    httpOnly: true,
     expires: expirationDate,
   });
 

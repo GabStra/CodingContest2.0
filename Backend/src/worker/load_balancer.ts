@@ -50,7 +50,7 @@ class LoadBalancer {
     await this.containersLock.acquire();
 
     let anyAvailableContainer = this.containersStatus.some((c) => !c.isBusy);
-    console.log(anyAvailableContainer);
+
     if (!anyAvailableContainer) {
       this.containersLock.release();
       return;

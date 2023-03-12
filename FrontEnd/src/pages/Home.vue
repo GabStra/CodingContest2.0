@@ -1,3 +1,13 @@
+<script lang="ts">
+import { defineComponent } from "vue";
+import { router, ROUTE } from "../scripts/router";
+export default defineComponent({
+  setup() {
+    return { ROUTE, router };
+  },
+});
+</script>
+
 <template>
   <a-layout class="container" has-sider>
     <a-layout-sider>
@@ -5,7 +15,12 @@
     </a-layout-sider>
     <a-layout>
       <a-layout-content :style="{ margin: '24px 16px 0', overflow: 'initial' }">
-        <router-view />
+        <a-button
+          type="primary"
+          @click="() => router.push({ name: ROUTE.LOGIN })"
+          >vai a login</a-button
+        >
+        <router-view @addAlert="(alert: any) => $emit('addAlert', alert)" />
       </a-layout-content>
       <a-layout-footer :style="{ textAlign: 'center' }">
         Coding Contest 2.0

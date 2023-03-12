@@ -20,6 +20,7 @@ import Keyv from "@keyvhq/core";
 import { v4 as uuidv4 } from "uuid";
 import { validate, VALIDATION_LANGUAGE } from "shared/dist/helper/validator";
 import dayjs from "dayjs";
+import { UserData } from "shared/models/userData";
 const router = express.Router();
 const keyv = new Keyv();
 
@@ -28,7 +29,7 @@ router.post("/login", async function (req: Request, res: Response) {
     let login = new Login(req.body);
     let errors = await validate(login, VALIDATION_LANGUAGE.IT);
     if (errors.length !== 0) {
-      res.sendStatus(400);
+      res.status(400);
       res.send(errors);
       return;
     }
@@ -53,7 +54,12 @@ router.post("/login", async function (req: Request, res: Response) {
     let sessionId = uuidv4();
     keyv.set(sessionId, userData.userId, expirationDate);
     createAccessTokenCookies(res, sessionId, role, login.rememberMe);
-    res.sendStatus(200);
+
+    res.status(200);
+    res.send({
+      userId: userData.userId,
+      role: role,
+    } as UserData);
   } catch {
     res.sendStatus(401);
   }
