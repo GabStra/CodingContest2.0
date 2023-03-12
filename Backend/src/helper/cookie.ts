@@ -1,7 +1,6 @@
 import dayjs from "dayjs";
-import { AccessTokenPayload } from "../../../Shared/models/accessTokenPayload";
-import { RefreshTokenPayload } from "../../../Shared/models/refreshTokenPayload";
-import { ROLE } from "../../../Shared/models/role";
+import { AccessTokenPayload } from "shared/dist/models/accessTokenPayload";
+import { ROLE } from "shared/dist/models/role";
 import jsonwebtoken, { SignOptions, Algorithm } from "jsonwebtoken";
 import fs from "fs";
 import { Request, Response } from "express";
@@ -18,18 +17,10 @@ export const publicKey = fs.readFileSync(
 
 export const ACCESS_TOKEN_PAYLOAD = "access_token_payload";
 export const ACCESS_TOKEN_SIGNATURE = "access_token_signature";
-export const REFRESH_TOKEN_PAYLOAD = "refresh_token_payload";
-export const REFRESH_TOKEN_SIGNATURE = "refresh_token_signature";
 
 export function buildJwt(tokenPayload, tokenSignature) {
   let [header, signature] = tokenSignature.split(".");
   return `${header}.${tokenPayload}.${signature}`;
-}
-
-export function hasRefreshToken(req: Request) {
-  return !(
-    !req.cookies.refresh_token_payload || !req.cookies.refresh_token_signature
-  );
 }
 
 export function hasAccessToken(req: Request) {
@@ -47,13 +38,6 @@ export function verifyJwt(jwt: string) {
   }
 }
 
-export function buildRefreshToken(req: Request) {
-  return buildJwt(
-    req.cookies.refresh_token_payload,
-    req.cookies.refresh_token_signature
-  );
-}
-
 export function buildAccessToken(req: Request) {
   return buildJwt(
     req.cookies.access_token_payload,
@@ -61,22 +45,34 @@ export function buildAccessToken(req: Request) {
   );
 }
 
+export function decodeAccessToken(jwt: string) {
+  return jsonwebtoken.decode(jwt) as AccessTokenPayload;
+}
+
+export function clearAccessToken(res: Response) {
+  res.clearCookie(ACCESS_TOKEN_PAYLOAD);
+  res.clearCookie(ACCESS_TOKEN_SIGNATURE);
+}
+
 export function createAccessTokenCookies(
   res: Response,
-  userId: string,
-  role: ROLE
+  sessionId: string,
+  role: ROLE,
+  rememberMe: boolean
 ) {
   let accessTokenPayload = {
-    userId: userId,
+    sessionId: sessionId,
     role: role,
   } as AccessTokenPayload;
   let jwt = jsonwebtoken.sign(accessTokenPayload, privateKey, {
     algorithm: "RS256",
-    expiresIn: "2m",
+    expiresIn: "15" + (rememberMe ? "d" : "m"),
   });
   let [header, payload, signature] = jwt.split(".");
 
-  let expirationDate = dayjs().add(2, "m").toDate();
+  let expirationDate = dayjs()
+    .add(15, rememberMe ? "d" : "m")
+    .toDate();
   res.cookie(ACCESS_TOKEN_PAYLOAD, payload, {
     sameSite: true,
     httpOnly: false,
@@ -90,65 +86,4 @@ export function createAccessTokenCookies(
   });
 
   return jwt;
-}
-
-export function createRefreshTokenCookies(
-  res: Response,
-  userId: string,
-  rememberMe: boolean
-) {
-  let refreshTokenPayload = {
-    userId: userId,
-    rememberMe: rememberMe,
-  } as RefreshTokenPayload;
-  let jwt = jsonwebtoken.sign(refreshTokenPayload, privateKey, {
-    algorithm: "RS256",
-    expiresIn: rememberMe ? "15d" : "15m",
-  });
-  let [header, payload, signature] = jwt.split(".");
-
-  let expirationDate = rememberMe
-    ? dayjs().add(15, "d").toDate()
-    : dayjs().add(15, "m").toDate();
-  res.cookie(REFRESH_TOKEN_PAYLOAD, payload, {
-    sameSite: true,
-    httpOnly: false,
-    expires: expirationDate,
-  });
-
-  res.cookie(REFRESH_TOKEN_SIGNATURE, header + "." + signature, {
-    sameSite: true,
-    httpOnly: false,
-    expires: expirationDate,
-  });
-
-  return jwt;
-}
-
-export function isAllowedRequestToken(req, keyv) {
-  try {
-    if (!hasRefreshToken(req)) return false;
-    let jwt = buildRefreshToken(req);
-    let payload = jwt_decode(jwt) as RefreshTokenPayload;
-    if (keyv.has(payload.userId)) return false;
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export function isAllowedAccessToken(req, keyv) {
-  try {
-    let jwt = buildRefreshToken(req);
-    let payload = jwt_decode(jwt) as RefreshTokenPayload;
-    if (keyv.has(payload.userId)) return false;
-    return true;
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
-}
-
-function jwt_decode(jwt: string): RefreshTokenPayload {
-  throw new Error("Function not implemented.");
 }

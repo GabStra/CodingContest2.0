@@ -1,4 +1,4 @@
-import { CppResponse } from "../../../Shared/compiled_proto/cpp";
+import { CppResponse } from "shared/compiled_proto/cpp";
 
 export enum TaskManagerMessageType {
   TaskResult,

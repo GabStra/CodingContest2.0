@@ -9,7 +9,7 @@ import {
   CppResponse,
   CppResponse_TaskStatus,
   CppResponse_TaskType,
-} from "../../Shared/compiled_proto/cpp";
+} from "shared/compiled_proto/cpp";
 import { stdout } from "process";
 import { ChildProcess } from "child_process";
 

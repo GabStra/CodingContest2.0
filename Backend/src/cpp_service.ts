@@ -3,7 +3,7 @@ import {
   CppRequest,
   CppResponse,
   CppResponse_TaskStatus,
-} from "../../Shared/compiled_proto/cpp";
+} from "shared/compiled_proto/cpp";
 import { PortMessage, Recipient } from "./message/port_sharing";
 import {
   TaskManagerMessage,
@@ -36,14 +36,10 @@ export class CppService {
     this.taskAbortEmitter = new EventEmitter2();
     this.checkTaskStatusEmitter = new EventEmitter2();
     this.dockerManagerWorker = new Worker(
-      "./dist/Backend/src/worker/docker_manager.js"
+      "./dist/src/worker/docker_manager.js"
     );
-    this.loadBalancerWorker = new Worker(
-      "./dist/Backend/src/worker/load_balancer.js"
-    );
-    this.taskManagerWorker = new Worker(
-      "./dist/Backend/src/worker/task_manager.js"
-    );
+    this.loadBalancerWorker = new Worker("./dist/src/worker/load_balancer.js");
+    this.taskManagerWorker = new Worker("./dist/src/worker/task_manager.js");
 
     const loadBalancerTaskManagerChannel = new MessageChannel();
     const dockerManagerTaskManagerChannel = new MessageChannel();

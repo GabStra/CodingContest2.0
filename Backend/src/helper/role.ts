@@ -1,4 +1,4 @@
-import { ROLE } from "../../../Shared/models/role";
+import { ROLE } from "shared/dist/models/role";
 import { TblUsers } from "../database/entities/TblUsers";
 
 export function getRoleFromUser(user: TblUsers) {

@@ -1,6 +1,5 @@
 import { MessagePort, parentPort } from "worker_threads";
-import { CppDefinition, CppRequest } from "../../../Shared/compiled_proto/cpp";
-import { EventEmitter2 } from "eventemitter2";
+import { CppDefinition, CppRequest } from "shared/compiled_proto/cpp";
 import {
   ChannelCredentials,
   Client,

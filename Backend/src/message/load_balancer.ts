@@ -1,4 +1,4 @@
-import { CppRequest } from "../../../Shared/compiled_proto/cpp";
+import { CppRequest } from "shared/compiled_proto/cpp";
 
 export enum LoadBalancerMessageType {
   NewTask,

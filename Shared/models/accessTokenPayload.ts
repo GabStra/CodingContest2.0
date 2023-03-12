@@ -1,7 +1,7 @@
 import { ROLE } from "./role";
 
 export interface AccessTokenPayload {
-  userId: string;
+  sessionId: string;
   role: ROLE;
   iat: number;
   exp: number;

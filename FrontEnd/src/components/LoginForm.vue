@@ -1,36 +1,26 @@
 <script lang="ts">
 import { FormInstance } from "ant-design-vue";
 import { defineComponent } from "vue";
-import { Login } from "../../../Shared/models/login";
-import isEmail from "validator/lib/isEmail";
-import { Rule } from "ant-design-vue/lib/form";
-import axios from "axios";
+import { Login } from "shared/view_models/login";
+import {
+  validate,
+  VALIDATION_LANGUAGE,
+  parseValidationErrorsToMap,
+} from "shared/helper/validator";
+
 export default defineComponent({
   data() {
     return {
-      loginData: {} as Login,
-    };
-  },
-  setup() {
-    let validateEmail = async (rule: Rule, value: string) => {
-      if (!!value && isEmail(value)) {
-        return Promise.resolve();
-      } else {
-        return Promise.reject("Email inserita non valida");
-      }
-    };
-    return {
-      validateEmail,
+      loginData: new Login(),
+      errors: new Map<string, string>(),
     };
   },
   methods: {
     handleSubmit: async function () {
       try {
-        const values = await (
-          this.$refs.loginForm as FormInstance
-        ).validateFields();
-        await this.$api.login(this.loginData);
-        console.log("Success:", values);
+        let errors = await validate(this.loginData, VALIDATION_LANGUAGE.IT);
+        parseValidationErrorsToMap(this.errors, errors);
+        if (errors.length === 0) await this.$api.login(this.loginData);
       } catch (errorInfo) {
         console.log("Failed:", errorInfo);
       }
@@ -44,7 +34,8 @@ export default defineComponent({
       <a-form-item
         label="Email"
         name="email"
-        :rules="[{ required: true, validator: validateEmail }]"
+        :validateStatus="errors.has('email') ? 'error' : undefined"
+        :help="errors.get('email')"
       >
         <a-input v-model:value="loginData.email" />
       </a-form-item>
@@ -52,7 +43,8 @@ export default defineComponent({
       <a-form-item
         label="Password"
         name="password"
-        :rules="[{ required: true, message: 'Please input your password!' }]"
+        :validateStatus="errors.has('password') ? 'error' : undefined"
+        :help="errors.get('password')"
       >
         <a-input-password v-model:value="loginData.password" />
       </a-form-item>

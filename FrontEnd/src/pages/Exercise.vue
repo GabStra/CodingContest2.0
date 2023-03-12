@@ -8,7 +8,7 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import { CaretRightOutlined } from "@ant-design/icons-vue";
 import { classname } from "@uiw/codemirror-extensions-classname";
 import readOnlyRangesExtension from "codemirror-readonly-ranges";
-import { CppRequest } from "../../../Shared/compiled_proto/cpp";
+import { CppRequest } from "shared/compiled_proto/cpp";
 import { EditorState } from "@codemirror/state";
 
 export default defineComponent({

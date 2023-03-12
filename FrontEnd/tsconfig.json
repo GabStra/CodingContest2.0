@@ -8,6 +8,8 @@
     "jsx": "preserve",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "esModuleInterop": true,
     "lib": ["esnext", "DOM"],
     "skipLibCheck": true,

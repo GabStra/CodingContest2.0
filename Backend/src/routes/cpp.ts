@@ -1,7 +1,7 @@
 import express, { Request, response, Response } from "express";
 import fsAsync from "fs/promises";
 import { CppService } from "../cpp_service";
-import { CppRequest } from "../../../Shared/compiled_proto/cpp";
+import { CppRequest } from "shared/compiled_proto/cpp";
 
 const router = express.Router();
 const cppService = new CppService();
