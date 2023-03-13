@@ -1,9 +1,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
-import { router, ROUTE } from "../scripts/router";
+import { router, URL } from "../scripts/router";
 export default defineComponent({
   setup() {
-    return { ROUTE, router };
+    return { URL, router };
   },
 });
 </script>

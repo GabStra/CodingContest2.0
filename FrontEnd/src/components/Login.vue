@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Login } from "shared/view_models/login";
+import { LoginDTO } from "shared/dto/loginDTO";
 import {
   validate,
   VALIDATION_LANGUAGE,
@@ -9,14 +9,19 @@ import {
 import { mapStores } from "pinia";
 import { useSessionStore } from "../scripts/store";
 import { ALERT_TYPE } from "../models/alert";
-import { router, ROUTE } from "../scripts/router";
+import { router, URL } from "../scripts/router";
 export default defineComponent({
   emit: ["onSuccess", "onError"],
   data() {
     return {
-      loginData: new Login(),
+      loginData: new LoginDTO(),
       errors: new Map<string, string>(),
       isLoading: false,
+    };
+  },
+  setup() {
+    return {
+      URL,
     };
   },
   computed: {
@@ -34,7 +39,7 @@ export default defineComponent({
             type: ALERT_TYPE.SUCCESS,
             message: "Login riuscito",
           });
-          router.push({ name: ROUTE.HOME });
+          router.push({ path: URL.HOME });
         }
       } catch (errorInfo) {
         this.$emit("addAlert", {
@@ -49,8 +54,10 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="form">
+  <div>
     <a-form layout="vertical" :model="loginData" ref="loginForm">
+      <h2>Coding Contest 2.0</h2>
+      <a-divider />
       <a-form-item
         label="Email"
         name="email"
@@ -81,5 +88,11 @@ export default defineComponent({
         >
       </a-form-item>
     </a-form>
+    <a-divider />
+    <router-link :to="{ path: URL.REGISTRATION }"> Registrati </router-link>
+    <a-divider type="vertical" />
+    <router-link :to="{ path: URL.PASSWORD_RECOVERY }">
+      Recupera Password
+    </router-link>
   </div>
 </template>

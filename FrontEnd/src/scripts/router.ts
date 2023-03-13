@@ -1,38 +1,47 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import Home from "../pages/Home.vue";
-import Login from "../pages/Login.vue";
+import Main from "../pages/Main.vue";
+import Login from "../components/Login.vue";
+import PasswordRecovery from "../components/PasswordRecovery.vue";
 import Exercise from "../pages/Exercise.vue";
 import { useSessionStore } from "../scripts/store";
 
 export enum URL {
+  MAIN = "/main",
   HOME = "/home",
   LOGIN = "/login",
   ERROR = "/error",
-}
-
-export enum ROUTE {
-  HOME = "home",
-  LOGIN = "login",
-  ERROR = "error",
+  REGISTRATION = "/registration",
+  NEW_PASSWORD = "/new-password",
+  PASSWORD_RECOVERY = "/password-recovery",
+  EXERCISE = "/exercise",
 }
 
 const HomeRoute: RouteRecordRaw = {
   path: URL.HOME,
-  name: ROUTE.HOME,
   component: Home,
   meta: { requiresLogin: true },
   children: [
     {
-      path: "/exercise",
+      path: URL.EXERCISE,
       component: Exercise,
     },
   ],
 };
 
-const LoginRoute: RouteRecordRaw = {
-  path: URL.LOGIN,
-  name: ROUTE.LOGIN,
-  component: Login,
+const MainRoute: RouteRecordRaw = {
+  path: URL.MAIN,
+  component: Main,
+  children: [
+    {
+      path: URL.LOGIN,
+      component: Login,
+    },
+    {
+      path: URL.PASSWORD_RECOVERY,
+      component: PasswordRecovery,
+    },
+  ],
 };
 
 const RedirectRoute: RouteRecordRaw = {
@@ -40,7 +49,7 @@ const RedirectRoute: RouteRecordRaw = {
   redirect: URL.LOGIN,
 };
 
-const routes: RouteRecordRaw[] = [HomeRoute, LoginRoute, RedirectRoute];
+const routes: RouteRecordRaw[] = [HomeRoute, MainRoute, RedirectRoute];
 
 const router = createRouter({
   history: createWebHistory(),

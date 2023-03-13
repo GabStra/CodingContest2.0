@@ -12,6 +12,7 @@ export default defineComponent({
     HandleNewAlert(alert: Alert) {
       this.alerts = [];
       this.alerts.push(alert);
+      setTimeout(() => {}, 10000);
     },
   },
 });
@@ -20,7 +21,7 @@ export default defineComponent({
 <template>
   <div class="alertContainer">
     <template v-for="alert in alerts">
-      <a-alert :message="alert.message" :type="alert.type" show-icon closable />
+      <a-alert :message="alert.message" :type="alert.type" show-icon />
     </template>
   </div>
 
@@ -28,12 +29,17 @@ export default defineComponent({
 </template>
 
 <style scoped>
+.ant-alert {
+  font-size: 20px;
+}
 .alertContainer {
   position: absolute;
-  bottom: 10px;
   z-index: 1000;
-  min-width: 200px;
-  width: 20vw;
-  right: 10px;
+  width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  bottom: 20px;
 }
 </style>

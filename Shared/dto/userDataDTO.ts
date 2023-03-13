@@ -1,6 +1,6 @@
-import { ROLE } from "./role";
+import { ROLE } from "../constants/role";
 
-export interface UserData {
+export interface UserDataDTO {
   userId: string;
   userName: string;
   avatar: string;

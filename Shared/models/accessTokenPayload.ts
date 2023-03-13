@@ -1,4 +1,4 @@
-import { ROLE } from "./role";
+import { ROLE } from "../constants/role";
 
 export interface AccessTokenPayload {
   sessionId: string;

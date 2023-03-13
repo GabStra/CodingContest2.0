@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { AccessTokenPayload } from "shared/dist/models/accessTokenPayload";
-import { ROLE } from "shared/dist/models/role";
+import { ROLE } from "shared/dist/constants/role";
 import jsonwebtoken, { SignOptions, Algorithm } from "jsonwebtoken";
 import fs from "fs";
 import { Request, Response } from "express";
