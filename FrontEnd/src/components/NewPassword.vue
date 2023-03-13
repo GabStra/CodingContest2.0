@@ -8,11 +8,17 @@ import {
 } from "shared/helper/validator";
 import { Modal } from "ant-design-vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
-import { ALERT_TYPE } from "../models/alert";
-import { URL } from "../scripts/router";
+import { NOTIFICATION_TYPE } from "../models/notification";
+import { NewPasswordResponseDTO } from "shared/dto/newPasswordResponseDTO";
+import { NEW_PASSWORD_STATUS } from "shared/constants/new_password_status";
+import { router, URL } from "../scripts/router";
+import { LoadingOutlined } from "@ant-design/icons-vue";
 
 export default defineComponent({
   emit: ["onSuccess", "onError"],
+  components: {
+    LoadingOutlined,
+  },
   data() {
     return {
       newPasswordData: new NewPasswordDTO(),
@@ -26,12 +32,12 @@ export default defineComponent({
     };
   },
   methods: {
-    handleSaveNewPassword() {
+    handleSave: async function () {
       let errors = await validate(this.newPasswordData, VALIDATION_LANGUAGE.IT);
       parseValidationErrorsToMap(this.errors, errors);
       if (errors.length !== 0) return;
 
-      let handleClick = this.handleClick;
+      let saveNewPassword = this.saveNewPassword;
       Modal.confirm({
         title: "Attenzione",
         icon: createVNode(ExclamationCircleOutlined),
@@ -40,33 +46,92 @@ export default defineComponent({
         okText: "Si",
         cancelText: "Annulla",
         onOk() {
-          handleClick();
+          saveNewPassword();
         },
       });
     },
-    handleClick: async function () {
+    saveNewPassword: async function () {
       try {
-        await this.$api.sendPasswordRecoveryEmail(this.newPasswordData);
-        this.$emit("addAlert", {
-          type: ALERT_TYPE.SUCCESS,
-          message: "Mail inviata",
-        });
+        let response = await this.$api.newPassword(this.newPasswordData);
+        this.manageAlert(response);
+        if (response.status === NEW_PASSWORD_STATUS.SUCCESS) {
+          router.push({ path: URL.LOGIN });
+        }
       } catch (errorInfo) {
-        this.$emit("addAlert", {
-          type: ALERT_TYPE.ERROR,
+        this.$emit("newNotification", {
+          type: NOTIFICATION_TYPE.ERROR,
           message: "Richiesta fallita",
         });
       } finally {
         this.isLoading = false;
       }
     },
+
+    checkLink: async function () {
+      try {
+        this.isLoading = true;
+        let response = await this.$api.newPasswordCheck(this.newPasswordData);
+        if (response.status === NEW_PASSWORD_STATUS.EXPIRED) {
+          this.expiredAlert();
+          router.push({ path: URL.LOGIN });
+        }
+      } catch {
+        this.$emit("newNotification", {
+          type: NOTIFICATION_TYPE.ERROR,
+          message: "Richiesta fallita",
+        });
+        router.push({ path: URL.LOGIN });
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    expiredAlert() {
+      this.$emit("newNotification", {
+        type: NOTIFICATION_TYPE.ERROR,
+        message: "Link scaduto",
+      });
+    },
+
+    manageAlert(response: NewPasswordResponseDTO) {
+      switch (response.status) {
+        case NEW_PASSWORD_STATUS.SUCCESS:
+          this.$emit("newNotification", {
+            type: NOTIFICATION_TYPE.SUCCESS,
+            message: "Password aggiornata",
+          });
+          return;
+
+        case NEW_PASSWORD_STATUS.FAIL:
+          this.$emit("newNotification", {
+            type: NOTIFICATION_TYPE.ERROR,
+            message: "Salvataggio fallito",
+          });
+          return;
+
+        case NEW_PASSWORD_STATUS.EXPIRED:
+          this.$emit("newNotification", {
+            type: NOTIFICATION_TYPE.ERROR,
+            message: "Token scaduto",
+          });
+          return;
+      }
+    },
+  },
+  mounted() {
+    this.newPasswordData.token = this.$route.query.token as string;
+    if (!this.newPasswordData.token) router.push({ path: URL.HOME });
+    this.checkLink();
   },
 });
 </script>
 <template>
-  <div class="form">
-    <a-form layout="vertical" :model="newPasswordData">
-      <h2>Recupera password</h2>
+  <div>
+    <div v-show="isLoading">
+      <LoadingOutlined spin />
+    </div>
+    <a-form layout="vertical" :model="newPasswordData" v-show="!isLoading">
+      <h2>Nuova password</h2>
       <a-divider />
       <a-form-item
         label="Nuova password"
@@ -78,8 +143,8 @@ export default defineComponent({
       </a-form-item>
 
       <a-form-item>
-        <a-button type="primary" @click="handleClick" :loading="isLoading"
-          >Invia mail</a-button
+        <a-button type="primary" @click="handleSave" :loading="isLoading"
+          >Salva</a-button
         >
         <a-divider type="vertical" />
         <a-button @click="() => $router.push({ path: URL.LOGIN })"

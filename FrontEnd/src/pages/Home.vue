@@ -31,7 +31,9 @@ export default defineComponent({
     <a-layout>
       <a-layout-content>
         <div class="content">
-          <router-view @addAlert="(alert: any) => $emit('addAlert', alert)" />
+          <router-view
+            @newNotification="(alert: any) => $emit('newNotification', alert)"
+          />
         </div>
       </a-layout-content>
     </a-layout>

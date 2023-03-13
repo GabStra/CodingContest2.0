@@ -7,7 +7,7 @@ import {
   parseValidationErrorsToMap,
 } from "shared/helper/validator";
 
-import { ALERT_TYPE } from "../models/alert";
+import { NOTIFICATION_TYPE } from "../models/notification";
 import { URL } from "../scripts/router";
 
 export default defineComponent({
@@ -35,14 +35,14 @@ export default defineComponent({
         parseValidationErrorsToMap(this.errors, errors);
         if (errors.length === 0) {
           await this.$api.sendPasswordRecoveryEmail(this.passwordRecoveryData);
-          this.$emit("addAlert", {
-            type: ALERT_TYPE.SUCCESS,
-            message: "Mail inviata",
+          this.$emit("newNotification", {
+            type: NOTIFICATION_TYPE.SUCCESS,
+            message: "Mail inviata a " + this.passwordRecoveryData.email,
           });
         }
       } catch (errorInfo) {
-        this.$emit("addAlert", {
-          type: ALERT_TYPE.ERROR,
+        this.$emit("newNotification", {
+          type: NOTIFICATION_TYPE.ERROR,
           message: "Richiesta fallita",
         });
       } finally {

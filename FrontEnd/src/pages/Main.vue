@@ -11,7 +11,7 @@ export default defineComponent({});
         <transition name="fade" mode="out-in">
           <component
             :is="Component"
-            @addAlert="(alert:any) => $emit('addAlert', alert)"
+            @newNotification="(alert:any) => $emit('newNotification', alert)"
           />
         </transition>
       </router-view>

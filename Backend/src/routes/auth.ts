@@ -20,12 +20,12 @@ import Keyv from "@keyvhq/core";
 import { v4 as uuidv4 } from "uuid";
 import { validate, VALIDATION_LANGUAGE } from "shared/dist/helper/validator";
 import dayjs from "dayjs";
-import { UserDataDTO } from "shared/dto/userDataDTO";
-import { NewPasswordDTO } from "shared/dto/newPasswordDTO";
-import { NewPasswordResponseDTO } from "shared/dto/NewPasswordResponseDTO";
+import { UserDataDTO } from "shared/dist/dto/userDataDTO";
+import { NewPasswordDTO } from "shared/dist/dto/newPasswordDTO";
+import { NewPasswordResponseDTO } from "shared/dist/dto/NewPasswordResponseDTO";
 import { NEW_PASSWORD_STATUS } from "shared/dist/constants/new_password_status";
 import { sendPasswordRecoveryEmail } from "../helper/mail";
-import Cryptr from "cryptr";
+import encryptpwd from "encrypt-with-password";
 const router = express.Router();
 const keyv = new Keyv();
 
@@ -107,12 +107,10 @@ router.post("/password-reset", async function (req: Request, res: Response) {
       return;
     }
 
-    const cryptr = new Cryptr(process.env.SECRET);
-    let token = cryptr.encrypt(userData.userId);
+    let token = encryptpwd.encrypt(userData.userId, process.env.SECRET);
     let link = `${process.env.FRONTEND_HOST}/new-password?token=${token}`;
 
-    userData.tokenCode = token;
-    await userRepo.save(userData);
+    keyv.set(token, +dayjs().add(15, "m"));
 
     await sendPasswordRecoveryEmail({
       userEmail: userData.userEmail,
@@ -133,13 +131,20 @@ router.post(
     try {
       let newPasswordDTO = new NewPasswordDTO(req.body);
       let errors = await validate(newPasswordDTO, VALIDATION_LANGUAGE.IT);
-      if (errors.length !== 0) {
+      console.log(errors);
+      if (errors.length > 1) {
         res.sendStatus(400);
         return;
       }
 
-      const cryptr = new Cryptr(process.env.SECRET);
-      let userId = cryptr.decrypt(newPasswordDTO.token);
+      if (!keyv.has(newPasswordDTO.token)) {
+        res.send({
+          status: NEW_PASSWORD_STATUS.EXPIRED,
+        } as NewPasswordResponseDTO);
+        return;
+      }
+
+      let userId = encryptpwd.decrypt(newPasswordDTO.token, process.env.SECRET);
       let userRepo = await getRepository<TblUsers>(TblUsers);
       let userData = await userRepo.findOne({
         where: {
@@ -153,12 +158,6 @@ router.post(
         return;
       }
 
-      if (userData.tokenCode !== newPasswordDTO.token) {
-        res.send({
-          status: NEW_PASSWORD_STATUS.EXPIRED,
-        } as NewPasswordResponseDTO);
-        return;
-      }
       res.send({
         status: NEW_PASSWORD_STATUS.SUCCESS,
       } as NewPasswordResponseDTO);
@@ -173,13 +172,19 @@ router.post("/new-password", async function (req: Request, res: Response) {
   try {
     let newPasswordDTO = new NewPasswordDTO(req.body);
     let errors = await validate(newPasswordDTO, VALIDATION_LANGUAGE.IT);
-    if (errors.length !== 0) {
+    if (errors.length > 1) {
       res.sendStatus(400);
       return;
     }
 
-    const cryptr = new Cryptr(process.env.SECRET);
-    let userId = cryptr.decrypt(newPasswordDTO.token);
+    if (!keyv.has(newPasswordDTO.token)) {
+      res.send({
+        status: NEW_PASSWORD_STATUS.EXPIRED,
+      } as NewPasswordResponseDTO);
+      return;
+    }
+
+    let userId = encryptpwd.decrypt(newPasswordDTO.token, process.env.SECRET);
     let userRepo = await getRepository<TblUsers>(TblUsers);
     let userData = await userRepo.findOne({
       where: {
@@ -194,14 +199,7 @@ router.post("/new-password", async function (req: Request, res: Response) {
       return;
     }
 
-    if (userData.tokenCode !== newPasswordDTO.token) {
-      res.send({
-        status: NEW_PASSWORD_STATUS.EXPIRED,
-      } as NewPasswordResponseDTO);
-      return;
-    }
-
-    let hash = await bcrypt.hash(newPasswordDTO.password, process.env.SECRET);
+    let hash = await bcrypt.hash(newPasswordDTO.password, +process.env.SECRET);
     userData.userPass = hash;
     await userRepo.save(userData);
 

@@ -8,7 +8,7 @@ import {
 } from "shared/helper/validator";
 import { mapStores } from "pinia";
 import { useSessionStore } from "../scripts/store";
-import { ALERT_TYPE } from "../models/alert";
+import { NOTIFICATION_TYPE } from "../models/notification";
 import { router, URL } from "../scripts/router";
 export default defineComponent({
   emit: ["onSuccess", "onError"],
@@ -35,15 +35,15 @@ export default defineComponent({
         parseValidationErrorsToMap(this.errors, errors);
         if (errors.length === 0) {
           this.sessionStore.userData = await this.$api.login(this.loginData);
-          this.$emit("addAlert", {
-            type: ALERT_TYPE.SUCCESS,
+          this.$emit("newNotification", {
+            type: NOTIFICATION_TYPE.SUCCESS,
             message: "Login riuscito",
           });
           router.push({ path: URL.HOME });
         }
       } catch (errorInfo) {
-        this.$emit("addAlert", {
-          type: ALERT_TYPE.ERROR,
+        this.$emit("newNotification", {
+          type: NOTIFICATION_TYPE.ERROR,
           message: "Richiesta fallita",
         });
       } finally {

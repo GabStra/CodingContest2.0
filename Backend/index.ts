@@ -39,10 +39,10 @@ app.use(express.json());
 app.use("/", authRouter);
 app.use("/", cppRouter);
 
-var credentials = { key: privateKey, cert: certificate };
+/* var credentials = { key: privateKey, cert: certificate };
 var httpsServer = https.createServer(credentials, app);
 httpsServer.listen(port, () => {
   console.log("HELLO");
-});
+}); */
 
-//app.listen(port);
+app.listen(port);

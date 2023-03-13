@@ -5,6 +5,7 @@ import Login from "../components/Login.vue";
 import PasswordRecovery from "../components/PasswordRecovery.vue";
 import Exercise from "../pages/Exercise.vue";
 import { useSessionStore } from "../scripts/store";
+import NewPassword from "../components/NewPassword.vue";
 
 export enum URL {
   MAIN = "/main",
@@ -40,6 +41,10 @@ const MainRoute: RouteRecordRaw = {
     {
       path: URL.PASSWORD_RECOVERY,
       component: PasswordRecovery,
+    },
+    {
+      path: URL.NEW_PASSWORD,
+      component: NewPassword,
     },
   ],
 };

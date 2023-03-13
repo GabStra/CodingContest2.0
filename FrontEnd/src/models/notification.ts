@@ -1,9 +1,9 @@
-export interface Alert {
-  type: ALERT_TYPE;
+export interface Notification {
+  type: NOTIFICATION_TYPE;
   message: string;
 }
 
-export enum ALERT_TYPE {
+export enum NOTIFICATION_TYPE {
   SUCCESS = "success",
   INFO = "info",
   WARNING = "warning",

@@ -178,7 +178,7 @@ export default defineComponent({
         <codemirror
           :modelValue="top"
           class="editor_element"
-          :style="{ overflow: 'scroll' }"
+          :style="{ height: 'auto' }"
           :extensions="extensionsTop"
           :indent-with-tab="true"
           :tab-size="4"
@@ -188,7 +188,7 @@ export default defineComponent({
 
       <codemirror
         :modelValue="code"
-        :style="{ flex: '1', overflow: 'scroll' }"
+        :style="{ height: 'auto' }"
         :extensions="extensions"
         :indent-with-tab="true"
         :tab-size="4"
@@ -204,22 +204,17 @@ export default defineComponent({
         <codemirror
           :modelValue="bottom"
           class="editor_element"
+          :style="{ height: 'auto' }"
           :key="refresh"
-          :style="{ overflow: 'scroll' }"
           :extensions="extensionsBottom"
           :indent-with-tab="true"
           :tab-size="4"
           @change="(value) => (bottom = value)"
         />
       </div>
-      <div class="console">
-        <a-textarea
-          readonly
-          :value="console"
-          :style="{ resize: 'none', height: '100%' }"
-          :autoSize="false"
-        />
-      </div>
+    </div>
+    <div class="console_container">
+      <a-textarea readonly :value="console" class="console" :autoSize="false" />
     </div>
   </div>
 </template>
@@ -228,7 +223,6 @@ export default defineComponent({
 .editor_container {
   position: relative;
   height: auto;
-  overflow: scroll;
 }
 .overlay_element {
   background: gray;
@@ -265,9 +259,20 @@ export default defineComponent({
     height: 80%;
     display: flex;
     flex-direction: column;
+    overflow: scroll;
+    background-color: #282c34;
   }
+  .console_container {
+    height: 20%;
+    background-color: #282c34;
+  }
+
   .console {
-    height: auto;
+    background-color: #282c34;
+    font-family: "Roboto";
+    color: #fff;
+    resize: "none";
+    height: 100%;
   }
 
   .ant-input:focus {
