@@ -12,3 +12,13 @@ export class NewPasswordDTO {
     obj && Object.assign(this, obj);
   }
 }
+
+export enum NEW_PASSWORD_STATUS {
+  SUCCESS,
+  FAIL,
+  EXPIRED,
+}
+
+export interface NewPasswordResponseDTO {
+  status: NEW_PASSWORD_STATUS;
+}

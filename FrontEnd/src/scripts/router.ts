@@ -6,6 +6,8 @@ import PasswordRecovery from "../components/PasswordRecovery.vue";
 import Exercise from "../pages/Exercise.vue";
 import { useSessionStore } from "../scripts/store";
 import NewPassword from "../components/NewPassword.vue";
+import Verify from "../components/Verify.vue";
+import Registration from "../components/Registration.vue";
 
 export enum URL {
   MAIN = "/main",
@@ -16,6 +18,7 @@ export enum URL {
   NEW_PASSWORD = "/new-password",
   PASSWORD_RECOVERY = "/password-recovery",
   EXERCISE = "/exercise",
+  VERIFY = "/verify",
 }
 
 const HomeRoute: RouteRecordRaw = {
@@ -46,6 +49,14 @@ const MainRoute: RouteRecordRaw = {
       path: URL.NEW_PASSWORD,
       component: NewPassword,
     },
+    {
+      path: URL.VERIFY,
+      component: Verify,
+    },
+    {
+      path: URL.REGISTRATION,
+      component: Registration,
+    },
   ],
 };
 
@@ -62,18 +73,13 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const sessionStore = useSessionStore();
-  console.log(to.path);
-  if (to.path === URL.LOGIN && !!sessionStore.userData) {
+  console.log(document.cookie);
+  if (to.path === URL.LOGIN && !!document.cookie) {
     next(URL.HOME);
     return;
   }
-  if (to.meta.requiresLogin) {
-    console.log(sessionStore.userData);
-  }
 
-  if (to.meta.requiresLogin && !sessionStore.userData) {
-    console.log("NON SEI LOGGATO");
+  if (to.meta.requiresLogin && !document.cookie) {
     next(URL.LOGIN);
     return;
   }

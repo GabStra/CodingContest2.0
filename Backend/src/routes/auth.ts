@@ -21,11 +21,25 @@ import { v4 as uuidv4 } from "uuid";
 import { validate, VALIDATION_LANGUAGE } from "shared/dist/helper/validator";
 import dayjs from "dayjs";
 import { UserDataDTO } from "shared/dist/dto/userDataDTO";
-import { NewPasswordDTO } from "shared/dist/dto/newPasswordDTO";
-import { NewPasswordResponseDTO } from "shared/dist/dto/NewPasswordResponseDTO";
-import { NEW_PASSWORD_STATUS } from "shared/dist/constants/new_password_status";
-import { sendPasswordRecoveryEmail } from "../helper/mail";
-import encryptpwd from "encrypt-with-password";
+import {
+  NewPasswordDTO,
+  NewPasswordResponseDTO,
+  NEW_PASSWORD_STATUS,
+} from "shared/dist/dto/newPasswordDTO";
+import { sendPasswordRecoveryEmail, sendVerifyEmail } from "../helper/mail";
+
+import {
+  RegistrationDTO,
+  REGISTRATION_STATUS,
+  RegistrationResponseDTO,
+} from "shared/dist/dto/registrationDTO";
+
+import {
+  VerifyDTO,
+  VerifyResponseDTO,
+  VERIFY_STATUS,
+} from "shared/dist/dto/verifyDTO";
+
 const router = express.Router();
 const keyv = new Keyv();
 
@@ -57,7 +71,7 @@ router.post("/login", async function (req: Request, res: Response) {
     let role = getRoleFromUser(userData);
     let expirationDate = +dayjs().add(15, loginDTO.rememberMe ? "d" : "m");
     let sessionId = uuidv4();
-    keyv.set(sessionId, userData.userId, expirationDate);
+    await keyv.set(sessionId, userData.userId, expirationDate);
     createAccessTokenCookies(res, sessionId, role, loginDTO.rememberMe);
 
     res.status(200);
@@ -76,13 +90,14 @@ router.post("/logout", async function (req: Request, res: Response) {
   try {
     let jwt = buildAccessToken(req);
     let accessToken = decodeAccessToken(jwt);
-    if (keyv.has(accessToken.sessionId))
-      await keyv.delete(accessToken.sessionId);
+    let result = await keyv.has(accessToken.sessionId);
+    if (result) await keyv.delete(accessToken.sessionId);
     res.clearCookie(ACCESS_TOKEN_PAYLOAD);
     res.clearCookie(ACCESS_TOKEN_SIGNATURE);
 
     res.sendStatus(200);
-  } catch {
+  } catch (err) {
+    console.log(err);
     res.sendStatus(400);
   }
 });
@@ -107,10 +122,10 @@ router.post("/password-reset", async function (req: Request, res: Response) {
       return;
     }
 
-    let token = encryptpwd.encrypt(userData.userId, process.env.SECRET);
+    let token = uuidv4();
     let link = `${process.env.FRONTEND_HOST}/new-password?token=${token}`;
-
-    keyv.set(token, +dayjs().add(15, "m"));
+    userData.tokenCode = token;
+    await userRepo.save(userData);
 
     await sendPasswordRecoveryEmail({
       userEmail: userData.userEmail,
@@ -137,18 +152,10 @@ router.post(
         return;
       }
 
-      if (!keyv.has(newPasswordDTO.token)) {
-        res.send({
-          status: NEW_PASSWORD_STATUS.EXPIRED,
-        } as NewPasswordResponseDTO);
-        return;
-      }
-
-      let userId = encryptpwd.decrypt(newPasswordDTO.token, process.env.SECRET);
       let userRepo = await getRepository<TblUsers>(TblUsers);
       let userData = await userRepo.findOne({
         where: {
-          userId: userId,
+          tokenCode: newPasswordDTO.token,
         },
       });
       if (!userData) {
@@ -177,18 +184,10 @@ router.post("/new-password", async function (req: Request, res: Response) {
       return;
     }
 
-    if (!keyv.has(newPasswordDTO.token)) {
-      res.send({
-        status: NEW_PASSWORD_STATUS.EXPIRED,
-      } as NewPasswordResponseDTO);
-      return;
-    }
-
-    let userId = encryptpwd.decrypt(newPasswordDTO.token, process.env.SECRET);
     let userRepo = await getRepository<TblUsers>(TblUsers);
     let userData = await userRepo.findOne({
       where: {
-        userId: userId,
+        tokenCode: newPasswordDTO.token,
       },
     });
 
@@ -212,6 +211,105 @@ router.post("/new-password", async function (req: Request, res: Response) {
   }
 });
 
+router.post("/registration", async function (req: Request, res: Response) {
+  try {
+    let registrationDTO = new RegistrationDTO(req.body);
+    let errors = await validate(registrationDTO, VALIDATION_LANGUAGE.IT);
+    if (errors.length !== 0) {
+      res.sendStatus(400);
+      return;
+    }
+
+    let userRepo = await getRepository<TblUsers>(TblUsers);
+    if (
+      !!(await userRepo.findOne({
+        where: {
+          userId: registrationDTO.userId,
+        },
+      }))
+    ) {
+      res.send({
+        status: REGISTRATION_STATUS.UserIdInUse,
+      } as RegistrationResponseDTO);
+      return;
+    }
+
+    if (
+      !!(await userRepo.findOne({
+        where: {
+          userEmail: registrationDTO.userEmail,
+        },
+      }))
+    ) {
+      res.send({
+        status: REGISTRATION_STATUS.EmailInUse,
+      } as RegistrationResponseDTO);
+      return;
+    }
+
+    let token = uuidv4();
+    let link = `${process.env.FRONTEND_HOST}/verify?token=${token}`;
+
+    let hash = await bcrypt.hash(registrationDTO.userPass, +process.env.SECRET);
+    let userData = new TblUsers();
+
+    userData.userId = registrationDTO.userId;
+    userData.userEmail = registrationDTO.userEmail;
+    userData.userName = registrationDTO.userName;
+    userData.userPass = hash;
+    userData.tokenCode = "";
+
+    let expirationDate = +dayjs().add(15, "m");
+    let userDataJSON = JSON.stringify(userData);
+    await keyv.set(token, userDataJSON, expirationDate);
+
+    await sendVerifyEmail({
+      userEmail: registrationDTO.userEmail,
+      userName: registrationDTO.userName,
+      verifyLink: link,
+    });
+
+    res.send({
+      status: REGISTRATION_STATUS.Success,
+    } as RegistrationResponseDTO);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400);
+  }
+});
+
+router.post("/verify", async function (req: Request, res: Response) {
+  try {
+    let verifyDTO = new VerifyDTO(req.body);
+    let errors = await validate(verifyDTO, VALIDATION_LANGUAGE.IT);
+    console.log(errors);
+    if (errors.length !== 0) {
+      res.sendStatus(400);
+      return;
+    }
+
+    if (!(await keyv.has(verifyDTO.token))) {
+      res.send({
+        status: VERIFY_STATUS.FAIL,
+      } as VerifyResponseDTO);
+    }
+
+    let userRepo = await getRepository<TblUsers>(TblUsers);
+    let userDataJSON = await keyv.get(verifyDTO.token);
+    let userData = JSON.parse(userDataJSON);
+    userData.tokenCode = "";
+    userData.userStatus = "Y";
+    await userRepo.save(userData);
+
+    res.send({
+      status: VERIFY_STATUS.SUCCESS,
+    } as VerifyResponseDTO);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400);
+  }
+});
+
 export async function isLoggedIn(req, res, next) {
   if (!hasAccessToken(req)) {
     res.sendStatus(401);
@@ -221,7 +319,7 @@ export async function isLoggedIn(req, res, next) {
   let jwt = buildAccessToken(req);
   let accessToken = decodeAccessToken(jwt);
   let isInvalid = !verifyJwt(jwt);
-  let isSessionInvalid = !keyv.has(accessToken.sessionId);
+  let isSessionInvalid = !(await keyv.has(accessToken.sessionId));
   if (isInvalid && !isSessionInvalid) await keyv.delete(accessToken.sessionId);
 
   if (isInvalid || isSessionInvalid) {

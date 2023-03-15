@@ -8,6 +8,7 @@ export default defineComponent({
     HandleNewNotification(notification: Notification) {
       popup[notification.type]({
         message: notification.message,
+        description: notification.description,
       });
     },
   },

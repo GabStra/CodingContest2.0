@@ -1,6 +1,7 @@
-import { IsNotEmpty, MaxLength, IsEmail } from "class-validator";
+import { IsNotEmpty, MaxLength, IsEmail, IsDefined } from "class-validator";
 
 export class PasswordRecoveryDTO {
+  @IsDefined()
   @MaxLength(100)
   @IsEmail()
   @IsNotEmpty()

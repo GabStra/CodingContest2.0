@@ -9,8 +9,10 @@ import {
 import { Modal } from "ant-design-vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { NOTIFICATION_TYPE } from "../models/notification";
-import { NewPasswordResponseDTO } from "shared/dto/newPasswordResponseDTO";
-import { NEW_PASSWORD_STATUS } from "shared/constants/new_password_status";
+import {
+  NewPasswordResponseDTO,
+  NEW_PASSWORD_STATUS,
+} from "shared/dto/newPasswordDTO";
 import { router, URL } from "../scripts/router";
 import { LoadingOutlined } from "@ant-design/icons-vue";
 
@@ -53,7 +55,7 @@ export default defineComponent({
     saveNewPassword: async function () {
       try {
         let response = await this.$api.newPassword(this.newPasswordData);
-        this.manageAlert(response);
+        this.manageNotification(response);
         if (response.status === NEW_PASSWORD_STATUS.SUCCESS) {
           router.push({ path: URL.LOGIN });
         }
@@ -72,7 +74,7 @@ export default defineComponent({
         this.isLoading = true;
         let response = await this.$api.newPasswordCheck(this.newPasswordData);
         if (response.status === NEW_PASSWORD_STATUS.EXPIRED) {
-          this.expiredAlert();
+          this.expiredNotification();
           router.push({ path: URL.LOGIN });
         }
       } catch {
@@ -86,14 +88,14 @@ export default defineComponent({
       }
     },
 
-    expiredAlert() {
+    expiredNotification() {
       this.$emit("newNotification", {
         type: NOTIFICATION_TYPE.ERROR,
         message: "Link scaduto",
       });
     },
 
-    manageAlert(response: NewPasswordResponseDTO) {
+    manageNotification(response: NewPasswordResponseDTO) {
       switch (response.status) {
         case NEW_PASSWORD_STATUS.SUCCESS:
           this.$emit("newNotification", {
@@ -126,7 +128,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div>
+  <div class="element_container">
     <div v-show="isLoading">
       <LoadingOutlined spin />
     </div>
@@ -143,14 +145,20 @@ export default defineComponent({
       </a-form-item>
 
       <a-form-item>
-        <a-button type="primary" @click="handleSave" :loading="isLoading"
-          >Salva</a-button
-        >
-        <a-divider type="vertical" />
-        <a-button @click="() => $router.push({ path: URL.LOGIN })"
-          >Annulla</a-button
-        >
+        <a-space>
+          <a-button type="primary" @click="handleSave" :loading="isLoading"
+            >Salva</a-button
+          >
+          <a-button @click="() => $router.push({ path: URL.LOGIN })"
+            >Annulla</a-button
+          >
+        </a-space>
       </a-form-item>
     </a-form>
   </div>
 </template>
+<style scoped>
+.element_container {
+  width: 300px;
+}
+</style>

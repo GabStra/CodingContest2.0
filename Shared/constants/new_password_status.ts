@@ -1,5 +1,0 @@
-export enum NEW_PASSWORD_STATUS {
-  SUCCESS,
-  FAIL,
-  EXPIRED,
-}

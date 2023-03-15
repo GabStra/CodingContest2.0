@@ -26,6 +26,7 @@ export async function validate(
   return cv_validate(model, {
     validationError: { target: false, value: false },
     stopAtFirstError: true,
+    skipMissingProperties: true,
     messages: errorMessages,
   });
 }

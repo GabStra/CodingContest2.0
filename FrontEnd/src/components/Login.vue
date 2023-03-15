@@ -10,6 +10,7 @@ import { mapStores } from "pinia";
 import { useSessionStore } from "../scripts/store";
 import { NOTIFICATION_TYPE } from "../models/notification";
 import { router, URL } from "../scripts/router";
+
 export default defineComponent({
   emit: ["onSuccess", "onError"],
   data() {
@@ -28,11 +29,12 @@ export default defineComponent({
     ...mapStores(useSessionStore),
   },
   methods: {
-    handleSubmit: async function () {
+    handleClick: async function () {
       try {
         this.isLoading = true;
         let errors = await validate(this.loginData, VALIDATION_LANGUAGE.IT);
         parseValidationErrorsToMap(this.errors, errors);
+        console.log("TEST", this.errors, this.loginData);
         if (errors.length === 0) {
           this.sessionStore.userData = await this.$api.login(this.loginData);
           this.$emit("newNotification", {
@@ -54,7 +56,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div>
+  <div class="element_container">
     <a-form layout="vertical" :model="loginData" ref="loginForm">
       <h2>Coding Contest 2.0</h2>
       <a-divider />
@@ -83,7 +85,7 @@ export default defineComponent({
       </a-form-item>
 
       <a-form-item :wrapper-col="{ span: 16 }">
-        <a-button type="primary" @click="handleSubmit" :loading="isLoading"
+        <a-button type="primary" @click="handleClick" :loading="isLoading"
           >Accedi</a-button
         >
       </a-form-item>
@@ -96,3 +98,8 @@ export default defineComponent({
     </router-link>
   </div>
 </template>
+<style scoped>
+.element_container {
+  width: 300px;
+}
+</style>

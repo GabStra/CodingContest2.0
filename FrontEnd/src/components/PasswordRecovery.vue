@@ -53,7 +53,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="form">
+  <div class="element_container">
     <a-form layout="vertical" :model="passwordRecoveryData">
       <h2>Recupera password</h2>
       <a-divider />
@@ -78,3 +78,8 @@ export default defineComponent({
     </a-form>
   </div>
 </template>
+<style scoped>
+.element_container {
+  width: 300px;
+}
+</style>
