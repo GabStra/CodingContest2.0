@@ -58,7 +58,10 @@ export default defineComponent({
 <template>
   <div class="element_container">
     <a-form layout="vertical" :model="loginData" ref="loginForm">
-      <h2>Coding Contest 2.0</h2>
+      <div class="center">
+        <h2>Coding Contest 2.0</h2>
+      </div>
+
       <a-divider />
       <a-form-item
         label="Email"
@@ -66,7 +69,10 @@ export default defineComponent({
         :validateStatus="errors.has('email') ? 'error' : undefined"
         :help="errors.get('email')"
       >
-        <a-input v-model:value="loginData.email" />
+        <a-input
+          v-model:value="loginData.email"
+          v-on:keyup.enter="handleClick"
+        />
       </a-form-item>
 
       <a-form-item
@@ -75,7 +81,10 @@ export default defineComponent({
         :validateStatus="errors.has('password') ? 'error' : undefined"
         :help="errors.get('password')"
       >
-        <a-input-password v-model:value="loginData.password" />
+        <a-input-password
+          v-model:value="loginData.password"
+          v-on:keyup.enter="handleClick"
+        />
       </a-form-item>
 
       <a-form-item name="rememberMe" :wrapper-col="{ span: 16 }">
@@ -84,22 +93,33 @@ export default defineComponent({
         >
       </a-form-item>
 
-      <a-form-item :wrapper-col="{ span: 16 }">
-        <a-button type="primary" @click="handleClick" :loading="isLoading"
-          >Accedi</a-button
-        >
+      <a-form-item>
+        <div class="center">
+          <a-button type="primary" @click="handleClick" :loading="isLoading"
+            >Accedi</a-button
+          >
+          <h4 style="margin: 0">
+            <router-link :to="{ path: URL.PASSWORD_RECOVERY }">
+              Recupera Password
+            </router-link>
+          </h4>
+        </div>
       </a-form-item>
     </a-form>
     <a-divider />
-    <router-link :to="{ path: URL.REGISTRATION }"> Registrati </router-link>
-    <a-divider type="vertical" />
-    <router-link :to="{ path: URL.PASSWORD_RECOVERY }">
-      Recupera Password
-    </router-link>
+    <div class="center">
+      <router-link :to="{ path: URL.REGISTRATION }"> Registrati </router-link>
+    </div>
   </div>
 </template>
 <style scoped>
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
 .element_container {
-  width: 300px;
+  width: 350px;
 }
 </style>

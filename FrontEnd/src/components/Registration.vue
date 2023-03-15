@@ -129,7 +129,7 @@ export default defineComponent({
         <a-input-password v-model:value="registrationData.userPass" />
       </a-form-item>
 
-      <div class="button_container">
+      <div class="center">
         <a-button type="primary" @click="handleSubmit" :loading="isLoading"
           >Registrati</a-button
         >
@@ -145,12 +145,12 @@ export default defineComponent({
 .element_container {
   width: 300px;
 }
-.button_container {
+
+.center {
   margin-top: 20px;
   display: flex;
-  width: 100%;
-  flex-direction: row;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
   gap: 10px;
 }
 </style>

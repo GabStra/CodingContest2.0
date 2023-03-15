@@ -51,7 +51,6 @@ export default defineComponent({
   align-items: center;
 }
 .userInfo-column {
-  font-family: "roboto";
   color: white;
   display: flex;
   justify-content: center;

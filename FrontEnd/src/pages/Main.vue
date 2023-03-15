@@ -30,7 +30,11 @@ export default defineComponent({});
   opacity: 0;
 }
 .element_container {
-  width: 300px;
+  padding: 20px;
+  border-radius: 14px 14px 14px 14px;
+  -webkit-border-radius: 14px 14px 14px 14px;
+  -moz-border-radius: 14px 14px 14px 14px;
+  background: #2b2a33;
 }
 
 .container {

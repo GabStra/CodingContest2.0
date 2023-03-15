@@ -66,20 +66,27 @@ export default defineComponent({
         <a-input v-model:value="passwordRecoveryData.email" />
       </a-form-item>
 
-      <a-form-item>
+      <div class="center">
         <a-button type="primary" @click="handleClick" :loading="isLoading"
           >Invia mail</a-button
         >
-        <a-divider type="vertical" />
         <a-button @click="() => $router.push({ path: URL.LOGIN })"
           >Annulla</a-button
         >
-      </a-form-item>
+      </div>
     </a-form>
   </div>
 </template>
 <style scoped>
 .element_container {
   width: 300px;
+}
+
+.center {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 </style>

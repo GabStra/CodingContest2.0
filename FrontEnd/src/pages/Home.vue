@@ -44,9 +44,6 @@ export default defineComponent({
       ><a-layout-header
         :style="{
           padding: '0 10px',
-          position: 'fixed',
-          zIndex: 1,
-          width: '100%',
         }"
       >
         <div class="header_container">
@@ -66,16 +63,14 @@ export default defineComponent({
           <a-menu-item key="1">
             <span class="nav-text">Istituti</span>
           </a-menu-item>
-          <a-menu-item key="1">
-            <span class="nav-text">Corsi</span>
-          </a-menu-item>
           <a-sub-menu key="sub2">
-            <template #title>Navigation Four</template>
-            <a-menu-item key="7">Option 7</a-menu-item>
-            <a-menu-item key="8">Option 8</a-menu-item>
-            <a-menu-item key="9">Option 9</a-menu-item>
-            <a-menu-item key="10">Option 10</a-menu-item>
+            <template #title>Corsi</template>
+            <a-menu-item key="7">Option 1</a-menu-item>
+            <a-menu-item key="8">Option 2</a-menu-item>
+            <a-menu-item key="9">Option 3</a-menu-item>
+            <a-menu-item key="10">Option 4</a-menu-item>
           </a-sub-menu>
+
           <a-menu-item key="2">
             <span class="nav-text">Impostazioni</span>
           </a-menu-item>
