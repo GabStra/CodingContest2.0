@@ -1,0 +1,77 @@
+#app {
+  width: 100vw;
+  height: 100vh; /* Fallback for browsers that do not support Custom Properties */
+  height: calc(var(--vh, 1vh) * 100);
+  overflow: scroll;
+  min-height: 600px;
+  background-color: #121212;
+}
+
+.ant-checkbox,
+.ant-input-affix-wrapper,
+.ant-select,
+.ant-input {
+  background-color: #121212 !important;
+  box-shadow: none !important;
+}
+
+.ant-form-item,
+.ant-select-selector {
+  box-shadow: none !important;
+}
+
+.ant-menu,
+.ant-menu-submenu-title,
+.ant-menu-item {
+  color: #848484 !important;
+}
+
+.ant-menu-inline-collapsed > .ant-menu-item {
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+.ant-menu-item:hover:not(.ant-menu-item-selected),
+.ant-menu-submenu:hover:not(.ant-menu-item-selected) {
+  background: #121212 !important;
+  color: #ecf2f8 !important;
+  transition: none !important;
+}
+
+.ant-menu-item-selected,
+.ant-menu::selection,
+.ant-menu-title-content::selection {
+  background: #121212 !important;
+  color: #4ebe31 !important;
+  transition: none !important;
+}
+
+.ant-table {
+  border: 1px solid #383838;
+  overflow: auto;
+}
+
+.ant-menu {
+  background: #121212 !important;
+}
+
+.ant-divider {
+  border-top: 1px solid #383838;
+}
+
+.ant-layout-sider-dark {
+  background: #121212 !important;
+  border-right: 1px solid #383838;
+}
+
+.ant-layout-header {
+  background: #121212 !important;
+  border-bottom: 1px solid #383838;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}

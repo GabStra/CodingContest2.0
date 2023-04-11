@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package rpc;
+
+service Cpp{
+    rpc RunCpp(CppRequest) returns (CppResponse) {}
+    rpc IsHealthy(HealthRequest) returns (HealthResponse) {}
+}
+
+message CppRequest{
+    string id =1;
+    string code = 2;
+    string input = 3;
+}
+
+message CppResponse{
+    string id =1;
+    string stdout = 2;
+    string stderr=3;
+    string output = 4;
+    enum TaskType{
+        COMPILE = 0;
+        RUN = 1;
+    }
+    TaskType taskType=5;
+    enum TaskStatus{
+        SUCCEDED = 0;
+        ABORTED = 1;
+        TIMEOUT = 2;
+        ERROR = 3;
+        FAILED = 4;  
+    }
+    TaskStatus taskStatus=6;
+    
+}
+
+message HealthRequest{}
+message HealthResponse{
+    bool isHealthy=1;
+    int32 errorCounter = 2;
+}
