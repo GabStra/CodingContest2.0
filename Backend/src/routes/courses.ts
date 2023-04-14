@@ -6,19 +6,19 @@ import { TblCorsi } from "../database/entities/TblCorsi";
 import { AuthRequest } from "../model/AuthRequest";
 import { isLoggedIn, isSuperAdmin } from "./auth";
 import { AvailableCourseDTO } from "shared/dto/availableCourseDTO";
-import { CourseDTO } from "shared/dist/dto/courseDTO";
-import { validate, VALIDATION_LANGUAGE } from "shared/dist/helper/validator";
+import { CourseDTO } from "shared/dto/courseDTO";
+import { validate, VALIDATION_LANGUAGE } from "shared/helper/validator";
 import { TblAssocDocenti } from "../database/entities/TblAssocDocenti";
-import { ListElementDTO } from "shared/dist/dto/ListElementDTO";
-import { ResponseDTO } from "shared/dist/dto/ResponseDTO";
+import { ListElementDTO } from "shared/dto/ListElementDTO";
+import { ResponseDTO } from "shared/dto/ResponseDTO";
 
 const router = express.Router();
 
 function buildCoursesArray(items: TblCorsi[]) {
-  return items.map<CourseDTO>((course) => ({
+  return items.map((course) => ({
     id: course.id,
     nome: course.nome,
-    attivo: course.attivo,
+    attivo: !!course.attivo,
     numeroIscritti: course.assocStudenti.length,
     nomiDocenti: course.assocDocenti.map(
       (assocDocente) => assocDocente.user.userName
@@ -54,7 +54,7 @@ router.get(
     });
 
     let response = buildCoursesArray(courses);
-    response.forEach((element) => {
+    response.forEach((element: any) => {
       element.isRegistered = registeredCourseIds.includes(element.id);
       element.isRegistrationActive = req.userData.studentCourseIds.includes(
         element.id
@@ -258,7 +258,7 @@ router.get("/course", isLoggedIn, async function (req: AuthRequest, res) {
     info: course.info,
     attivo: course.attivo,
     idDocenti: course.assocDocenti.map((assocDocente) => assocDocente.idUtente),
-  } as CourseDTO);
+  });
 });
 
 export { router as coursesRouter };

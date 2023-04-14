@@ -6,9 +6,9 @@ import { AuthRequest } from "../model/AuthRequest";
 import { isLoggedIn, isSuperAdmin } from "./auth";
 import { ResponseDTO } from "shared/dto/ResponseDTO";
 import { ListElementDTO } from "shared/dto/ListElementDTO";
-import { UserFilterDTO } from "shared/dist/dto/userFilterDTO";
+import { UserFilterDTO } from "shared/dto/userFilterDTO";
 import { In, Like } from "typeorm";
-import { ROLE } from "shared/dist/constants/role";
+import { ROLE } from "shared/constants/role";
 const router = express.Router();
 
 router.use(isLoggedIn);

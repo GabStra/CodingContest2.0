@@ -1,8 +1,8 @@
 import express, { Request, response, Response } from "express";
-import { AccessTokenPayload } from "shared/dist/models/accessTokenPayload";
-import { ROLE } from "shared/dist/constants/role";
-import { LoginDTO } from "shared/dist/dto/loginDTO";
-import { PasswordRecoveryDTO } from "shared/dist/dto/PasswordRecoveryDTO";
+import { AccessTokenPayload } from "shared/models/accessTokenPayload";
+import { ROLE } from "shared/constants/role";
+import { LoginDTO } from "shared/dto/loginDTO";
+import { PasswordRecoveryDTO } from "shared/dto/PasswordRecoveryDTO";
 import { getRepository } from "../database/datasource";
 import { TblUsers } from "../database/entities/TblUsers";
 import bcrypt from "bcrypt";
@@ -18,27 +18,27 @@ import {
 } from "../helper/cookie";
 import Keyv from "@keyvhq/core";
 import { v4 as uuidv4 } from "uuid";
-import { validate, VALIDATION_LANGUAGE } from "shared/dist/helper/validator";
+import { validate, VALIDATION_LANGUAGE } from "shared/helper/validator";
 import dayjs from "dayjs";
-import { UserDataDTO } from "shared/dist/dto/userDataDTO";
+import { UserDataDTO } from "shared/dto/userDataDTO";
 import {
   NewPasswordDTO,
   NewPasswordResponseDTO,
   NEW_PASSWORD_STATUS,
-} from "shared/dist/dto/newPasswordDTO";
+} from "shared/dto/newPasswordDTO";
 import { sendPasswordRecoveryEmail, sendVerifyEmail } from "../helper/mail";
 
 import {
   RegistrationDTO,
   REGISTRATION_STATUS,
   RegistrationResponseDTO,
-} from "shared/dist/dto/registrationDTO";
+} from "shared/dto/registrationDTO";
 
 import {
   VerifyDTO,
   VerifyResponseDTO,
   VERIFY_STATUS,
-} from "shared/dist/dto/verifyDTO";
+} from "shared/dto/verifyDTO";
 import { UserData } from "../model/UserData";
 import { AuthRequest } from "../model/AuthRequest";
 import { TblAssocStudenti } from "../database/entities/TblAssocStudenti";

@@ -1,5 +1,5 @@
 import { MessagePort, parentPort } from "worker_threads";
-import { CppDefinition, CppRequest } from "shared/dist/compiled_proto/cpp";
+import { CppDefinition, CppRequest } from "shared/compiled_proto/cpp";
 import {
   ChannelCredentials,
   Client,

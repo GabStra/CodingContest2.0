@@ -1,4 +1,4 @@
-import { ROLE } from "shared/dist/constants/role";
+import { ROLE } from "shared/constants/role";
 
 export interface UserData {
   id: number;

@@ -11,6 +11,7 @@ import { usersRouter } from "./src/routes/users";
 import { tagsRouter } from "./src/routes/tags";
 import appRootPath from "app-root-path";
 import https from "https";
+import { exercisesRouter } from "./src/routes/exercises";
 dotenv.config();
 const app: Express = express();
 const port = Number(process.env.PORT);
@@ -23,8 +24,6 @@ var certificate = fs.readFileSync(
   appRootPath.resolve("keys/https/cert.pem"),
   "utf8"
 );
-
-//RETRY22
 
 app.use(cors({ credentials: true, origin: process.env.FRONTEND_HOST }));
 app.use(cookieParser());
@@ -44,6 +43,7 @@ app.use("/", cppRouter);
 app.use("/", coursesRouter);
 app.use("/", usersRouter);
 app.use("/", tagsRouter);
+app.use("/", exercisesRouter);
 
 /* var credentials = { key: privateKey, cert: certificate };
 var httpsServer = https.createServer(credentials, app);
