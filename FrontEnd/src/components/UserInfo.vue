@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue'
 import { mapStores } from 'pinia'
 import { useSessionStore } from '../scripts/store'
-import { ROLES } from 'shared/constants/roless'
+import { ROLES } from 'shared/constants/roles'
 import { UserOutlined } from '@ant-design/icons-vue'
 export default defineComponent({
     components: {

@@ -10,7 +10,7 @@ import { ListElement } from "shared/dto/ListElement";
 const router = express.Router();
 
 router.get(
-  ENDPOINTS.EXERCISE,
+  ENDPOINTS.EXERCISE_TEACHER,
   isLoggedIn,
   isTeacher,
   async function (req: TeacherRequest, res) {
@@ -23,62 +23,75 @@ router.get(
     }
 
     let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
+    console.log(title, req.courseId);
     let esercizio = await eserciziRepo.findOne({
       where: {
         title: title,
         idCorso: req.courseId,
       },
     });
-
+    console.log(esercizio);
     res.send(esercizio);
   }
 );
 
+async function manageExercise(req: TeacherRequest, res, isNew: boolean) {
+  let exercise = new Exercise(req.body);
+
+  let errors = await validate(exercise, VALIDATION_LANGUAGE.IT);
+  if (errors.length !== 0) {
+    res.sendStatus(400);
+    return;
+  }
+
+  let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
+  let exerciseData: TblEsercizi;
+  if (!!exercise.title) {
+    exerciseData = await eserciziRepo.findOne({
+      where: {
+        title: exercise.title,
+        idCorso: req.courseId,
+      },
+    });
+  }
+
+  if (isNew && !!exerciseData) {
+    res.status(400);
+    res.send("Esercizio già esistente - scegliere un altro titolo");
+    return;
+  }
+
+  delete exercise.autore;
+  delete exercise.idCorso;
+
+  if (!exerciseData) {
+    exerciseData = new TblEsercizi();
+    exerciseData.path = "";
+    exerciseData.autore = req.userData.userName;
+    exerciseData.idCorso = req.courseId;
+  }
+
+  exercise.title = exercise.title.trim();
+  if (!exercise.prop) exercise.prop = 0;
+
+  Object.assign(exerciseData, exercise);
+  await eserciziRepo.save(exerciseData);
+  console.log(exerciseData);
+  res.send(exerciseData);
+}
+
 router.post(
-  ENDPOINTS.SAVE_EXERCISE,
+  ENDPOINTS.NEW_EXERCISE,
   isLoggedIn,
   isTeacher,
-  async function (req: TeacherRequest, res) {
-    let exercise = new Exercise(req.body);
-    let errors = await validate(exercise, VALIDATION_LANGUAGE.IT);
-    if (errors.length !== 0) {
-      res.sendStatus(400);
-      return;
-    }
+  async (req: TeacherRequest, res) => await manageExercise(req, res, true)
+);
 
-    let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
-    let exerciseData: TblEsercizi;
-    if (!!exercise.title) {
-      exerciseData = await eserciziRepo.findOne({
-        where: {
-          title: exercise.title,
-          idCorso: req.courseId,
-        },
-      });
-    }
-
-    if (!!req.query.new && !!exerciseData) {
-      res.status(400);
-      res.send("Esercizio già esistente - scegliere un altro titolo");
-      return;
-    }
-
-    delete exercise.autore;
-    delete exercise.idCorso;
-
-    if (!exerciseData) {
-      exerciseData = new TblEsercizi();
-      exerciseData.path = "";
-      exerciseData.autore = req.userData.userName;
-      exerciseData.idCorso = req.courseId;
-    }
-
-    if (!exercise.prop) exerciseData.prop = "0";
-
-    Object.assign(exerciseData, exercise);
-    await eserciziRepo.save(exerciseData);
-    res.send(exerciseData);
-  }
+router.post(
+  ENDPOINTS.EDIT_EXERCISE,
+  isLoggedIn,
+  isTeacher,
+  async (req: TeacherRequest, res) => await manageExercise(req, res, false)
 );
 
 router.delete(
@@ -134,11 +147,13 @@ router.get(
 router.get(
   ENDPOINTS.EXERCISES_TEACHER,
   isLoggedIn,
+  isTeacher,
   async function (req: TeacherRequest, res) {
     try {
       let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
       let response = await eserciziRepo.find({
         select: ["title", "pronto", "pubblicato"],
+        where: { idCorso: req.courseId },
       });
       res.send(response);
     } catch {
@@ -155,6 +170,7 @@ router.get(
       let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
       let response = await eserciziRepo.find({
         select: ["title", "pronto", "pubblicato"],
+        where: { idCorso: req.courseId },
       });
       res.send(response);
     } catch {

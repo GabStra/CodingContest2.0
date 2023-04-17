@@ -38,7 +38,7 @@ axios.interceptors.response.use(
     (error) => {
         console.log(error.response)
         if (!!error.response) {
-            if (error.response.status === 400) {
+            if (error.response.status === 401) {
                 let cookies = document.cookie.split(';')
                 // set past expiry to all cookies
                 for (var i = 0; i < cookies.length; i++) {
@@ -58,9 +58,9 @@ axios.interceptors.response.use(
                 document.cookie =
                     cookies[i] + '=; expires=' + new Date(0).toUTCString()
             }
-            router.push({ name: URL.OFFLINE })
+            router.push({ path: URL.OFFLINE })
         }
-        return Promise.resolve()
+        return Promise.resolve(error.response)
     }
 )
 

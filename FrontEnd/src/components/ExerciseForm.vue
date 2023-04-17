@@ -109,6 +109,13 @@ export default defineComponent({
                 },
             ]
         },
+        isEdit() {
+            return (
+                !!this.$route.query.titoloEsercizio &&
+                Object.hasOwn(this.$route.meta, 'copy') &&
+                !this.$route.meta.copy
+            )
+        },
     },
     methods: {
         onLoadExercise: async function () {
@@ -118,7 +125,7 @@ export default defineComponent({
         },
         loadExercise: async function () {
             let response = await this.$api.get<Exercise>(
-                ENDPOINTS.EXERCISE,
+                ENDPOINTS.EXERCISE_TEACHER,
                 {
                     course: Number(this.$route.query.idCorso),
                     title: this.$route.query.titoloEsercizio,
@@ -169,11 +176,10 @@ export default defineComponent({
             parseValidationErrorsToMap(this.errors, errors)
             if (errors.length !== 0) return
             let response = await this.$api.postWithParams<any, Exercise>(
-                ENDPOINTS.SAVE_EXERCISE,
+                this.isEdit ? ENDPOINTS.EDIT_EXERCISE : ENDPOINTS.NEW_EXERCISE,
                 this.exerciseData,
                 {
                     course: Number(this.$route.query.idCorso),
-                    new: !this.$route.query.titoloEsercizio,
                 },
                 true
             )
@@ -208,6 +214,7 @@ export default defineComponent({
         }
 
         await Promise.all(promises)
+
         if (
             this.exerciseData.prop &&
             !this.exercisesOptions.some(
@@ -228,9 +235,7 @@ export default defineComponent({
                 <div class="center">
                     <h2>
                         <a-typography-text strong>{{
-                            !!$route.query.titoloEsercizio && !$route.meta?.copy
-                                ? 'Modifica Esercizio'
-                                : 'Nuovo Esercizio'
+                            isEdit ? 'Modifica Esercizio' : 'Nuovo Esercizio'
                         }}</a-typography-text>
                     </h2>
                 </div>
