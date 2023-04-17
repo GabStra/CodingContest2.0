@@ -1,18 +1,18 @@
 <script lang="ts">
 import { createVNode, defineComponent } from 'vue'
-import { NewPasswordDTO } from 'shared/dto/newPasswordDTO'
+import { NewPassword } from 'shared/dto/newPassword'
 import {
     validate,
     VALIDATION_LANGUAGE,
     parseValidationErrorsToMap,
-} from 'shared/helper/validator'
+} from 'shared/utils/validator'
 import { Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { POPUP_TYPE } from '../models/popup'
 import {
-    NewPasswordResponseDTO,
+    NewPasswordResponse,
     NEW_PASSWORD_STATUS,
-} from 'shared/dto/newPasswordDTO'
+} from 'shared/dto/newPassword'
 import { router, URL } from '../scripts/router'
 import { LoadingOutlined } from '@ant-design/icons-vue'
 import { ENDPOINTS } from 'shared/constants/endpoints'
@@ -24,7 +24,7 @@ export default defineComponent({
     },
     data() {
         return {
-            newPasswordData: new NewPasswordDTO(),
+            newPasswordData: new NewPassword(),
             errors: new Map<string, string>(),
             isLoading: false,
         }
@@ -66,8 +66,8 @@ export default defineComponent({
 
         saveNewPassword: async function () {
             let response = await this.$api.post<
-                NewPasswordResponseDTO,
-                NewPasswordDTO
+                NewPasswordResponse,
+                NewPassword
             >(ENDPOINTS.NEW_PASSWORD, this.newPasswordData)
             if (response === null) return
             this.manageNotification(response.data)
@@ -84,8 +84,8 @@ export default defineComponent({
 
         checkLink: async function () {
             let response = await this.$api.post<
-                NewPasswordResponseDTO,
-                NewPasswordDTO
+                NewPasswordResponse,
+                NewPassword
             >(ENDPOINTS.NEW_PASSWORD_CHECK, this.newPasswordData)
             if (response === null) return
             if (response.data.status === NEW_PASSWORD_STATUS.EXPIRED) {
@@ -97,7 +97,7 @@ export default defineComponent({
             }
         },
 
-        manageNotification(response: NewPasswordResponseDTO) {
+        manageNotification(response: NewPasswordResponse) {
             switch (response.status) {
                 case NEW_PASSWORD_STATUS.SUCCESS:
                     this.$emit('newPopup', {

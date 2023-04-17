@@ -1,21 +1,46 @@
 import express from "express";
 import { isLoggedIn, isTeacher } from "./auth";
 import { TeacherRequest } from "../model/TeacherRequest";
-import { validate, VALIDATION_LANGUAGE } from "shared/helper/validator";
+import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
 import { ENDPOINTS } from "shared/constants/endpoints";
-import { ExerciseDTO } from "shared/dto/exerciseDTO";
+import { Exercise } from "shared/dto/exercise";
 import { TblEsercizi } from "../database/entities/TblEsercizi";
 import { getRepository } from "../database/datasource";
-import { ListElementDTO } from "shared/dto/ListElementDTO";
+import { ListElement } from "shared/dto/ListElement";
 const router = express.Router();
+
+router.get(
+  ENDPOINTS.EXERCISE,
+  isLoggedIn,
+  isTeacher,
+  async function (req: TeacherRequest, res) {
+    let title = "";
+    try {
+      title = String(req.query.title);
+    } catch {
+      res.sendStatus(400);
+      return;
+    }
+
+    let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
+    let esercizio = await eserciziRepo.findOne({
+      where: {
+        title: title,
+        idCorso: req.courseId,
+      },
+    });
+
+    res.send(esercizio);
+  }
+);
 
 router.post(
   ENDPOINTS.SAVE_EXERCISE,
   isLoggedIn,
   isTeacher,
   async function (req: TeacherRequest, res) {
-    let exerciseDTO = new ExerciseDTO(req.body);
-    let errors = await validate(exerciseDTO, VALIDATION_LANGUAGE.IT);
+    let exercise = new Exercise(req.body);
+    let errors = await validate(exercise, VALIDATION_LANGUAGE.IT);
     if (errors.length !== 0) {
       res.sendStatus(400);
       return;
@@ -23,17 +48,34 @@ router.post(
 
     let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
     let exerciseData: TblEsercizi;
-    if (!!exerciseDTO.id && exerciseDTO.id > 0) {
+    if (!!exercise.title) {
       exerciseData = await eserciziRepo.findOne({
         where: {
-          id: exerciseDTO.id,
+          title: exercise.title,
+          idCorso: req.courseId,
         },
       });
-    } else {
-      exerciseData = new TblEsercizi();
     }
 
-    Object.assign(exerciseData, exerciseDTO);
+    if (!!req.query.new && !!exerciseData) {
+      res.status(400);
+      res.send("Esercizio già esistente - scegliere un altro titolo");
+      return;
+    }
+
+    delete exercise.autore;
+    delete exercise.idCorso;
+
+    if (!exerciseData) {
+      exerciseData = new TblEsercizi();
+      exerciseData.path = "";
+      exerciseData.autore = req.userData.userName;
+      exerciseData.idCorso = req.courseId;
+    }
+
+    if (!exercise.prop) exerciseData.prop = "0";
+
+    Object.assign(exerciseData, exercise);
     await eserciziRepo.save(exerciseData);
     res.send(exerciseData);
   }
@@ -45,10 +87,19 @@ router.delete(
   isTeacher,
   async function (req: TeacherRequest, res) {
     let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
-    let id = Number(req.query.id);
-    let exerciseData = await await eserciziRepo.findOne({
+    let title = "";
+    try {
+      title = String(req.query.title);
+      console.log(title);
+    } catch {
+      res.sendStatus(400);
+      return;
+    }
+
+    let exerciseData = await eserciziRepo.findOne({
       where: {
-        id: id,
+        title: title,
+        idCorso: req.courseId,
       },
     });
 
@@ -56,7 +107,7 @@ router.delete(
       res.sendStatus(404);
       return;
     }
-    await eserciziRepo.delete(id);
+    await eserciziRepo.remove(exerciseData);
     res.sendStatus(200);
   }
 );
@@ -69,11 +120,42 @@ router.get(
     try {
       let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
       let results = await eserciziRepo.find();
-
       let response = results.map(
         (item) =>
-          ({ id: item.id, data: item.title } as ListElementDTO<number, string>)
+          ({ id: item.id, data: item.title } as ListElement<number, string>)
       );
+      res.send(response);
+    } catch {
+      res.send([]);
+    }
+  }
+);
+
+router.get(
+  ENDPOINTS.EXERCISES_TEACHER,
+  isLoggedIn,
+  async function (req: TeacherRequest, res) {
+    try {
+      let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
+      let response = await eserciziRepo.find({
+        select: ["title", "pronto", "pubblicato"],
+      });
+      res.send(response);
+    } catch {
+      res.send([]);
+    }
+  }
+);
+
+router.get(
+  ENDPOINTS.EXERCISES_STUDENT,
+  isLoggedIn,
+  async function (req: TeacherRequest, res) {
+    try {
+      let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
+      let response = await eserciziRepo.find({
+        select: ["title", "pronto", "pubblicato"],
+      });
       res.send(response);
     } catch {
       res.send([]);

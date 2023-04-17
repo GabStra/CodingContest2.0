@@ -1,14 +1,14 @@
 <script lang="ts">
-import { TagDTO } from 'shared/dto/tagDTO'
-import { defineComponent } from 'vue'
-import { ENDPOINTS } from 'shared/constants/endpoints'
-import { LoadingOutlined } from '@ant-design/icons-vue'
+import { Tag } from "shared/dto/tag"
+import { defineComponent } from "vue"
+import { ENDPOINTS } from "shared/constants/endpoints"
+import { LoadingOutlined } from "@ant-design/icons-vue"
 import {
     parseValidationErrorsToMap,
     validate,
     VALIDATION_LANGUAGE,
-} from 'shared/helper/validator'
-import { POPUP_TYPE } from '../models/popup'
+} from "shared/utils/validator"
+import { POPUP_TYPE } from "../models/popup"
 
 export default defineComponent({
     components: {
@@ -16,15 +16,15 @@ export default defineComponent({
     },
     data() {
         return {
-            tags: [] as TagDTO[],
-            tagData: new TagDTO(),
+            tags: [] as Tag[],
+            tagData: new Tag(),
             errors: new Map<string, string>(),
             isLoading: false,
-            newTag: null as TagDTO | null,
+            newTag: null as Tag | null,
         }
     },
     watch: {
-        '$route.params.id'(to, from) {
+        "$route.query.id"(to, from) {
             if (!to) return
             this.onLoadTags()
         },
@@ -36,26 +36,26 @@ export default defineComponent({
             this.isLoading = false
         },
         loadTags: async function () {
-            let response = await this.$api.get<TagDTO[]>(
+            let response = await this.$api.get<Tag[]>(
                 ENDPOINTS.TAGS,
-                { course: Number(this.$route.params.id) },
+                { course: Number(this.$route.query.id) },
                 true
             )
             if (response === null) return
             this.tags = response.data
         },
-        startEdit(tag: TagDTO) {
+        startEdit(tag: Tag) {
             if (this.newTag) this.cancelNewTag()
-            this.tagData = new TagDTO(tag)
+            this.tagData = new Tag(tag)
         },
         stopEdit() {
             if (this.newTag) this.cancelNewTag()
-            this.tagData = new TagDTO()
+            this.tagData = new Tag()
         },
         addTag() {
-            this.newTag = new TagDTO({ id: -1 })
+            this.newTag = new Tag({ id: -1 })
             this.errors.clear()
-            this.tagData = new TagDTO(this.newTag)
+            this.tagData = new Tag(this.newTag)
         },
         cancelNewTag() {
             this.newTag = null
@@ -64,19 +64,19 @@ export default defineComponent({
             let errors = await validate(this.tagData, VALIDATION_LANGUAGE.IT)
             parseValidationErrorsToMap(this.errors, errors)
             if (errors.length !== 0) return
-            let response = await this.$api.postWithParams<any, TagDTO>(
+            let response = await this.$api.postWithParams<any, Tag>(
                 ENDPOINTS.SAVE_TAG,
                 this.tagData,
-                { course: Number(this.$route.params.id) },
+                { course: Number(this.$route.query.id) },
                 true
             )
             if (response === null) return
-            this.$emit('newPopup', {
+            this.$emit("newPopup", {
                 type: POPUP_TYPE.SUCCESS,
                 message:
                     this.tagData.id === -1
-                        ? 'Categoria salvata'
-                        : 'Categoria modificata',
+                        ? "Categoria salvata"
+                        : "Categoria modificata",
             })
             this.onLoadTags()
             if (this.tagData.id === -1) {
@@ -89,13 +89,13 @@ export default defineComponent({
         deleteTag: async function (id: number) {
             let response = await this.$api.delete<any>(
                 ENDPOINTS.DELETE_TAG,
-                { course: Number(this.$route.params.id), id: id },
+                { course: Number(this.$route.query.id), id: id },
                 true
             )
             if (response === null) return
-            this.$emit('newPopup', {
+            this.$emit("newPopup", {
                 type: POPUP_TYPE.SUCCESS,
-                message: 'Categoria eliminata',
+                message: "Categoria eliminata",
             })
             this.onLoadTags()
         },
@@ -112,18 +112,18 @@ export default defineComponent({
     setup() {
         const columns = [
             {
-                title: 'Categoria',
-                dataIndex: 'tag',
-                key: 'tag',
-                width: 'auto',
-                slots: { customRender: 'tag' },
+                title: "Categoria",
+                dataIndex: "tag",
+                key: "tag",
+                width: "auto",
+                slots: { customRender: "tag" },
             },
             {
-                title: '',
-                key: 'actions',
-                dataIndex: 'tags',
-                width: '50px',
-                slots: { customRender: 'actions' },
+                title: "",
+                key: "actions",
+                dataIndex: "tags",
+                width: "50px",
+                slots: { customRender: "actions" },
             },
         ]
         return {
@@ -161,9 +161,9 @@ export default defineComponent({
                             label="Nome Categoria"
                             name="tag"
                             :validateStatus="
-                                errors.has('tag') ? 'error' : undefined
+                                errors.has("tag") ? "error" : undefined
                             "
-                            :help="errors.get('tag')">
+                            :help="errors.get("tag")">
                             <a-input v-model:value="tagData.tag" />
                         </a-form-item>
                     </template>
@@ -179,7 +179,7 @@ export default defineComponent({
                                     placement="left"
                                     :title="
                                         record.id === -1
-                                            ? 'Sicuro di voler salvare la categoria?'
+                                            ? "Sicuro di voler salvare la categoria?"
                                             : `Sicuro di voler confermare le modifiche?`
                                     "
                                     @confirm="saveTag">

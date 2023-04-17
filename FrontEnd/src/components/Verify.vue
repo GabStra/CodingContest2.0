@@ -1,11 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import {
-    VerifyDTO,
-    VERIFY_STATUS,
-    VerifyResponseDTO,
-} from 'shared/dto/verifyDTO'
+import { Verify, VERIFY_STATUS, VerifyResponse } from 'shared/dto/verify'
 import { router, URL } from '../scripts/router'
 import { LoadingOutlined } from '@ant-design/icons-vue'
 import { ENDPOINTS } from 'shared/constants/endpoints'
@@ -17,7 +13,7 @@ export default defineComponent({
     },
     data() {
         return {
-            verifyData: new VerifyDTO(),
+            verifyData: new Verify(),
             status: null as VERIFY_STATUS | null,
             token: null as string | null,
             isLoading: false,
@@ -36,7 +32,7 @@ export default defineComponent({
         },
 
         checkLink: async function () {
-            let response = await this.$api.post<VerifyResponseDTO, VerifyDTO>(
+            let response = await this.$api.post<VerifyResponse, Verify>(
                 ENDPOINTS.VERIFY,
                 this.verifyData
             )

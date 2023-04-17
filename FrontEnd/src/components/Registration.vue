@@ -1,15 +1,15 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import {
-    RegistrationDTO,
-    RegistrationResponseDTO,
+    Registration,
+    RegistrationResponse,
     REGISTRATION_STATUS,
-} from 'shared/dto/registrationDTO'
+} from 'shared/dto/registration'
 import {
     validate,
     VALIDATION_LANGUAGE,
     parseValidationErrorsToMap,
-} from 'shared/helper/validator'
+} from 'shared/utils/validator'
 import { mapStores } from 'pinia'
 import { useSessionStore } from '../scripts/store'
 import { POPUP_TYPE } from '../models/popup'
@@ -20,7 +20,7 @@ export default defineComponent({
     emit: ['onSuccess', 'onError'],
     data() {
         return {
-            registrationData: new RegistrationDTO(),
+            registrationData: new Registration(),
             errors: new Map<string, string>(),
             isLoading: false,
         }
@@ -48,8 +48,8 @@ export default defineComponent({
             parseValidationErrorsToMap(this.errors, errors)
             if (errors.length !== 0) return
             let response = await this.$api.post<
-                RegistrationResponseDTO,
-                RegistrationDTO
+                RegistrationResponse,
+                Registration
             >(ENDPOINTS.REGISTRATION, this.registrationData)
             if (response === null) return
             this.manageNotification(response.data)
@@ -58,7 +58,7 @@ export default defineComponent({
             }
         },
 
-        manageNotification(response: RegistrationResponseDTO) {
+        manageNotification(response: RegistrationResponse) {
             switch (response.status) {
                 case REGISTRATION_STATUS.EmailInUse:
                     this.$emit('newPopup', {

@@ -1,24 +1,29 @@
 <script lang="ts">
-import { ExerciseDTO } from 'shared/dto/exerciseDTO'
+import { Exercise } from 'shared/dto/exercise'
 import { defineComponent } from 'vue'
 import { ENDPOINTS } from 'shared/constants/endpoints'
-import { LoadingOutlined } from '@ant-design/icons-vue'
+import {
+    LoadingOutlined,
+    CheckOutlined,
+    CloseOutlined,
+} from '@ant-design/icons-vue'
 import { POPUP_TYPE } from '../models/popup'
-import { ROUTES, URL } from '../scripts/router'
-import { ListElementDTO } from 'shared/dto/ListElementDTO'
+import { URL } from '../scripts/router'
 
 export default defineComponent({
     components: {
         LoadingOutlined,
+        CheckOutlined,
+        CloseOutlined,
     },
     data() {
         return {
-            exercises: [] as ListElementDTO<number, string>[],
+            exercises: [] as Exercise[],
             isLoading: false,
         }
     },
     watch: {
-        '$route.params.id'(to, from) {
+        '$route.query.id'(to, from) {
             if (!to) return
             this.onLoadExercises()
         },
@@ -30,21 +35,21 @@ export default defineComponent({
             this.isLoading = false
         },
         loadExercises: async function () {
-            let response = await this.$api.get<
-                ListElementDTO<number, string>[]
-            >(
-                ENDPOINTS.EXERCISE_LIST,
-                { course: Number(this.$route.params.id) },
+            let response = await this.$api.get<Exercise[]>(
+                ENDPOINTS.EXERCISES_TEACHER,
+                { course: Number(this.$route.query.id) },
                 true
             )
             if (response === null) return
             this.exercises = response.data
         },
-
-        deleteExercise: async function (id: number) {
+        deleteExercise: async function (title: string) {
             let response = await this.$api.delete<any>(
                 ENDPOINTS.DELETE_EXERCISE,
-                { course: Number(this.$route.params.id), id: id },
+                {
+                    course: Number(this.$route.query.id),
+                    title: title,
+                },
                 true
             )
             if (response === null) return
@@ -54,12 +59,22 @@ export default defineComponent({
             })
             this.onLoadExercises()
         },
-        handleEdit(courseId: number) {
+        handleEdit(title: string) {
             this.$router.push({
-                name: ROUTES.MANAGE_EXERCISE,
-                params: {
-                    courseId: Number(this.$route.params.id),
-                    id: courseId,
+                path: URL.MANAGE_EXERCISE,
+                query: {
+                    idCorso: Number(this.$route.query.id),
+                    titoloEsercizio: title,
+                },
+            })
+        },
+
+        handleCopy(title: string) {
+            this.$router.push({
+                path: URL.MANAGE_EXERCISE_COPY,
+                query: {
+                    idCorso: Number(this.$route.query.id),
+                    titoloEsercizio: title,
                 },
             })
         },
@@ -73,9 +88,23 @@ export default defineComponent({
         const columns = [
             {
                 title: 'Titolo esercizio',
-                dataIndex: 'data',
-                key: 'data',
+                dataIndex: 'title',
+                key: 'title',
                 width: 'auto',
+            },
+            {
+                title: 'Pronto',
+                dataIndex: 'pronto',
+                key: 'pronto',
+                width: '70px',
+                slots: { customRender: 'pronto' },
+            },
+            {
+                title: 'Pubblicato',
+                dataIndex: 'pubblicato',
+                key: 'pubblicato',
+                width: '100px',
+                slots: { customRender: 'pubblicato' },
             },
             {
                 title: '',
@@ -87,7 +116,6 @@ export default defineComponent({
         ]
         return {
             URL,
-            ROUTES,
             columns,
         }
     },
@@ -99,12 +127,6 @@ export default defineComponent({
 
 <template>
     <div>
-        <div class="center">
-            <h2>
-                <a-typography-text strong>Categorie</a-typography-text>
-            </h2>
-        </div>
-        <a-divider />
         <div v-show="isLoading">
             <div class="center">
                 <LoadingOutlined spin />
@@ -117,24 +139,38 @@ export default defineComponent({
                         @click="
                             () =>
                                 $router.push({
-                                    name: ROUTES.MANAGE_EXERCISE,
-                                    params: {
-                                        courseId: Number($route.params.id),
+                                    path: URL.MANAGE_EXERCISE,
+                                    query: {
+                                        idCorso: Number($route.query.id),
                                     },
                                 })
                         ">
-                        Aggiungi
+                        Nuovo Esercizio
                     </a-button>
+                </template>
+                <template #pronto="{ record }">
+                    <div class="center">
+                        <CheckOutlined v-if="record.pronto" />
+                        <CloseOutlined v-else />
+                    </div>
+                </template>
+                <template #pubblicato="{ record }">
+                    <div class="center">
+                        <CheckOutlined v-if="record.pubblicato" />
+                        <CloseOutlined v-else />
+                    </div>
                 </template>
                 <template #actions="{ record }">
                     <div class="center">
                         <a-space>
-                            <a @click="handleEdit(record.id)">Modifica</a>
+                            <a @click="handleEdit(record.title)">Modifica</a>
+                            <a-divider type="vertical" />
+                            <a @click="handleCopy(record.title)">Copia</a>
                             <a-divider type="vertical" />
                             <a-popconfirm
                                 placement="left"
-                                :title="`Sicuro di voler cancellare ${record.data}?`"
-                                @confirm="deleteExercise(record.id)">
+                                :title="`Sicuro di voler cancellare ${record.title}?`"
+                                @confirm="deleteExercise(record.title)">
                                 <a>Cancella</a>
                             </a-popconfirm>
                         </a-space>

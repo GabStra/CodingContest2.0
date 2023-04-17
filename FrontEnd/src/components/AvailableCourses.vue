@@ -1,20 +1,20 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { router, ROUTES, URL } from '../scripts/router'
-import { CourseDTO } from 'shared/dto/courseDTO'
+import { router, URL } from '../scripts/router'
+import { Course } from 'shared/dto/course'
 import { LoadingOutlined } from '@ant-design/icons-vue'
 import { ENDPOINTS } from 'shared/constants/endpoints'
 import { POPUP_TYPE } from '../models/popup'
 import { mapActions } from 'pinia'
 import { useSessionStore } from '../scripts/store'
-import { ListElementDTO } from 'shared/dto/ListElementDTO'
+import { ListElement } from 'shared/dto/ListElement'
 export default defineComponent({
     components: {
         LoadingOutlined,
     },
     data() {
         return {
-            courses: [] as CourseDTO[],
+            courses: [] as Course[],
             isLoading: false,
             searchValue: '' as string,
         }
@@ -28,7 +28,7 @@ export default defineComponent({
             this.isLoading = false
         },
         loadCourses: async function () {
-            let response = await this.$api.get<CourseDTO[]>(
+            let response = await this.$api.get<Course[]>(
                 ENDPOINTS.AVAILABLE_COURSES,
                 null,
                 true
@@ -36,10 +36,10 @@ export default defineComponent({
             if (response === null) return
             this.courses = response.data
         },
-        register: async function (course: CourseDTO) {
-            let response = await this.$api.post<any, CourseDTO>(
+        register: async function (course: Course) {
+            let response = await this.$api.post<any, Course>(
                 ENDPOINTS.REGISTER_COURSE,
-                { id: course.id } as CourseDTO,
+                { id: course.id } as Course,
                 true
             )
             if (response === null) return
@@ -88,7 +88,6 @@ export default defineComponent({
         ]
         return {
             URL,
-            ROUTES,
             columns,
         }
     },

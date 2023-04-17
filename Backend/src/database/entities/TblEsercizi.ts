@@ -1,4 +1,5 @@
-import { Column, Entity } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
+import { TblTags } from "./TblTags";
 
 @Entity("tbl_esercizi", { schema: "codingcontest2" })
 export class TblEsercizi {

@@ -1,17 +1,17 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { LoginDTO } from 'shared/dto/loginDTO'
+import { Login } from 'shared/dto/login'
 import {
     validate,
     VALIDATION_LANGUAGE,
     parseValidationErrorsToMap,
-} from 'shared/helper/validator'
+} from 'shared/utils/validator'
 import { mapStores } from 'pinia'
 import { useSessionStore } from '../scripts/store'
 import { POPUP_TYPE } from '../models/popup'
 import { router, URL } from '../scripts/router'
 import { ENDPOINTS } from 'shared/constants/endpoints'
-import { UserDataDTO } from 'shared/dto/userDataDTO'
+import { UserData } from 'shared/dto/userData'
 import { LoadingOutlined } from '@ant-design/icons-vue'
 export default defineComponent({
     components: {
@@ -19,7 +19,7 @@ export default defineComponent({
     },
     data() {
         return {
-            loginData: new LoginDTO(),
+            loginData: new Login(),
             errors: new Map<string, string>(),
             isLoading: false,
             loadPage: false,
@@ -38,7 +38,7 @@ export default defineComponent({
             let errors = await validate(this.loginData, VALIDATION_LANGUAGE.IT)
             parseValidationErrorsToMap(this.errors, errors)
             if (errors.length !== 0) return
-            let response = await this.$api.post<UserDataDTO, LoginDTO>(
+            let response = await this.$api.post<UserData, Login>(
                 ENDPOINTS.LOGIN,
                 this.loginData,
                 true

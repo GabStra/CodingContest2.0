@@ -1,4 +1,4 @@
-import { IsNotEmpty, MaxLength } from "class-validator";
+import { IsNotEmpty, MaxLength, IsNumber } from "class-validator";
 
 export class Exercise {
   id: number | null;
@@ -7,36 +7,42 @@ export class Exercise {
   @IsNotEmpty()
   title: string;
 
-  @IsNotEmpty()
-  idCorso: number;
+  @MaxLength(100)
+  titoloEsteso: string | null;
 
   idCategoria: number | null;
 
+  @IsNumber()
+  @IsNotEmpty()
   level: number;
 
-  maxscore: number | null;
-  task: number | null;
+  @IsNumber()
+  task: number;
 
-  @MaxLength(100)
-  titoloEsteso: string;
-
+  @IsNotEmpty()
   introduzione: string;
 
   specifiche: string;
-
-  input: string;
-
-  output: string;
 
   note: string;
 
   esempio: string;
 
+  @IsNotEmpty()
+  input: string;
+
+  @IsNotEmpty()
+  output: string;
+
   pronto: boolean;
 
   pubblicato: boolean;
 
+  prop: number | null;
+
   autore: string;
+
+  idCorso: number;
 
   constructor(obj?) {
     obj && Object.assign(this, obj);

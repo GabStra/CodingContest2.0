@@ -1,13 +1,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { CourseDTO } from 'shared/dto/courseDTO'
+import { Course } from 'shared/dto/course'
 import { LabeledValue } from 'ant-design-vue/es/select'
 import {
     validate,
     VALIDATION_LANGUAGE,
     parseValidationErrorsToMap,
-} from 'shared/helper/validator'
-import { ListElementDTO } from 'shared/dto/ListElementDTO'
+} from 'shared/utils/validator'
+import { ListElement } from 'shared/dto/ListElement'
 import { LoadingOutlined } from '@ant-design/icons-vue'
 import { ENDPOINTS } from 'shared/constants/endpoints'
 import { POPUP_TYPE } from '../models/popup'
@@ -23,10 +23,10 @@ export default defineComponent({
     },
     data() {
         return {
-            courseData: new CourseDTO(),
+            courseData: new Course(),
             errors: new Map<string, string>(),
             isUsersListLoading: false,
-            users: [] as ListElementDTO<number, string>[],
+            users: [] as ListElement<number, string>[],
             isLoading: false,
         }
     },
@@ -54,9 +54,9 @@ export default defineComponent({
             this.isLoading = false
         },
         loadCourse: async function () {
-            let response = await this.$api.get<CourseDTO>(
+            let response = await this.$api.get<Course>(
                 ENDPOINTS.COURSE,
-                { id: Number(this.$route.params.id) },
+                { id: Number(this.$route.query.id) },
                 true
             )
             if (response === null) return
@@ -68,9 +68,11 @@ export default defineComponent({
             this.isUsersListLoading = false
         },
         loadUsers: async function () {
-            let response = await this.$api.get<
-                ListElementDTO<number, string>[]
-            >(ENDPOINTS.USERS_LIST, null, true)
+            let response = await this.$api.get<ListElement<number, string>[]>(
+                ENDPOINTS.USERS_LIST,
+                null,
+                true
+            )
             if (response === null) return
             this.users = response.data
         },
@@ -84,7 +86,7 @@ export default defineComponent({
             let errors = await validate(this.courseData, VALIDATION_LANGUAGE.IT)
             parseValidationErrorsToMap(this.errors, errors)
             if (errors.length !== 0) return
-            let response = await this.$api.post<any, CourseDTO>(
+            let response = await this.$api.post<any, Course>(
                 ENDPOINTS.NEW_COURSE,
                 this.courseData,
                 true
@@ -99,7 +101,7 @@ export default defineComponent({
     },
     beforeMount() {
         this.courseData.idDocenti = []
-        if (!!this.$route.params.id) {
+        if (!!this.$route.query.id) {
             this.onLoadCourse()
         }
 

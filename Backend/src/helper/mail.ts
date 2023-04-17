@@ -1,8 +1,8 @@
 import { createTransport } from "nodemailer";
 import { nodemailerMjmlPlugin } from "nodemailer-mjml";
 import appRootPath from "app-root-path";
-import { PasswordRecoveryMailDTO } from "../dto/passwordRecoveryMailDTO";
-import { VerifyMailDTO } from "../dto/verifyMailDTO";
+import { PasswordRecoveryMail } from "../dto/passwordRecoveryMail";
+import { VerifyMail } from "../dto/verifyMail";
 
 let transport;
 
@@ -25,7 +25,7 @@ function initTrasport() {
 }
 
 export async function sendPasswordRecoveryEmail(
-  passwordRecover: PasswordRecoveryMailDTO
+  passwordRecover: PasswordRecoveryMail
 ) {
   if (!transport) initTrasport();
 
@@ -41,7 +41,7 @@ export async function sendPasswordRecoveryEmail(
   });
 }
 
-export async function sendVerifyEmail(verifyMail: VerifyMailDTO) {
+export async function sendVerifyEmail(verifyMail: VerifyMail) {
   if (!transport) initTrasport();
 
   return await transport.sendMail({

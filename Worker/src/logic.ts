@@ -5,7 +5,7 @@ import {
   CppResponse,
   CppResponse_TaskStatus,
   CppResponse_TaskType,
-} from "shared/compiled_proto/cpp";
+} from "shared-ts/compiled_proto/cpp";
 
 const FILE_NAME = "app.cpp";
 

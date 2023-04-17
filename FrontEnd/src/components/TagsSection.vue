@@ -1,5 +1,5 @@
 <script lang="ts">
-import { TagDTO } from 'shared/dto/tagDTO'
+import { Tag } from 'shared/dto/tag'
 import { defineComponent } from 'vue'
 import { ENDPOINTS } from 'shared/constants/endpoints'
 import { LoadingOutlined } from '@ant-design/icons-vue'
@@ -7,7 +7,7 @@ import {
     parseValidationErrorsToMap,
     validate,
     VALIDATION_LANGUAGE,
-} from 'shared/helper/validator'
+} from 'shared/utils/validator'
 import { POPUP_TYPE } from '../models/popup'
 
 export default defineComponent({
@@ -16,15 +16,15 @@ export default defineComponent({
     },
     data() {
         return {
-            tags: [] as TagDTO[],
-            tagData: new TagDTO(),
+            tags: [] as Tag[],
+            tagData: new Tag(),
             errors: new Map<string, string>(),
             isLoading: false,
-            newTag: null as TagDTO | null,
+            newTag: null as Tag | null,
         }
     },
     watch: {
-        '$route.params.id'(to, from) {
+        '$route.query.id'(to, from) {
             if (!to) return
             this.onLoadTags()
         },
@@ -36,26 +36,26 @@ export default defineComponent({
             this.isLoading = false
         },
         loadTags: async function () {
-            let response = await this.$api.get<TagDTO[]>(
+            let response = await this.$api.get<Tag[]>(
                 ENDPOINTS.TAGS,
-                { course: Number(this.$route.params.id) },
+                { course: Number(this.$route.query.id) },
                 true
             )
             if (response === null) return
             this.tags = response.data
         },
-        startEdit(tag: TagDTO) {
+        startEdit(tag: Tag) {
             if (this.newTag) this.cancelNewTag()
-            this.tagData = new TagDTO(tag)
+            this.tagData = new Tag(tag)
         },
         stopEdit() {
             if (this.newTag) this.cancelNewTag()
-            this.tagData = new TagDTO()
+            this.tagData = new Tag()
         },
         addTag() {
-            this.newTag = new TagDTO({ id: -1 })
+            this.newTag = new Tag({ id: -1 })
             this.errors.clear()
-            this.tagData = new TagDTO(this.newTag)
+            this.tagData = new Tag(this.newTag)
         },
         cancelNewTag() {
             this.newTag = null
@@ -64,10 +64,10 @@ export default defineComponent({
             let errors = await validate(this.tagData, VALIDATION_LANGUAGE.IT)
             parseValidationErrorsToMap(this.errors, errors)
             if (errors.length !== 0) return
-            let response = await this.$api.postWithParams<any, TagDTO>(
+            let response = await this.$api.postWithParams<any, Tag>(
                 ENDPOINTS.SAVE_TAG,
                 this.tagData,
-                { course: Number(this.$route.params.id) },
+                { course: Number(this.$route.query.id) },
                 true
             )
             if (response === null) return
@@ -89,7 +89,7 @@ export default defineComponent({
         deleteTag: async function (id: number) {
             let response = await this.$api.delete<any>(
                 ENDPOINTS.DELETE_TAG,
-                { course: Number(this.$route.params.id), id: id },
+                { course: Number(this.$route.query.id), id: id },
                 true
             )
             if (response === null) return
@@ -112,7 +112,7 @@ export default defineComponent({
     setup() {
         const columns = [
             {
-                title: 'Categoria',
+                title: 'Nome Categoria',
                 dataIndex: 'tag',
                 key: 'tag',
                 width: 'auto',
@@ -139,12 +139,6 @@ export default defineComponent({
 
 <template>
     <div>
-        <div class="center">
-            <h2>
-                <a-typography-text strong>Categorie</a-typography-text>
-            </h2>
-        </div>
-        <a-divider />
         <div v-show="isLoading">
             <div class="center">
                 <LoadingOutlined spin />
@@ -153,7 +147,9 @@ export default defineComponent({
         <div class="fill" v-if="!isLoading">
             <a-table :columns="columns" :data-source="datasource">
                 <template #title>
-                    <a-button @click="addTag"> Aggiungi </a-button></template
+                    <a-button @click="addTag"
+                        >Nuova Categoria
+                    </a-button></template
                 >
                 <template #tag="{ record }">
                     <template v-if="record.id === tagData.id">

@@ -1,11 +1,11 @@
 import express from "express";
 import { isLoggedIn, isTeacher } from "./auth";
-import { validate, VALIDATION_LANGUAGE } from "shared/helper/validator";
-import { TagDTO } from "shared/dto/tagDTO";
+import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
+import { Tag } from "shared/dto/tag";
 import { getRepository } from "../database/datasource";
 import { TeacherRequest } from "../model/TeacherRequest";
 import { TblTags } from "../database/entities/TblTags";
-import { ListElementDTO } from "shared/dto/ListElementDTO";
+import { ListElement } from "shared/dto/ListElement";
 import { ENDPOINTS } from "shared/constants/endpoints";
 const router = express.Router();
 
@@ -21,12 +21,12 @@ router.get(
       },
     });
 
-    let response = tags.map<TagDTO>(
+    let response = tags.map<Tag>(
       (element) =>
         ({
           id: element.id,
           tag: element.tag,
-        } as TagDTO)
+        } as Tag)
     );
 
     res.send(response);
@@ -38,8 +38,8 @@ router.post(
   isLoggedIn,
   isTeacher,
   async function (req: TeacherRequest, res) {
-    let tagDTO = new TagDTO(req.body);
-    let errors = await validate(tagDTO, VALIDATION_LANGUAGE.IT);
+    let tag = new Tag(req.body);
+    let errors = await validate(tag, VALIDATION_LANGUAGE.IT);
     if (errors.length !== 0) {
       res.sendStatus(400);
       return;
@@ -47,17 +47,17 @@ router.post(
 
     let tagsRepo = await getRepository<TblTags>(TblTags);
     let tagData: TblTags;
-    if (!!tagDTO.id && tagDTO.id > 0) {
+    if (!!tag.id && tag.id > 0) {
       tagData = await tagsRepo.findOne({
         where: {
-          id: tagDTO.id,
+          id: tag.id,
         },
       });
     } else {
       tagData = new TblTags();
     }
 
-    tagData.tag = tagDTO.tag;
+    tagData.tag = tag.tag;
     tagData.idCorso = req.courseId;
     await tagsRepo.save(tagData);
     res.send(tagData);
@@ -97,7 +97,7 @@ router.get(
 
       let response = results.map(
         (item) =>
-          ({ id: item.id, data: item.tag } as ListElementDTO<number, string>)
+          ({ id: item.id, data: item.tag } as ListElement<number, string>)
       );
       res.send(response);
     } catch {

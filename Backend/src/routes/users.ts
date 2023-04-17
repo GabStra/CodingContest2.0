@@ -1,14 +1,14 @@
-import express, { Request, response, Response } from "express";
+import express from "express";
 import { getRepository } from "../database/datasource";
 
 import { TblUsers } from "../database/entities/TblUsers";
 import { AuthRequest } from "../model/AuthRequest";
 import { isLoggedIn, isSuperAdmin } from "./auth";
-import { ResponseDTO } from "shared/dto/ResponseDTO";
-import { ListElementDTO } from "shared/dto/ListElementDTO";
-import { UserFilterDTO } from "shared/dto/userFilterDTO";
+import { Response } from "shared/dto/Response";
+import { ListElement } from "shared/dto/ListElement";
+import { UserFilter } from "shared/dto/userFilter";
 import { In, Like } from "typeorm";
-import { ROLE } from "shared/constants/role";
+import { ROLES } from "shared/constants/roles";
 const router = express.Router();
 
 router.use(isLoggedIn);
@@ -19,7 +19,7 @@ router.get("/user", async function (req: AuthRequest, res) {
     return;
   }
 
-  if (req.userData.role === ROLE.USER && req.userData.userId !== id) {
+  if (req.userData.role === ROLES.USER && req.userData.userId !== id) {
     res.sendStatus(401);
     return;
   }
@@ -35,12 +35,12 @@ router.get("/user", async function (req: AuthRequest, res) {
 
 router.post("/users-by-filter", async function (req: AuthRequest, res) {
   try {
-    if (req.userData.role === ROLE.USER) {
+    if (req.userData.role === ROLES.USER) {
       res.sendStatus(401);
       return;
     }
 
-    let filter = new UserFilterDTO(req.body);
+    let filter = new UserFilter(req.body);
     let userRepo = await getRepository<TblUsers>(TblUsers);
     let results = await userRepo.find({
       select: {
@@ -56,21 +56,21 @@ router.post("/users-by-filter", async function (req: AuthRequest, res) {
     let response = {
       data: results.map(
         (user) =>
-          ({ id: user.userId, data: user.userName } as ListElementDTO<
+          ({ id: user.userId, data: user.userName } as ListElement<
             string,
             string
           >)
       ),
-    } as ResponseDTO<ListElementDTO<string, string>[]>;
+    } as Response<ListElement<string, string>[]>;
     res.send(response);
   } catch {
-    res.send({ data: [] } as ResponseDTO<ListElementDTO<string, string>[]>);
+    res.send({ data: [] } as Response<ListElement<string, string>[]>);
   }
 });
 
 router.get("/users-list", async function (req: AuthRequest, res) {
   try {
-    // if (req.userData.role === ROLE.USER) {
+    // if (req.userData.role === ROLES.USER) {
     //   res.sendStatus(401);
     //   return;
     // }
@@ -80,7 +80,7 @@ router.get("/users-list", async function (req: AuthRequest, res) {
 
     let response = results.map(
       (user) =>
-        ({ id: user.id, data: user.userName } as ListElementDTO<number, string>)
+        ({ id: user.id, data: user.userName } as ListElement<number, string>)
     );
     res.send(response);
   } catch {

@@ -1,22 +1,8 @@
 {
   "name": "shared",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "build": "npx tsc",
-    "start": "node dist/index.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "class-validator": "^0.14.0",
-    "class-validator-multi-lang": "^0.130.201",
-    "nice-grpc": "^2.1.0"
-  },
-  "devDependencies": {
-    "typescript": "^4.9.5"
-  }
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ]
 }

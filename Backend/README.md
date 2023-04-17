@@ -11,6 +11,7 @@ CREATE TABLE `tbl_submissions` (
 
 ALTER TABLE tbl_tags ADD COLUMN idCorso INT;
 
+
 TO UPDATE MODELS
 
 npx typeorm-model-generator -d codingcontest2 -u username -x password -e mariadb -o .

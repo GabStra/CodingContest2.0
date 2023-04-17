@@ -1,11 +1,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { PasswordRecoveryDTO } from 'shared/dto/passwordRecoveryDTO'
+import { PasswordRecovery } from 'shared/dto/passwordRecovery'
 import {
     validate,
     VALIDATION_LANGUAGE,
     parseValidationErrorsToMap,
-} from 'shared/helper/validator'
+} from 'shared/utils/validator'
 
 import { POPUP_TYPE } from '../models/popup'
 import { URL } from '../scripts/router'
@@ -15,7 +15,7 @@ export default defineComponent({
     emit: ['onSuccess', 'onError'],
     data() {
         return {
-            passwordRecoveryData: new PasswordRecoveryDTO(),
+            passwordRecoveryData: new PasswordRecovery(),
             errors: new Map<string, string>(),
             isLoading: false,
         }
@@ -38,7 +38,7 @@ export default defineComponent({
             )
             parseValidationErrorsToMap(this.errors, errors)
             if (errors.length !== 0) return
-            let response = await this.$api.post<any, PasswordRecoveryDTO>(
+            let response = await this.$api.post<any, PasswordRecovery>(
                 ENDPOINTS.PASSWORD_RESET,
                 this.passwordRecoveryData
             )

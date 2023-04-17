@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
-import { AccessTokenPayload } from "shared/models/accessTokenPayload";
-import { ROLE } from "shared/constants/role";
+import { AccessTokenPayload } from "shared/dto/accessTokenPayload";
+import { ROLES } from "shared/constants/roles";
 import jsonwebtoken, { SignOptions, Algorithm } from "jsonwebtoken";
 import fs from "fs";
 import { Request, Response } from "express";
@@ -57,7 +57,7 @@ export function clearAccessToken(res: Response) {
 export function createAccessTokenCookies(
   res: Response,
   sessionId: string,
-  role: ROLE,
+  role: ROLES,
   rememberMe: boolean
 ) {
   let accessTokenPayload = {

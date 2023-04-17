@@ -10,6 +10,7 @@ import { coursesRouter } from "./src/routes/courses";
 import { usersRouter } from "./src/routes/users";
 import { tagsRouter } from "./src/routes/tags";
 import appRootPath from "app-root-path";
+import boolParser from "express-query-boolean";
 import https from "https";
 import { exercisesRouter } from "./src/routes/exercises";
 dotenv.config();
@@ -28,6 +29,7 @@ var certificate = fs.readFileSync(
 app.use(cors({ credentials: true, origin: process.env.FRONTEND_HOST }));
 app.use(cookieParser());
 app.use(express.json());
+app.use(boolParser());
 
 // app.use(
 //   corsGate({

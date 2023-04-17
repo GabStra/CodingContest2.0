@@ -1,16 +1,16 @@
-import express, { Request, response, Response } from "express";
+import express from "express";
 import { Not, In } from "typeorm";
 import { getRepository } from "../database/datasource";
 import { TblAssocStudenti } from "../database/entities/TblAssocStudenti";
 import { TblCorsi } from "../database/entities/TblCorsi";
 import { AuthRequest } from "../model/AuthRequest";
 import { isLoggedIn, isSuperAdmin } from "./auth";
-import { AvailableCourseDTO } from "shared/dto/availableCourseDTO";
-import { CourseDTO } from "shared/dto/courseDTO";
-import { validate, VALIDATION_LANGUAGE } from "shared/helper/validator";
+import { AvailableCourse } from "shared/dto/availableCourse";
+import { Course } from "shared/dto/course";
+import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
 import { TblAssocDocenti } from "../database/entities/TblAssocDocenti";
-import { ListElementDTO } from "shared/dto/ListElementDTO";
-import { ResponseDTO } from "shared/dto/ResponseDTO";
+import { ListElement } from "shared/dto/ListElement";
+import { Response } from "shared/dto/Response";
 
 const router = express.Router();
 
@@ -74,11 +74,11 @@ router.get(
         id: Not(In(req.userData.studentCourseIds)),
       },
     });
-    let response = courses.map<ListElementDTO<number, string>>((element) => {
+    let response = courses.map<ListElement<number, string>>((element) => {
       return {
         id: element.id,
         data: element.nome,
-      } as ListElementDTO<number, string>;
+      } as ListElement<number, string>;
     });
 
     res.send(response);
@@ -90,8 +90,8 @@ router.post(
   isLoggedIn,
   //isSuperAdmin,
   async function (req: AuthRequest, res) {
-    let courseDTO = new CourseDTO(req.body);
-    let errors = await validate(courseDTO, VALIDATION_LANGUAGE.IT);
+    let course = new Course(req.body);
+    let errors = await validate(course, VALIDATION_LANGUAGE.IT);
     if (errors.length !== 0) {
       res.sendStatus(400);
       return;
@@ -100,13 +100,13 @@ router.post(
     let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
 
     let courseData: TblCorsi;
-    if (!!courseDTO.id) {
+    if (!!course.id) {
       courseData = await await coursesRepo.findOne({
         relations: {
           assocDocenti: true,
         },
         where: {
-          id: courseDTO.id,
+          id: course.id,
         },
       });
       let assocDocentiRepo = await getRepository<TblAssocDocenti>(
@@ -117,12 +117,12 @@ router.post(
       courseData = new TblCorsi();
     }
 
-    courseData.nome = courseDTO.nome;
-    courseData.info = courseDTO.info;
-    courseData.attivo = !!courseDTO.attivo ? 1 : 0;
+    courseData.nome = course.nome;
+    courseData.info = course.info;
+    courseData.attivo = !!course.attivo ? 1 : 0;
     courseData.istituto = 1;
     courseData.assocDocenti = [];
-    for (let idDocente of courseDTO.idDocenti) {
+    for (let idDocente of course.idDocenti) {
       let assocDocente = new TblAssocDocenti();
       assocDocente.idCorso = courseData.id;
       assocDocente.idUtente = idDocente;
@@ -137,7 +137,7 @@ router.post(
 
 router.post("/register-course", async function (req: AuthRequest, res) {
   try {
-    let courseId = new CourseDTO(req.body).id;
+    let courseId = new Course(req.body).id;
 
     let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
     let course = await coursesRepo.findOne({
@@ -178,14 +178,12 @@ router.get(
       },
     });
 
-    let response = assocStudenti.map<ListElementDTO<number, string>>(
-      (element) => {
-        return {
-          id: element.idCorso,
-          data: element.corso.nome,
-        } as ListElementDTO<number, string>;
-      }
-    );
+    let response = assocStudenti.map<ListElement<number, string>>((element) => {
+      return {
+        id: element.idCorso,
+        data: element.corso.nome,
+      } as ListElement<number, string>;
+    });
 
     res.send(response);
   }
@@ -207,14 +205,12 @@ router.get(
       },
     });
 
-    let response = assocStudenti.map<ListElementDTO<number, string>>(
-      (element) => {
-        return {
-          id: element.idCorso,
-          data: element.corso.nome,
-        } as ListElementDTO<number, string>;
-      }
-    );
+    let response = assocStudenti.map<ListElement<number, string>>((element) => {
+      return {
+        id: element.idCorso,
+        data: element.corso.nome,
+      } as ListElement<number, string>;
+    });
 
     res.send(response);
   }

@@ -1,13 +1,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { ExerciseDTO } from 'shared/dto/exerciseDTO'
+import { Exercise } from 'shared/dto/exercise'
 import { LabeledValue } from 'ant-design-vue/es/select'
 import {
     validate,
     VALIDATION_LANGUAGE,
     parseValidationErrorsToMap,
-} from 'shared/helper/validator'
-import { ListElementDTO } from 'shared/dto/ListElementDTO'
+} from 'shared/utils/validator'
+import { ListElement } from 'shared/dto/ListElement'
 import { LoadingOutlined } from '@ant-design/icons-vue'
 import { ENDPOINTS } from 'shared/constants/endpoints'
 import { POPUP_TYPE } from '../models/popup'
@@ -23,22 +23,39 @@ export default defineComponent({
     },
     data() {
         return {
-            exerciseData: new ExerciseDTO(),
+            exerciseData: new Exercise(),
             errors: new Map<string, string>(),
-            tags: [] as ListElementDTO<number, string>[],
+            tags: [] as ListElement<number, string>[],
+            exercises: [] as ListElement<number, string>[],
             isLoading: false,
             isTagsListLoading: false,
+            isExercisesListLoading: false,
         }
     },
     computed: {
-        options() {
+        tagsOptions() {
             if (!this.tags) return []
-
             let results = this.tags.map(
-                (tag: ListElementDTO<number, string>) =>
+                (tag: ListElement<number, string>) =>
                     <LabeledValue>{
                         label: tag.data,
                         value: tag.id,
+                    }
+            )
+
+            return results
+        },
+        exercisesOptions() {
+            if (!this.exercises) return []
+            let filteredExercises = this.exercises.filter(
+                (exercise: ListElement<number, string>) =>
+                    exercise.data !== this.exerciseData.title
+            )
+            let results = filteredExercises.map(
+                (exercise: ListElement<number, string>) =>
+                    <LabeledValue>{
+                        label: exercise.data,
+                        value: exercise.data,
                     }
             )
 
@@ -100,11 +117,11 @@ export default defineComponent({
             this.isLoading = false
         },
         loadExercise: async function () {
-            let response = await this.$api.get<ExerciseDTO>(
+            let response = await this.$api.get<Exercise>(
                 ENDPOINTS.EXERCISE,
                 {
-                    course: Number(this.$route.params.courseId),
-                    id: Number(this.$route.params.id),
+                    course: Number(this.$route.query.idCorso),
+                    title: this.$route.query.titoloEsercizio,
                 },
                 true
             )
@@ -117,22 +134,33 @@ export default defineComponent({
             this.isTagsListLoading = false
         },
         loadTagsList: async function () {
-            let response = await this.$api.get<
-                ListElementDTO<number, string>[]
-            >(
+            let response = await this.$api.get<ListElement<number, string>[]>(
                 ENDPOINTS.TAGS_LIST,
-                { course: Number(this.$route.params.courseId) },
+                { course: Number(this.$route.query.idCorso) },
                 true
             )
             if (response === null) return
             this.tags = response.data
+        },
+        onLoadExercisesList: async function () {
+            this.isTagsListLoading = true
+            await this.loadExercisesList()
+            this.isTagsListLoading = false
+        },
+        loadExercisesList: async function () {
+            let response = await this.$api.get<ListElement<number, string>[]>(
+                ENDPOINTS.EXERCISE_LIST,
+                { course: Number(this.$route.query.idCorso) },
+                true
+            )
+            if (response === null) return
+            this.exercises = response.data
         },
         handleSubmit: async function () {
             this.isLoading = true
             await this.saveExercise()
             this.isLoading = false
         },
-
         saveExercise: async function () {
             let errors = await validate(
                 this.exerciseData,
@@ -140,25 +168,54 @@ export default defineComponent({
             )
             parseValidationErrorsToMap(this.errors, errors)
             if (errors.length !== 0) return
-            let response = await this.$api.postWithParams<any, ExerciseDTO>(
+            let response = await this.$api.postWithParams<any, Exercise>(
                 ENDPOINTS.SAVE_EXERCISE,
                 this.exerciseData,
-                { course: Number(this.$route.params.courseId) },
+                {
+                    course: Number(this.$route.query.idCorso),
+                    new: !this.$route.query.titoloEsercizio,
+                },
                 true
             )
             if (response === null) return
+            if (response.statusCode === 400 && !!response.data) {
+                this.$emit('newPopup', {
+                    type: POPUP_TYPE.ERROR,
+                    message: response.data,
+                })
+                return
+            }
+
             this.$emit('newPopup', {
                 type: POPUP_TYPE.SUCCESS,
                 message: 'Salvataggio esercizio riuscito',
             })
+
+            this.returnToCourseHome()
+        },
+
+        returnToCourseHome: function () {
+            this.$router.push({
+                path: URL.TEACHER_COURSE,
+                query: { id: this.$route.query.idCorso },
+            })
         },
     },
-    beforeMount() {
-        if (!!this.$route.params.id) {
-            this.onLoadExercise()
+    beforeMount: async function () {
+        let promises = [this.onLoadTagsList(), this.onLoadExercisesList()]
+        if (!!this.$route.query.titoloEsercizio || this.$route.meta.copy) {
+            promises.push(this.onLoadExercise())
         }
 
-        this.loadTagsList()
+        await Promise.all(promises)
+        if (
+            this.exerciseData.prop &&
+            !this.exercisesOptions.some(
+                (element) => element.value === this.exerciseData.prop
+            )
+        ) {
+            this.exerciseData.prop = null
+        }
     },
 })
 </script>
@@ -171,9 +228,9 @@ export default defineComponent({
                 <div class="center">
                     <h2>
                         <a-typography-text strong>{{
-                            !!exerciseData.id
+                            !!$route.query.titoloEsercizio && !$route.meta?.copy
                                 ? 'Modifica Esercizio'
-                                : 'Nuovo esercizio'
+                                : 'Nuovo Esercizio'
                         }}</a-typography-text>
                     </h2>
                 </div>
@@ -183,7 +240,21 @@ export default defineComponent({
                     name="title"
                     :validateStatus="errors.has('title') ? 'error' : undefined"
                     :help="errors.get('title')">
-                    <a-input v-model:value="exerciseData.title" />
+                    <a-input
+                        v-model:value="exerciseData.title"
+                        :disabled="
+                            !!$route.query.titoloEsercizio && !$route.meta?.copy
+                        " />
+                </a-form-item>
+
+                <a-form-item
+                    label="Titolo Esteso"
+                    name="titoloEsteso"
+                    :validateStatus="
+                        errors.has('titoloEsteso') ? 'error' : undefined
+                    "
+                    :help="errors.get('titoloEsteso')">
+                    <a-input v-model:value="exerciseData.titoloEsteso" />
                 </a-form-item>
 
                 <a-form-item
@@ -202,7 +273,7 @@ export default defineComponent({
                     name="task"
                     :validateStatus="errors.has('task') ? 'error' : undefined"
                     :help="errors.get('task')">
-                    <a-input v-model:value="exerciseData.task" />
+                    <a-input-number v-model:value="exerciseData.task" />
                 </a-form-item>
 
                 <a-form-item
@@ -245,7 +316,7 @@ export default defineComponent({
                     "
                     :help="errors.get('esempio')">
                     <a-textarea
-                        v-model:value="exerciseData.specifiche"
+                        v-model:value="exerciseData.esempio"
                         :rows="4" />
                 </a-form-item>
 
@@ -275,26 +346,48 @@ export default defineComponent({
                     v-show="!isTagsListLoading">
                     <a-select
                         v-model:value="exerciseData.idCategoria"
-                        :options="options"
+                        :options="tagsOptions"
                         show-search />
                 </a-form-item>
 
-                <a-form-item name="pronto" :wrapper-col="{ span: 16 }">
-                    <a-checkbox v-model:checked="exerciseData.pronto"
-                        >Pronto</a-checkbox
-                    >
+                <div class="center" v-show="isExercisesListLoading">
+                    <LoadingOutlined spin />
+                </div>
+
+                <a-form-item
+                    label="Propedeudicità"
+                    name="prop"
+                    v-show="!isExercisesListLoading">
+                    <a-select
+                        v-model:value="exerciseData.prop"
+                        :options="exercisesOptions"
+                        show-search
+                        allow-clear />
                 </a-form-item>
-                <a-form-item name="pubblicato" :wrapper-col="{ span: 16 }">
-                    <a-checkbox v-model:checked="exerciseData.pubblicato"
-                        >Pubblicato</a-checkbox
-                    >
-                </a-form-item>
+
+                <a-row>
+                    <a-col :xs="6">
+                        <a-form-item name="pronto" :wrapper-col="{ span: 16 }">
+                            <a-checkbox v-model:checked="exerciseData.pronto"
+                                >Pronto</a-checkbox
+                            >
+                        </a-form-item>
+                    </a-col>
+                    <a-col :xs="6">
+                        <a-form-item
+                            name="pubblicato"
+                            :wrapper-col="{ span: 16 }">
+                            <a-checkbox
+                                v-model:checked="exerciseData.pubblicato"
+                                >Pubblicato</a-checkbox
+                            >
+                        </a-form-item>
+                    </a-col>
+                </a-row>
             </a-form>
             <div class="center">
                 <a-button type="primary" @click="handleSubmit">Salva</a-button>
-                <a-button @click="() => $router.push({ path: URL.COURSES })"
-                    >Annulla</a-button
-                >
+                <a-button @click="returnToCourseHome">Annulla</a-button>
             </div>
         </div>
     </div>

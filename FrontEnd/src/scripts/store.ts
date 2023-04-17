@@ -1,21 +1,21 @@
 import { defineStore } from 'pinia'
-import { UserDataDTO } from 'shared/dto/userDataDTO'
+import { UserData } from 'shared/dto/userData'
 import { Popup } from '../models/popup'
-import { ListElementDTO } from 'shared/dto/ListElementDTO'
+import { ListElement } from 'shared/dto/ListElement'
 import { api } from './api'
 import { ENDPOINTS } from 'shared/constants/endpoints'
 
 export const useSessionStore = defineStore('session', {
     state: () => ({
-        userData: null as UserDataDTO | null,
+        userData: null as UserData | null,
         popups: [] as Popup[],
-        courses_student: [] as ListElementDTO<number, string>[],
-        courses_teacher: [] as ListElementDTO<number, string>[],
+        courses_student: [] as ListElement<number, string>[],
+        courses_teacher: [] as ListElement<number, string>[],
         refreshMyCourses: false,
     }),
     actions: {
         loadMyCoursesAsStudent: async function () {
-            let response = await api.get<ListElementDTO<number, string>[]>(
+            let response = await api.get<ListElement<number, string>[]>(
                 ENDPOINTS.MY_COURSES_STUDENT,
                 null,
                 true
@@ -24,7 +24,7 @@ export const useSessionStore = defineStore('session', {
             this.courses_student = response.data
         },
         loadMyCoursesAsTeacher: async function () {
-            let response = await api.get<ListElementDTO<number, string>[]>(
+            let response = await api.get<ListElement<number, string>[]>(
                 ENDPOINTS.MY_COURSES_TEACHER,
                 null,
                 true

@@ -1,12 +1,11 @@
 <script lang="ts">
-import { createVNode, defineComponent } from 'vue'
-import { router, ROUTES, URL } from '../scripts/router'
-import { CourseDTO } from 'shared/dto/courseDTO'
+import { defineComponent } from 'vue'
+import { Course } from 'shared/dto/course'
 
 export default defineComponent({
     data() {
         return {
-            courses: [] as CourseDTO[],
+            courses: [] as Course[],
             isLoading: false,
             activeKey: null,
         }

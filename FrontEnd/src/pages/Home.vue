@@ -84,7 +84,8 @@ export default defineComponent({
                 <div class="content">
                     <transition name="fade" mode="out-in">
                         <router-view
-                            @newPopup="(alert: any) => $emit('newPopup', alert)" />
+                            @newPopup="(alert: any) =>
+                        $emit('newPopup', alert)" />
                     </transition>
                 </div>
             </a-layout-content>

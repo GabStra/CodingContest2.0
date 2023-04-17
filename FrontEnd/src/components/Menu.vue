@@ -1,14 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { POPUP_TYPE } from '../models/popup'
-import { router, URL, ROUTES } from '../scripts/router'
+import { router, URL } from '../scripts/router'
 import { ENDPOINTS } from 'shared/constants/endpoints'
 import { useSessionStore } from '../scripts/store'
 import { mapState, mapActions } from 'pinia'
-import { ListElementDTO } from 'shared/dto/ListElementDTO'
+import { ListElement } from 'shared/dto/ListElement'
 export default defineComponent({
     setup() {
-        return { URL, router, ROUTES }
+        return { URL, router }
     },
     computed: {
         ...mapState(useSessionStore, ['courses_student']),
@@ -43,14 +43,14 @@ export default defineComponent({
             @click="
                 () =>
                     $router.push({
-                        name: ROUTES.STUDENT_COURSE,
-                        params: { id: item.id },
+                        path: URL.STUDENT_COURSE,
+                        query: { id: item.id },
                     })
             "
             v-for="(item, i) in courses_student">
             {{ item.data }}
         </a-menu-item>
-        <a-menu-item key="1" @click="() => $router.push({ name: ROUTES.HOME })">
+        <a-menu-item key="1" @click="() => $router.push({ path: URL.HOME })">
             Gestisci corsi
         </a-menu-item>
         <template v-if="courses_teacher.length !== 0">
@@ -63,8 +63,8 @@ export default defineComponent({
                 @click="
                     () =>
                         $router.push({
-                            name: ROUTES.TEACHER_COURSE,
-                            params: { id: item.id },
+                            path: URL.TEACHER_COURSE,
+                            query: { id: item.id },
                         })
                 "
                 v-for="(item, i) in courses_teacher">

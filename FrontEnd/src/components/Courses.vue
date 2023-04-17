@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { router, ROUTES, URL } from '../scripts/router'
-import { CourseDTO } from 'shared/dto/courseDTO'
+import { router, URL } from '../scripts/router'
+import { Course } from 'shared/dto/course'
 import {
     LoadingOutlined,
     CheckOutlined,
@@ -21,7 +21,7 @@ export default defineComponent({
     },
     data() {
         return {
-            courses: [] as CourseDTO[],
+            courses: [] as Course[],
             isLoading: false,
         }
     },
@@ -32,7 +32,7 @@ export default defineComponent({
             this.isLoading = false
         },
         loadCourses: async function () {
-            let response = await this.$api.get<CourseDTO[]>(
+            let response = await this.$api.get<Course[]>(
                 ENDPOINTS.COURSES,
                 null,
                 true
@@ -42,8 +42,8 @@ export default defineComponent({
         },
         handleEdit(courseId: number) {
             router.push({
-                name: ROUTES.MANAGE_COURSE,
-                params: { id: courseId },
+                path: URL.MANAGE_COURSE,
+                query: { id: courseId },
             })
         },
     },
@@ -85,7 +85,6 @@ export default defineComponent({
         ]
         return {
             URL,
-            ROUTES,
             columns,
         }
     },
@@ -123,7 +122,7 @@ export default defineComponent({
                     <a-button
                         type="primary"
                         @click="
-                            () => $router.push({ name: ROUTES.MANAGE_COURSE })
+                            () => $router.push({ path: URL.MANAGE_COURSE })
                         ">
                         Aggiungi
                     </a-button></template
