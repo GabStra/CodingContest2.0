@@ -2,7 +2,7 @@ import express from "express";
 import { getRepository } from "../database/datasource";
 
 import { TblUsers } from "../database/entities/TblUsers";
-import { AuthRequest } from "../model/AuthRequest";
+import { AuthRequest } from "../dto/AuthRequest";
 import { isLoggedIn, isSuperAdmin } from "./auth";
 import { Response } from "shared/dto/Response";
 import { ListElement } from "shared/dto/ListElement";

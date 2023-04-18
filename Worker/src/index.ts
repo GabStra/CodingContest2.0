@@ -12,7 +12,7 @@ import {
   HealthResponse,
   CppResponse_TaskStatus,
   CppResponse_TaskType,
-} from "shared-ts/compiled_proto/cpp";
+} from "shared/compiled_proto/cpp";
 import VitalSigns from "vitalsigns";
 import { runCpp } from "./logic";
 

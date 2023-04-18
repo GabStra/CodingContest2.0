@@ -35,14 +35,14 @@ import {
 } from "shared/dto/registration";
 
 import { Verify, VerifyResponse, VERIFY_STATUS } from "shared/dto/verify";
-import { UserData } from "../model/UserData";
-import { AuthRequest } from "../model/AuthRequest";
+import { UserData } from "../dto/UserData";
+import { AuthRequest } from "../dto/AuthRequest";
 import { TblAssocStudenti } from "../database/entities/TblAssocStudenti";
 import { TblAssocDocenti } from "../database/entities/TblAssocDocenti";
-import { TeacherRequest } from "../model/TeacherRequest";
+import { CourseRequest } from "../dto/CourseRequest";
 
 const router = express.Router();
-const keyv = new Keyv();
+export const cache = new Keyv();
 
 router.post("/login", async function (req: Request, res: Response) {
   try {
@@ -81,7 +81,7 @@ router.post("/login", async function (req: Request, res: Response) {
     let role = getRoleFromUser(userData);
     let expirationDate = +dayjs().add(15, login.rememberMe ? "d" : "m");
     let sessionId = uuidv4();
-    await keyv.set(
+    await cache.set(
       sessionId,
       {
         id: userData.id,
@@ -112,8 +112,8 @@ router.post("/logout", async function (req: Request, res: Response) {
   try {
     let jwt = buildAccessToken(req);
     let accessToken = decodeAccessToken(jwt);
-    let result = await keyv.has(accessToken.sessionId);
-    if (result) await keyv.delete(accessToken.sessionId);
+    let result = await cache.has(accessToken.sessionId);
+    if (result) await cache.delete(accessToken.sessionId);
     res.clearCookie(ACCESS_TOKEN_PAYLOAD);
     res.clearCookie(ACCESS_TOKEN_SIGNATURE);
     res.sendStatus(200);
@@ -281,7 +281,7 @@ router.post("/registration", async function (req: Request, res: Response) {
 
     let expirationDate = +dayjs().add(15, "m");
     let userDataJSON = JSON.stringify(userData);
-    await keyv.set(token, userDataJSON, expirationDate);
+    await cache.set(token, userDataJSON, expirationDate);
 
     await sendVerifyEmail({
       userEmail: registration.userEmail,
@@ -308,14 +308,14 @@ router.post("/verify", async function (req: Request, res: Response) {
       return;
     }
 
-    if (!(await keyv.has(verify.token))) {
+    if (!(await cache.has(verify.token))) {
       res.send({
         status: VERIFY_STATUS.FAIL,
       } as VerifyResponse);
     }
 
     let userRepo = await getRepository<TblUsers>(TblUsers);
-    let userDataJSON = await keyv.get(verify.token);
+    let userDataJSON = await cache.get(verify.token);
     let userData = JSON.parse(userDataJSON);
     userData.tokenCode = "";
     userData.userStatus = "Y";
@@ -328,62 +328,6 @@ router.post("/verify", async function (req: Request, res: Response) {
     console.log(err);
     res.sendStatus(400);
   }
-});
-
-export async function isLoggedIn(req: AuthRequest, res, next) {
-  if (!hasAccessToken(req)) {
-    res.sendStatus(401);
-    return;
-  }
-
-  let jwt = buildAccessToken(req);
-  let accessToken = decodeAccessToken(jwt);
-  let isInvalid = !verifyJwt(jwt);
-  let isSessionInvalid = !(await keyv.has(accessToken.sessionId));
-  if (isInvalid && !isSessionInvalid) await keyv.delete(accessToken.sessionId);
-
-  if (isInvalid || isSessionInvalid) {
-    res.clearCookie(ACCESS_TOKEN_PAYLOAD);
-    res.clearCookie(ACCESS_TOKEN_SIGNATURE);
-    res.sendStatus(401);
-    return;
-  }
-  req.userData = await keyv.get(accessToken.sessionId);
-  next();
-}
-
-export function isAdmin(req, res, next) {
-  let jwt = buildAccessToken(req);
-  let accessToken = decodeAccessToken(jwt);
-  if (accessToken.role === ROLES.ADMIN) next();
-  else res.sendStatus(401);
-}
-
-export function isSuperAdmin(req, res, next) {
-  let jwt = buildAccessToken(req);
-  let accessToken = decodeAccessToken(jwt);
-  if (accessToken.role === ROLES.SUPER_ADMIN) next();
-  else res.sendStatus(401);
-}
-
-export async function isTeacher(req: TeacherRequest, res, next) {
-  try {
-    if (!req.query.course) throw "invalid";
-    req.courseId = Number(req.query.course);
-    if (!req.userData.teacherCourseIds.includes(req.courseId)) {
-      res.sendStatus(401);
-      return;
-    }
-    next();
-  } catch {
-    res.status(400);
-    res.send("query parameter 'course' is missing");
-  }
-}
-
-//ESEMPIO RISORSA PROTETTA
-router.get("/segreto", isLoggedIn, isAdmin, function (req, res) {
-  res.send("SEGRETO");
 });
 
 export { router as authRouter };

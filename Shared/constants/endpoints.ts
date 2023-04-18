@@ -25,4 +25,7 @@ export enum ENDPOINTS {
   NEW_EXERCISE = "/new-exercise",
   EDIT_EXERCISE = "/edit-exercise",
   DELETE_EXERCISE = "/delete-exercise",
+  TOTAL_SCORE = "/total-score",
+  EXERCISE_RUN = "/exercise/run",
+  EXERCISE_STOP = "/exercise/stop",
 }

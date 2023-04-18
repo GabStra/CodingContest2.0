@@ -1,19 +1,22 @@
 import express from "express";
-import { isLoggedIn, isTeacher } from "./auth";
-import { TeacherRequest } from "../model/TeacherRequest";
+import { isLoggedIn, isStudent, isTeacher } from "../helper/middleware";
+import { CourseRequest } from "../dto/CourseRequest";
 import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
 import { ENDPOINTS } from "shared/constants/endpoints";
 import { Exercise } from "shared/dto/exercise";
 import { TblEsercizi } from "../database/entities/TblEsercizi";
 import { getRepository } from "../database/datasource";
 import { ListElement } from "shared/dto/ListElement";
+import Keyv from "@keyvhq/core";
+
 const router = express.Router();
+const keyv = new Keyv();
 
 router.get(
   ENDPOINTS.EXERCISE_TEACHER,
   isLoggedIn,
   isTeacher,
-  async function (req: TeacherRequest, res) {
+  async function (req: CourseRequest, res) {
     let title = "";
     try {
       title = String(req.query.title);
@@ -35,7 +38,7 @@ router.get(
   }
 );
 
-async function manageExercise(req: TeacherRequest, res, isNew: boolean) {
+async function manageExercise(req: CourseRequest, res, isNew: boolean) {
   let exercise = new Exercise(req.body);
 
   let errors = await validate(exercise, VALIDATION_LANGUAGE.IT);
@@ -84,21 +87,21 @@ router.post(
   ENDPOINTS.NEW_EXERCISE,
   isLoggedIn,
   isTeacher,
-  async (req: TeacherRequest, res) => await manageExercise(req, res, true)
+  async (req: CourseRequest, res) => await manageExercise(req, res, true)
 );
 
 router.post(
   ENDPOINTS.EDIT_EXERCISE,
   isLoggedIn,
   isTeacher,
-  async (req: TeacherRequest, res) => await manageExercise(req, res, false)
+  async (req: CourseRequest, res) => await manageExercise(req, res, false)
 );
 
 router.delete(
   ENDPOINTS.DELETE_EXERCISE,
   isLoggedIn,
   isTeacher,
-  async function (req: TeacherRequest, res) {
+  async function (req: CourseRequest, res) {
     let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
     let title = "";
     try {
@@ -129,7 +132,7 @@ router.get(
   ENDPOINTS.EXERCISE_LIST,
   isLoggedIn,
   isTeacher,
-  async function (req: TeacherRequest, res) {
+  async function (req: CourseRequest, res) {
     try {
       let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
       let results = await eserciziRepo.find();
@@ -148,7 +151,7 @@ router.get(
   ENDPOINTS.EXERCISES_TEACHER,
   isLoggedIn,
   isTeacher,
-  async function (req: TeacherRequest, res) {
+  async function (req: CourseRequest, res) {
     try {
       let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
       let response = await eserciziRepo.find({
@@ -163,13 +166,21 @@ router.get(
 );
 
 router.get(
+  ENDPOINTS.TOTAL_SCORE,
+  isLoggedIn,
+  isStudent,
+  async function (req: CourseRequest, res) {}
+);
+
+router.get(
   ENDPOINTS.EXERCISES_STUDENT,
   isLoggedIn,
-  async function (req: TeacherRequest, res) {
+  isStudent,
+  async function (req: CourseRequest, res) {
     try {
       let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
       let response = await eserciziRepo.find({
-        select: ["title", "pronto", "pubblicato"],
+        select: ["title", "level", "pubblicato"],
         where: { idCorso: req.courseId },
       });
       res.send(response);

@@ -4,7 +4,7 @@ import cors from "cors";
 import corsGate from "cors-gate";
 import fs from "fs";
 import cookieParser from "cookie-parser";
-import { cppRouter } from "./src/routes/cpp";
+import { exerciseManagerRouter } from "./src/routes/exerciseManager";
 import { authRouter } from "./src/routes/auth";
 import { coursesRouter } from "./src/routes/courses";
 import { usersRouter } from "./src/routes/users";
@@ -39,7 +39,7 @@ app.use(express.json());
 // );
 
 app.use("/", authRouter);
-app.use("/", cppRouter);
+app.use("/", exerciseManagerRouter);
 app.use("/", coursesRouter);
 app.use("/", usersRouter);
 app.use("/", tagsRouter);

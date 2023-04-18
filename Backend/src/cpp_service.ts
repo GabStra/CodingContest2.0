@@ -145,7 +145,7 @@ export class CppService {
     let cpp: CppRequest = {
       id: cppRequest.id,
       code: source,
-      input: await fs.readFile("static/input.txt", "utf8"),
+      input: cppRequest.input,
     };
     this.loadBalancerPort.postMessage({
       type: CppServiceMessageType.StartTask,

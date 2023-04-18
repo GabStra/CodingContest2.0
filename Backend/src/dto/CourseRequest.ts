@@ -1,5 +1,5 @@
 import { AuthRequest } from "./AuthRequest";
 
-export interface TeacherRequest extends AuthRequest {
+export interface CourseRequest extends AuthRequest {
   courseId: number;
 }

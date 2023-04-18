@@ -1,16 +1,16 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { router, URL } from '../scripts/router'
+import { URL } from '../scripts/router'
 import { Course } from 'shared/dto/course'
-import { LoadingOutlined } from '@ant-design/icons-vue'
+import { LoadingOutlined, SearchOutlined } from '@ant-design/icons-vue'
 import { ENDPOINTS } from 'shared/constants/endpoints'
 import { POPUP_TYPE } from '../models/popup'
 import { mapActions } from 'pinia'
 import { useSessionStore } from '../scripts/store'
-import { ListElement } from 'shared/dto/ListElement'
 export default defineComponent({
     components: {
         LoadingOutlined,
+        SearchOutlined,
     },
     data() {
         return {
@@ -64,6 +64,7 @@ export default defineComponent({
                 dataIndex: 'nome',
                 key: 'nome',
                 width: 'auto',
+                slots: { customRender: 'nome' },
             },
             {
                 title: 'Docenti',
@@ -131,7 +132,31 @@ export default defineComponent({
                     <a-input
                         v-model:value="searchValue"
                         placeholder="Nome corso"
-                        class="search-input" />
+                        class="search-input">
+                        <template #prefix>
+                            <SearchOutlined />
+                        </template>
+                    </a-input>
+                </template>
+                <template #nome="{ record }">
+                    <template
+                        v-if="
+                            record.isRegistered && record.isRegistrationActive
+                        ">
+                        <a
+                            @click="
+                                () =>
+                                    $router.push({
+                                        path: URL.STUDENT_COURSE,
+                                        query: { id: record.id },
+                                    })
+                            ">
+                            {{ record.nome }}
+                        </a>
+                    </template>
+                    <template v-else>
+                        {{ record.nome }}
+                    </template>
                 </template>
                 <template #attivo="{ record }">
                     <div class="center">
@@ -145,33 +170,29 @@ export default defineComponent({
                     </div>
                 </template>
                 <template #actions="{ record }">
-                    <template v-if="!record.isRegistered">
-                        <a-popconfirm
-                            v-if="datasource.length"
-                            placement="left"
-                            :title="`Sicuro di volerti iscrivere al corso ${record.nome}?`"
-                            @confirm="register(record)">
-                            <a
-                                ><a-tag color="orange" style="padding: 4px 15px"
-                                    >Iscriviti</a-tag
-                                ></a
-                            >
-                        </a-popconfirm>
-                    </template>
-                    <template v-else>
-                        <template v-if="record.isRegistrationActive"
-                            ><a-tag color="red" style="padding: 4px 15px"
-                                >In Attesa</a-tag
-                            ></template
-                        >
-                        <template v-else
-                            ><a
-                                ><a-tag color="green" style="padding: 4px 15px"
-                                    >Accedi</a-tag
-                                ></a
-                            ></template
-                        >
-                    </template>
+                    <div class="center">
+                        <template v-if="!record.isRegistered">
+                            <a-popconfirm
+                                v-if="datasource.length"
+                                placement="left"
+                                :title="`Sicuro di volerti iscrivere al corso ${record.nome}?`"
+                                @confirm="register(record)">
+                                <a> Iscriviti </a>
+                            </a-popconfirm>
+                        </template>
+                        <template v-else>
+                            <template v-if="record.isRegistrationActive">
+                                <a-tag color="green" style="padding: 4px 15px">
+                                    Iscritto
+                                </a-tag>
+                            </template>
+                            <template v-else>
+                                <a-tag color="orange" style="padding: 4px 15px">
+                                    In Attesa
+                                </a-tag>
+                            </template>
+                        </template>
+                    </div>
                 </template>
             </a-table>
         </div>

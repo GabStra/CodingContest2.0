@@ -120,7 +120,6 @@ export default defineComponent({
             <a-table :columns="columns" :data-source="datasource">
                 <template #title>
                     <a-button
-                        type="primary"
                         @click="
                             () => $router.push({ path: URL.MANAGE_COURSE })
                         ">
