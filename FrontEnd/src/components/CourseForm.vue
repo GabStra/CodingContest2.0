@@ -56,7 +56,7 @@ export default defineComponent({
         loadCourse: async function () {
             let response = await this.$api.get<Course>(
                 ENDPOINTS.COURSE,
-                { id: Number(this.$route.query.id) },
+                { course: Number(this.$route.query.id) },
                 true
             )
             if (response === null) return
@@ -87,7 +87,7 @@ export default defineComponent({
             parseValidationErrorsToMap(this.errors, errors)
             if (errors.length !== 0) return
             let response = await this.$api.post<any, Course>(
-                ENDPOINTS.NEW_COURSE,
+                ENDPOINTS.SAVE_COURSE,
                 this.courseData,
                 true
             )

@@ -10,6 +10,7 @@ import {
     DeleteOutlined,
 } from '@ant-design/icons-vue'
 import { ENDPOINTS } from 'shared/constants/endpoints'
+import { POPUP_TYPE } from '../models/popup'
 
 export default defineComponent({
     components: {
@@ -45,6 +46,19 @@ export default defineComponent({
                 path: URL.MANAGE_COURSE,
                 query: { id: courseId },
             })
+        },
+        deleteCourse: async function (id: number) {
+            let response = await this.$api.delete<any>(
+                ENDPOINTS.DELETE_COURSE,
+                { course: Number(this.$route.query.id) },
+                true
+            )
+            if (response === null) return
+            this.$emit('newPopup', {
+                type: POPUP_TYPE.SUCCESS,
+                message: 'Corso eliminato',
+            })
+            this.onLoadCourses()
         },
     },
     setup() {
@@ -145,8 +159,9 @@ export default defineComponent({
                             <a-popconfirm
                                 v-if="datasource.length"
                                 placement="left"
-                                :title="`Sicuro di voler cancellare ${record.nome}?`">
-                                <a @click="">Cancella</a>
+                                :title="`Sicuro di voler cancellare ${record.nome}?`" 
+                                @confirm="deleteCourse(record.id)">
+                                <a>Cancella</a>
                             </a-popconfirm>
                         </a-space>
                     </div>

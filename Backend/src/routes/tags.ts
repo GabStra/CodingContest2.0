@@ -3,7 +3,7 @@ import { isLoggedIn, isTeacher } from "../helper/middleware";
 import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
 import { Tag } from "shared/dto/tag";
 import { getRepository } from "../database/datasource";
-import { CourseRequest } from "../dto/CourseRequest";
+import { AuthRequestWithCourseId } from "../dto/AuthRequest";
 import { TblTags } from "../database/entities/TblTags";
 import { ListElement } from "shared/dto/ListElement";
 import { ENDPOINTS } from "shared/constants/endpoints";
@@ -13,7 +13,7 @@ router.get(
   ENDPOINTS.TAGS,
   isLoggedIn,
   isTeacher,
-  async function (req: CourseRequest, res) {
+  async function (req: AuthRequestWithCourseId, res) {
     let tagsRepo = await getRepository<TblTags>(TblTags);
     let tags = await tagsRepo.find({
       where: {
@@ -37,7 +37,7 @@ router.post(
   ENDPOINTS.SAVE_TAG,
   isLoggedIn,
   isTeacher,
-  async function (req: CourseRequest, res) {
+  async function (req: AuthRequestWithCourseId, res) {
     let tag = new Tag(req.body);
     let errors = await validate(tag, VALIDATION_LANGUAGE.IT);
     if (errors.length !== 0) {
@@ -68,7 +68,7 @@ router.delete(
   ENDPOINTS.DELETE_TAG,
   isLoggedIn,
   isTeacher,
-  async function (req: CourseRequest, res) {
+  async function (req: AuthRequestWithCourseId, res) {
     let tagsRepo = await getRepository<TblTags>(TblTags);
     let tagId = Number(req.query.id);
     let tagData = await await tagsRepo.findOne({
@@ -90,7 +90,7 @@ router.get(
   ENDPOINTS.TAGS_LIST,
   isLoggedIn,
   isTeacher,
-  async function (req: CourseRequest, res) {
+  async function (req: AuthRequestWithCourseId, res) {
     try {
       let tagsRepo = await getRepository<TblTags>(TblTags);
       let results = await tagsRepo.find();

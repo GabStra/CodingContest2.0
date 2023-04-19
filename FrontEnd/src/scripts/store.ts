@@ -11,6 +11,7 @@ export const useSessionStore = defineStore('session', {
         popups: [] as Popup[],
         courses_student: [] as ListElement<number, string>[],
         courses_teacher: [] as ListElement<number, string>[],
+        hasRequestsByCourseId: {} as Record<number, boolean>,
         refreshMyCourses: false,
     }),
     actions: {
@@ -31,6 +32,21 @@ export const useSessionStore = defineStore('session', {
             )
             if (response === null) return
             this.courses_teacher = response.data
+        },
+        loadPendingRequestsCount: async function () {
+            let courseIds = this.courses_teacher.map((course) => course.id)
+
+            if (!courseIds.length) return
+
+            for (let courseId of courseIds) {
+                let response = await api.get<number>(
+                    ENDPOINTS.WAITING_TO_BE_APPROVED_COUNT,
+                    { course: courseId },
+                    true
+                )
+                if (response === null) continue
+                this.hasRequestsByCourseId[courseId] = response.data > 0
+            }
         },
     },
     persist: true,

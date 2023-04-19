@@ -39,7 +39,7 @@ import { UserData } from "../dto/UserData";
 import { AuthRequest } from "../dto/AuthRequest";
 import { TblAssocStudenti } from "../database/entities/TblAssocStudenti";
 import { TblAssocDocenti } from "../database/entities/TblAssocDocenti";
-import { CourseRequest } from "../dto/CourseRequest";
+import { AuthRequestWithCourseId } from "../dto/AuthRequest";
 
 const router = express.Router();
 export const cache = new Keyv();

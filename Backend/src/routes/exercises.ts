@@ -1,6 +1,6 @@
 import express from "express";
 import { isLoggedIn, isStudent, isTeacher } from "../helper/middleware";
-import { CourseRequest } from "../dto/CourseRequest";
+import { AuthRequestWithCourseId } from "../dto/AuthRequest";
 import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
 import { ENDPOINTS } from "shared/constants/endpoints";
 import { Exercise } from "shared/dto/exercise";
@@ -16,7 +16,7 @@ router.get(
   ENDPOINTS.EXERCISE_TEACHER,
   isLoggedIn,
   isTeacher,
-  async function (req: CourseRequest, res) {
+  async function (req: AuthRequestWithCourseId, res) {
     let title = "";
     try {
       title = String(req.query.title);
@@ -33,12 +33,15 @@ router.get(
         idCorso: req.courseId,
       },
     });
-    console.log(esercizio);
     res.send(esercizio);
   }
 );
 
-async function manageExercise(req: CourseRequest, res, isNew: boolean) {
+async function manageExercise(
+  req: AuthRequestWithCourseId,
+  res,
+  isNew: boolean
+) {
   let exercise = new Exercise(req.body);
 
   let errors = await validate(exercise, VALIDATION_LANGUAGE.IT);
@@ -87,21 +90,23 @@ router.post(
   ENDPOINTS.NEW_EXERCISE,
   isLoggedIn,
   isTeacher,
-  async (req: CourseRequest, res) => await manageExercise(req, res, true)
+  async (req: AuthRequestWithCourseId, res) =>
+    await manageExercise(req, res, true)
 );
 
 router.post(
   ENDPOINTS.EDIT_EXERCISE,
   isLoggedIn,
   isTeacher,
-  async (req: CourseRequest, res) => await manageExercise(req, res, false)
+  async (req: AuthRequestWithCourseId, res) =>
+    await manageExercise(req, res, false)
 );
 
 router.delete(
   ENDPOINTS.DELETE_EXERCISE,
   isLoggedIn,
   isTeacher,
-  async function (req: CourseRequest, res) {
+  async function (req: AuthRequestWithCourseId, res) {
     let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
     let title = "";
     try {
@@ -132,7 +137,7 @@ router.get(
   ENDPOINTS.EXERCISE_LIST,
   isLoggedIn,
   isTeacher,
-  async function (req: CourseRequest, res) {
+  async function (req: AuthRequestWithCourseId, res) {
     try {
       let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
       let results = await eserciziRepo.find();
@@ -151,7 +156,7 @@ router.get(
   ENDPOINTS.EXERCISES_TEACHER,
   isLoggedIn,
   isTeacher,
-  async function (req: CourseRequest, res) {
+  async function (req: AuthRequestWithCourseId, res) {
     try {
       let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
       let response = await eserciziRepo.find({
@@ -169,14 +174,14 @@ router.get(
   ENDPOINTS.TOTAL_SCORE,
   isLoggedIn,
   isStudent,
-  async function (req: CourseRequest, res) {}
+  async function (req: AuthRequestWithCourseId, res) {}
 );
 
 router.get(
   ENDPOINTS.EXERCISES_STUDENT,
   isLoggedIn,
   isStudent,
-  async function (req: CourseRequest, res) {
+  async function (req: AuthRequestWithCourseId, res) {
     try {
       let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
       let response = await eserciziRepo.find({

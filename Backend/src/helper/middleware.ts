@@ -1,5 +1,5 @@
 import { ROLES } from "shared/constants/roles";
-import { CourseRequest } from "../dto/CourseRequest";
+import { AuthRequestWithCourseId } from "../dto/AuthRequest";
 import {
   ACCESS_TOKEN_PAYLOAD,
   ACCESS_TOKEN_SIGNATURE,
@@ -47,7 +47,7 @@ export function isSuperAdmin(req, res, next) {
   else res.sendStatus(401);
 }
 
-export async function isTeacher(req: CourseRequest, res, next) {
+export async function isTeacher(req: AuthRequestWithCourseId, res, next) {
   try {
     if (!req.query.course) throw "invalid";
     req.courseId = Number(req.query.course);
@@ -62,7 +62,7 @@ export async function isTeacher(req: CourseRequest, res, next) {
   }
 }
 
-export async function isStudent(req: CourseRequest, res, next) {
+export async function isStudent(req: AuthRequestWithCourseId, res, next) {
   try {
     if (!req.query.course) throw "invalid";
     req.courseId = Number(req.query.course);
@@ -84,5 +84,16 @@ export async function hasTitleQueryParam(req, res, next) {
   } catch {
     res.status(400);
     res.send("query parameter 'title' is missing");
+  }
+}
+
+export async function hasCourseQueryParam(req, res, next) {
+  try {
+    if (!req.query.course) throw "invalid";
+    req.courseId = Number(req.query.course);
+    next();
+  } catch {
+    res.status(400);
+    res.send("query parameter 'course' is missing");
   }
 }

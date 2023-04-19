@@ -3,14 +3,19 @@ import { Not, In } from "typeorm";
 import { getRepository } from "../database/datasource";
 import { TblAssocStudenti } from "../database/entities/TblAssocStudenti";
 import { TblCorsi } from "../database/entities/TblCorsi";
-import { AuthRequest } from "../dto/AuthRequest";
-import { isLoggedIn } from "../helper/middleware";
-import { AvailableCourse } from "shared/dto/availableCourse";
+import { AuthRequest, AuthRequestWithCourseId } from "../dto/AuthRequest";
+import {
+  hasCourseQueryParam,
+  isAdmin,
+  isLoggedIn,
+  isTeacher,
+} from "../helper/middleware";
 import { Course } from "shared/dto/course";
 import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
 import { TblAssocDocenti } from "../database/entities/TblAssocDocenti";
 import { ListElement } from "shared/dto/ListElement";
-import { Response } from "shared/dto/Response";
+import { ENDPOINTS } from "shared/constants/endpoints";
+import { CourseRegistrationManager } from "shared/dto/courseRegistrationManager";
 
 const router = express.Router();
 
@@ -27,7 +32,7 @@ function buildCoursesArray(items: TblCorsi[]) {
 }
 
 router.get(
-  "/available-courses",
+  ENDPOINTS.AVAILABLE_COURSES,
   isLoggedIn,
   async function (req: AuthRequest, res) {
     let assocStudentiRepo = await getRepository<TblAssocStudenti>(
@@ -39,7 +44,9 @@ router.get(
       },
     });
     let registeredCourseIds = assocStudenti.map((item) => item.idCorso);
-
+    let registeredCourseIdsActive = assocStudenti
+      .filter((item) => item.attivo)
+      .map((item) => item.idCorso);
     let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
     let courses = await coursesRepo.find({
       where: {
@@ -56,7 +63,7 @@ router.get(
     let response = buildCoursesArray(courses);
     response.forEach((element: any) => {
       element.isRegistered = registeredCourseIds.includes(element.id);
-      element.isRegistrationActive = req.userData.studentCourseIds.includes(
+      element.isRegistrationActive = registeredCourseIdsActive.includes(
         element.id
       );
     });
@@ -64,31 +71,10 @@ router.get(
   }
 );
 
-router.get(
-  "/active-courses",
-  isLoggedIn,
-  async function (req: AuthRequest, res) {
-    let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
-    let courses = await coursesRepo.find({
-      where: {
-        id: Not(In(req.userData.studentCourseIds)),
-      },
-    });
-    let response = courses.map<ListElement<number, string>>((element) => {
-      return {
-        id: element.id,
-        data: element.nome,
-      } as ListElement<number, string>;
-    });
-
-    res.send(response);
-  }
-);
-
 router.post(
-  "/new-course",
+  ENDPOINTS.SAVE_COURSE,
   isLoggedIn,
-  //isSuperAdmin,
+  //isAdmin,
   async function (req: AuthRequest, res) {
     let course = new Course(req.body);
     let errors = await validate(course, VALIDATION_LANGUAGE.IT);
@@ -135,34 +121,67 @@ router.post(
   }
 );
 
-router.post("/register-course", async function (req: AuthRequest, res) {
-  try {
-    let courseId = new Course(req.body).id;
-
+router.delete(
+  ENDPOINTS.DELETE_COURSE,
+  isLoggedIn,
+  isAdmin,
+  hasCourseQueryParam,
+  async function (req: AuthRequestWithCourseId, res) {
     let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
-    let course = await coursesRepo.findOne({
+    let courseData = await coursesRepo.findOne({
       where: {
-        id: courseId,
+        id: req.courseId,
       },
     });
 
-    let assocStudente = new TblAssocStudenti();
-    assocStudente.idCorso = courseId;
-    assocStudente.idUtente = req.userData.userId;
-    assocStudente.attivo = Number(!course.iscrizione);
-    let assocStudentiRepo = await getRepository<TblAssocStudenti>(
-      TblAssocStudenti
-    ); //t
-    await assocStudentiRepo.save(assocStudente);
+    if (!courseData) {
+      res.sendStatus(404);
+      return;
+    }
+    await coursesRepo.delete(courseData);
     res.sendStatus(200);
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(500);
   }
-});
+);
+
+router.post(
+  ENDPOINTS.REGISTER_COURSE,
+  isLoggedIn,
+  async function (req: AuthRequest, res) {
+    try {
+      let courseId = new Course(req.body).id;
+
+      let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
+      let course = await coursesRepo.findOne({
+        where: {
+          id: courseId,
+        },
+      });
+
+      if (!course) {
+        res.sendStatus(404);
+        return;
+      }
+
+      let assocStudentiRepo = await getRepository<TblAssocStudenti>(
+        TblAssocStudenti
+      );
+
+      let assocStudente = new TblAssocStudenti();
+      assocStudente.idCorso = courseId;
+      assocStudente.idUtente = req.userData.userId;
+      assocStudente.attivo = Number(!course.iscrizione);
+
+      await assocStudentiRepo.save(assocStudente);
+      res.sendStatus(200);
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
+  }
+);
 
 router.get(
-  "/my-courses-student",
+  ENDPOINTS.MY_COURSES_STUDENT,
   isLoggedIn,
   async function (req: AuthRequest, res) {
     let assocStudentiRepo = await getRepository<TblAssocStudenti>(
@@ -190,7 +209,7 @@ router.get(
 );
 
 router.get(
-  "/my-courses-teacher",
+  ENDPOINTS.MY_COURSES_TEACHER,
   isLoggedIn,
   async function (req: AuthRequest, res) {
     let assocDocentiRepo = await getRepository<TblAssocDocenti>(
@@ -216,45 +235,167 @@ router.get(
   }
 );
 
-router.get("/courses", isLoggedIn, async function (req: AuthRequest, res) {
-  let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
-  let courses = await coursesRepo.find({
-    relations: {
-      assocDocenti: {
-        user: true,
+router.get(
+  ENDPOINTS.COURSES,
+  isLoggedIn,
+  async function (req: AuthRequest, res) {
+    let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
+    let courses = await coursesRepo.find({
+      relations: {
+        assocDocenti: {
+          user: true,
+        },
+        assocStudenti: true,
       },
-      assocStudenti: true,
-    },
-  });
+    });
 
-  let response = buildCoursesArray(courses);
-  res.send(response);
-});
-
-router.get("/course", isLoggedIn, async function (req: AuthRequest, res) {
-  let id = Number(req.query.id);
-  if (!id) {
-    res.sendStatus(400);
-    return;
+    let response = buildCoursesArray(courses);
+    res.send(response);
   }
+);
 
-  let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
-  let course = await coursesRepo.findOne({
-    relations: {
-      assocDocenti: true,
-    },
-    where: {
-      id: id,
-    },
-  });
+router.get(
+  ENDPOINTS.COURSE,
+  isLoggedIn,
+  isTeacher,
+  async function (req: AuthRequestWithCourseId, res) {
+    let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
+    let course = await coursesRepo.findOne({
+      relations: {
+        assocDocenti: true,
+      },
+      where: {
+        id: req.courseId,
+      },
+    });
 
-  res.send({
-    id: course.id,
-    nome: course.nome,
-    info: course.info,
-    attivo: course.attivo,
-    idDocenti: course.assocDocenti.map((assocDocente) => assocDocente.idUtente),
-  });
-});
+    res.send({
+      id: course.id,
+      nome: course.nome,
+      info: course.info,
+      attivo: course.attivo,
+      idDocenti: course.assocDocenti.map(
+        (assocDocente) => assocDocente.idUtente
+      ),
+    });
+  }
+);
+
+router.get(
+  ENDPOINTS.WAITING_TO_BE_APPROVED_LIST,
+  isLoggedIn,
+  isTeacher,
+  async function (req: AuthRequestWithCourseId, res) {
+    try {
+      let assocStudentiRepo = await getRepository<TblAssocStudenti>(
+        TblAssocStudenti
+      );
+      let results = await assocStudentiRepo.find({
+        select: {
+          idUtente: true,
+          user: {
+            userName: true,
+          },
+        },
+        where: {
+          attivo: 0,
+          idCorso: req.courseId,
+        },
+        relations: {
+          user: true,
+        },
+      });
+
+      let response = results.map(
+        (item) =>
+          ({ id: item.idUtente, data: item.user.userName } as ListElement<
+            string,
+            string
+          >)
+      );
+      res.send(response);
+    } catch {
+      res.send([]);
+    }
+  }
+);
+
+router.get(
+  ENDPOINTS.WAITING_TO_BE_APPROVED_COUNT,
+  isLoggedIn,
+  isTeacher,
+  async function (req: AuthRequestWithCourseId, res) {
+    let assocStudentiRepo = await getRepository<TblAssocStudenti>(
+      TblAssocStudenti
+    );
+    let assocStudenti = await assocStudentiRepo.find({
+      where: {
+        attivo: 0,
+        idCorso: req.courseId,
+      },
+    });
+
+    res.send(assocStudenti.length.toString());
+  }
+);
+
+router.post(
+  ENDPOINTS.APPROVE_REQUESTS,
+  isLoggedIn,
+  isTeacher,
+  async function (req: AuthRequestWithCourseId, res) {
+    let registrationManager = new CourseRegistrationManager(req.body);
+    let errors = await validate(registrationManager, VALIDATION_LANGUAGE.IT);
+    if (errors.length !== 0) {
+      res.sendStatus(400);
+      return;
+    }
+
+    let assocStudentiRepo = await getRepository<TblAssocStudenti>(
+      TblAssocStudenti
+    );
+
+    try {
+      await assocStudentiRepo.update(
+        {
+          idUtente: In(registrationManager.ids),
+          idCorso: req.courseId,
+        },
+        { attivo: 1 }
+      );
+      res.sendStatus(200);
+    } catch {
+      res.sendStatus(500);
+    }
+  }
+);
+
+router.post(
+  ENDPOINTS.REJECT_REQUESTS,
+  isLoggedIn,
+  isTeacher,
+  async function (req: AuthRequestWithCourseId, res) {
+    let registrationManager = new CourseRegistrationManager(req.body);
+    let errors = await validate(registrationManager, VALIDATION_LANGUAGE.IT);
+    if (errors.length !== 0) {
+      res.sendStatus(400);
+      return;
+    }
+
+    let assocStudentiRepo = await getRepository<TblAssocStudenti>(
+      TblAssocStudenti
+    );
+
+    try {
+      await assocStudentiRepo.delete({
+        idCorso: req.courseId,
+        idUtente: In(registrationManager.ids),
+      });
+      res.sendStatus(200);
+    } catch {
+      res.sendStatus(500);
+    }
+  }
+);
 
 export { router as coursesRouter };

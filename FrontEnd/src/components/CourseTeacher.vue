@@ -3,20 +3,44 @@ import { defineComponent } from 'vue'
 import TagsSection from './TagsSection.vue'
 import ExercisesSection from './ExercisesSection.vue'
 import { useSessionStore } from '../scripts/store'
-import { mapState } from 'pinia'
+import { mapActions, mapState } from 'pinia'
+import RegistrationRequestsSection from './RegistrationRequestsSection.vue'
 
 export default defineComponent({
     components: {
         TagsSection,
         ExercisesSection,
+        RegistrationRequestsSection,
+    },
+    watch: {
+        hasRequestsByCourseId: {
+            handler: function (to, from) {
+                this.$forceUpdate()
+            },
+            deep: true,
+        },
     },
     computed: {
+        ...mapState(useSessionStore, ['hasRequestsByCourseId']),
         ...mapState(useSessionStore, ['courses_teacher']),
         title() {
             let result = (this.courses_teacher.find(
-                (course) => course.id === Number(this.$route.query.id)
+                (course) => course.id === this.courseId
             )?.data ?? '') as string
             return result
+        },
+        courseId(): number {
+            try {
+                return Number(this.$route.query.id)
+            } catch {
+                return 0
+            }
+        },
+    },
+    methods: {
+        anyRequestForCourse(courseId: number) {
+            if (!this.hasRequestsByCourseId[courseId]) return false
+            return this.hasRequestsByCourseId[courseId]
         },
     },
     data() {
@@ -38,10 +62,17 @@ export default defineComponent({
         </div>
         <a-divider />
         <a-tabs v-model:activeKey="activeTab">
-            <a-tab-pane :key="1" tab="Esercizi">
+            <a-tab-pane :key="1" force-render>
+                <template #tab>
+                    Richieste
+                    <a-badge :dot="anyRequestForCourse(courseId)" />
+                </template>
+                <RegistrationRequestsSection />
+            </a-tab-pane>
+            <a-tab-pane :key="2" tab="Esercizi">
                 <ExercisesSection />
             </a-tab-pane>
-            <a-tab-pane :key="2" tab="Categorie" force-render>
+            <a-tab-pane :key="3" tab="Categorie" force-render>
                 <TagsSection />
             </a-tab-pane>
         </a-tabs>

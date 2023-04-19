@@ -3,7 +3,7 @@ import { getRepository } from "../database/datasource";
 
 import { TblUsers } from "../database/entities/TblUsers";
 import { AuthRequest } from "../dto/AuthRequest";
-import { isLoggedIn, isSuperAdmin } from "./auth";
+import { isLoggedIn, isSuperAdmin } from "../helper/middleware";
 import { Response } from "shared/dto/Response";
 import { ListElement } from "shared/dto/ListElement";
 import { UserFilter } from "shared/dto/userFilter";
