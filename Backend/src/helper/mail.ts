@@ -8,8 +8,7 @@ let transport;
 
 function initTrasport() {
   transport = createTransport({
-    host: process.env.MAIL_HOST,
-    port: 587,
+    service: "gmail",
     auth: {
       user: process.env.MAIL_USERNAME,
       pass: process.env.MAIL_PASSWORD,

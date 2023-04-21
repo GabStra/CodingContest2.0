@@ -1,10 +1,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import { Verify, VERIFY_STATUS, VerifyResponse } from 'shared/dto/verify'
+import { Verify, VERIFY_STATUS, VerifyResponse } from 'shared/dist/dto/verify'
 import { router, URL } from '../scripts/router'
 import { LoadingOutlined } from '@ant-design/icons-vue'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 
 export default defineComponent({
     emit: ['onSuccess', 'onError'],

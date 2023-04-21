@@ -1,4 +1,3 @@
-import { ROLES } from "shared/constants/roles";
 import { AuthRequestWithCourseId } from "../dto/AuthRequest";
 import {
   ACCESS_TOKEN_PAYLOAD,
@@ -9,7 +8,7 @@ import {
   verifyJwt,
 } from "./cookie";
 import { AuthRequest } from "../dto/AuthRequest";
-import { cache } from "../routes/auth";
+import { sessionCache } from "../../index";
 
 export async function isLoggedIn(req: AuthRequest, res, next) {
   if (!hasAccessToken(req)) {
@@ -20,8 +19,9 @@ export async function isLoggedIn(req: AuthRequest, res, next) {
   let jwt = buildAccessToken(req);
   let accessToken = decodeAccessToken(jwt);
   let isInvalid = !verifyJwt(jwt);
-  let isSessionInvalid = !(await cache.has(accessToken.sessionId));
-  if (isInvalid && !isSessionInvalid) await cache.delete(accessToken.sessionId);
+  let isSessionInvalid = !(await sessionCache.has(accessToken.sessionId));
+  if (isInvalid && !isSessionInvalid)
+    await sessionCache.delete(accessToken.sessionId);
 
   if (isInvalid || isSessionInvalid) {
     res.clearCookie(ACCESS_TOKEN_PAYLOAD);
@@ -29,25 +29,16 @@ export async function isLoggedIn(req: AuthRequest, res, next) {
     res.sendStatus(401);
     return;
   }
-  req.userData = await cache.get(accessToken.sessionId);
+  req.userData = await sessionCache.get(accessToken.sessionId);
   next();
 }
 
-export function isAdmin(req, res, next) {
-  let jwt = buildAccessToken(req);
-  let accessToken = decodeAccessToken(jwt);
-  if (accessToken.role === ROLES.ADMIN) next();
+export function isAdmin(req: AuthRequest, res, next) {
+  if (req.userData.isAdmin) next();
   else res.sendStatus(401);
 }
 
-export function isSuperAdmin(req, res, next) {
-  let jwt = buildAccessToken(req);
-  let accessToken = decodeAccessToken(jwt);
-  if (accessToken.role === ROLES.SUPER_ADMIN) next();
-  else res.sendStatus(401);
-}
-
-export async function isTeacher(req: AuthRequestWithCourseId, res, next) {
+export function isTeacher(req: AuthRequestWithCourseId, res, next) {
   try {
     if (!req.query.course) throw "invalid";
     req.courseId = Number(req.query.course);
@@ -62,7 +53,7 @@ export async function isTeacher(req: AuthRequestWithCourseId, res, next) {
   }
 }
 
-export async function isStudent(req: AuthRequestWithCourseId, res, next) {
+export function isStudent(req: AuthRequestWithCourseId, res, next) {
   try {
     if (!req.query.course) throw "invalid";
     req.courseId = Number(req.query.course);
@@ -77,7 +68,7 @@ export async function isStudent(req: AuthRequestWithCourseId, res, next) {
   }
 }
 
-export async function hasTitleQueryParam(req, res, next) {
+export function hasTitleQueryParam(req, res, next) {
   try {
     if (!req.query.title) throw "invalid";
     req.title = String(req.query.title);
@@ -88,7 +79,7 @@ export async function hasTitleQueryParam(req, res, next) {
   }
 }
 
-export async function hasCourseQueryParam(req, res, next) {
+export function hasCourseQueryParam(req, res, next) {
   try {
     if (!req.query.course) throw "invalid";
     req.courseId = Number(req.query.course);

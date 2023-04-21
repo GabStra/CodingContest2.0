@@ -14,6 +14,7 @@ import { Api, api } from './scripts/api'
 import piniaPluginPersistedState from 'pinia-plugin-persistedstate'
 import { useSessionStore } from './scripts/store'
 import { Popup, POPUP_TYPE } from './models/popup'
+
 declare module 'vue' {
     interface ComponentCustomProperties {
         $api: Api
@@ -36,7 +37,6 @@ axios.interceptors.response.use(
         return response
     },
     (error) => {
-        console.log(error.response)
         if (!!error.response) {
             if (error.response.status === 401) {
                 let cookies = document.cookie.split(';')

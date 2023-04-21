@@ -1,8 +1,6 @@
-import { ROLES } from "../constants/roles";
-
 export interface AccessTokenPayload {
   sessionId: string;
-  role: ROLES;
+  isAdmin: boolean;
   iat: number;
   exp: number;
 }

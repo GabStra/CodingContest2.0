@@ -1,10 +1,8 @@
-import { ROLES } from "shared/constants/roles";
-
-export interface UserData {
+export interface UserSessionData {
   id: number;
   userName: string;
   userId: string;
   studentCourseIds: number[];
   teacherCourseIds: number[];
-  role: ROLES;
+  isAdmin: boolean;
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Course } from 'shared/dto/course'
+import { Course } from 'shared/dist/dto/course'
 
 export default defineComponent({
     data() {

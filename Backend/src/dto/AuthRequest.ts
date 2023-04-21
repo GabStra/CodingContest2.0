@@ -1,9 +1,10 @@
 import { Request } from "express";
-import { UserData } from "./UserData";
+import { UserSessionData } from "./userSessionData";
 
 export interface AuthRequest extends Request {
-  userData: UserData;
+  userData: UserSessionData;
 }
+
 
 export type AuthRequestWithCourseId = AuthRequest & { courseId: number };
 export type AuthRequestWithTitle = AuthRequest & { title: string };

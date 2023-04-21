@@ -1,15 +1,15 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { PasswordRecovery } from 'shared/dto/passwordRecovery'
+import { PasswordRecovery } from 'shared/dist/dto/passwordRecovery'
 import {
     validate,
     VALIDATION_LANGUAGE,
     parseValidationErrorsToMap,
-} from 'shared/utils/validator'
+} from 'shared/dist/utils/validator'
 
 import { POPUP_TYPE } from '../models/popup'
 import { URL } from '../scripts/router'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 
 export default defineComponent({
     emit: ['onSuccess', 'onError'],

@@ -2,26 +2,50 @@
 import { defineComponent } from 'vue'
 import { mapStores } from 'pinia'
 import { useSessionStore } from '../scripts/store'
-import { ROLES } from 'shared/constants/roles'
 import { UserOutlined } from '@ant-design/icons-vue'
 export default defineComponent({
     components: {
         UserOutlined,
     },
+    data() {
+        return {
+            showDefault: false,
+        }
+    },
+    watch: {
+        'sessionStore.userData.avatar': {
+            handler: function (to, from) {
+                console.log('avatar changed')
+                this.$forceUpdate()
+            },
+            deep: true,
+        },
+    },
     computed: {
         ...mapStores(useSessionStore),
-    },
-    setup() {
-        return { ROLES }
+        imageUrl() {
+            return new URL(
+                `/src/assets/icons/${this.sessionStore.userData!.avatar}.svg`,
+                import.meta.url
+            ).href
+        },
     },
 })
 </script>
 <template>
     <div class="userInfo-container">
         <div class="userInfo-row">
-            <a-avatar size="medium">
-                <template #icon><UserOutlined /></template>
-            </a-avatar>
+            <template v-if="!showDefault">
+                <img
+                    :src="imageUrl"
+                    style="width: 70px"
+                    @error="showDefault = true" />
+            </template>
+            <template v-else>
+                <a-avatar size="medium">
+                    <template #icon><UserOutlined /></template>
+                </a-avatar>
+            </template>
             <div class="userInfo-column">
                 <span
                     style="
@@ -31,21 +55,6 @@ export default defineComponent({
                     "
                     >{{ sessionStore.userData?.userName }}</span
                 >
-                <div>
-                    <template v-if="sessionStore.userData?.role === ROLES.USER">
-                        <a-tag color="green">Studente</a-tag>
-                    </template>
-                    <template
-                        v-if="sessionStore.userData?.role === ROLES.ADMIN">
-                        <a-tag color="orange">Docente</a-tag>
-                    </template>
-                    <template
-                        v-if="
-                            sessionStore.userData?.role === ROLES.SUPER_ADMIN
-                        ">
-                        <a-tag color="red">Admin</a-tag>
-                    </template>
-                </div>
             </div>
         </div>
     </div>
@@ -55,10 +64,11 @@ export default defineComponent({
     padding: 5px;
 }
 .userInfo-row {
+    padding-left: 20px;
     display: flex;
     flex-direction: row;
     gap: 15px;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
 }
 .userInfo-column {

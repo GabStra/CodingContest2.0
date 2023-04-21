@@ -1,7 +1,6 @@
 <script lang="ts">
-import { StoreDefinition, mapState } from 'pinia'
 import { defineComponent } from 'vue'
-import { useSessionStore } from '../scripts/store'
+
 export default defineComponent({})
 </script>
 <template>
@@ -19,7 +18,7 @@ export default defineComponent({})
     </div>
 </template>
 
-<style scoped lang="less">
+<style scoped>
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.5s ease;

@@ -1,11 +1,11 @@
 <mjml>
   <mj-body>
   
-    <mj-section background-color="#fafafa">     
+    <mj-section background-color="#121212">     
           <mj-column>
-             <mj-text font-size="25px" font-weight="bold" font-family="roboto" align="center">Coding Contest 2.0</mj-text>
+             <mj-text font-size="25px" font-weight="bold" color="#e1e1e1" font-family="roboto" align="center">Coding Contest 2.0</mj-text>
             <mj-divider border-width="1px" border-color="lightgrey" />
-            <mj-text font-size="16px" font-family="roboto" color="#525252">Ciao {{userName}},<br\><br\>
+            <mj-text font-size="16px" font-family="roboto" color="#e1e1e1">Ciao {{userName}},<br\><br\>
               Completa la registrazione cliccando sul pulsante qui sotto.<br/></br\></mj-text>
             <mj-button font-size="16px" background-color="#0aa679" href="{{link}}">Verifica e-mail</mj-button>
           </mj-column>

@@ -15,6 +15,7 @@ import CourseStudent from '../components/CourseStudent.vue'
 import CourseTeacher from '../components/CourseTeacher.vue'
 import ExerciseForm from '../components/ExerciseForm.vue'
 import ExecuteExercise from '../components/ExecuteExercise.vue'
+import Users from '../components/Users.vue'
 
 export enum URL {
     MAIN = '/main',
@@ -35,6 +36,7 @@ export enum URL {
     TEACHER_COURSE = '/docente/corso',
     OFFLINE = '/offline',
     EXECUTE_EXERCISE = '/studente/esercitazione',
+    USERS = '/utenti',
 }
 
 const HomeRoute: RouteRecordRaw = {
@@ -86,6 +88,10 @@ const HomeRoute: RouteRecordRaw = {
         {
             path: URL.MANAGE_EXERCISE,
             component: ExerciseForm,
+        },
+        {
+            path: URL.USERS,
+            component: Users,
         },
     ],
 }

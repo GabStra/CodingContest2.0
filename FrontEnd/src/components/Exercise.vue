@@ -4,22 +4,26 @@ import { defineComponent } from 'vue'
 import { Codemirror } from 'vue-codemirror'
 import { cpp } from '@codemirror/lang-cpp'
 import { oneDark } from '@codemirror/theme-one-dark'
-
-import { CaretRightOutlined, ClearOutlined } from '@ant-design/icons-vue'
+import {
+    CaretRightOutlined,
+    ClearOutlined,
+    StopOutlined,
+} from '@ant-design/icons-vue'
 import { classname } from '@uiw/codemirror-extensions-classname'
 import readOnlyRangesExtension from 'codemirror-readonly-ranges'
-import { CppRequest } from 'shared/compiled_proto/cpp'
+import { CppRequest } from 'shared/dist/compiled_proto/cpp'
 import { EditorState } from '@codemirror/state'
-import { ENDPOINTS } from 'shared/constants/endpoints'
-import { RemoteExecutionRequest } from 'shared/dto/remoteExecutionRequest'
-import { RemoteExecutionResult } from 'shared/dto/remoteExecutionResult'
-import { RemoteExecutionBase } from 'shared/dto/remoteExecutionBase'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
+import { RemoteExecutionRequest } from 'shared/dist/dto/remoteExecutionRequest'
+import { RemoteExecutionResult } from 'shared/dist/dto/remoteExecutionResult'
+import { RemoteExecutionBase } from 'shared/dist/dto/remoteExecutionBase'
 
 export default defineComponent({
     components: {
         Codemirror,
         CaretRightOutlined,
         ClearOutlined,
+        StopOutlined,
     },
 
     data() {
@@ -153,7 +157,7 @@ export default defineComponent({
             addLineReadOnly,
             lineNumbers({
                 formatNumber: (n, s) => {
-                    return String(n).padStart(3, '0')
+                    return String(n).padStart(4, '0')
                 },
             }),
         ]
@@ -163,7 +167,7 @@ export default defineComponent({
             cpp(),
             lineNumbers({
                 formatNumber: (n, s) => {
-                    return String(n + 4).padStart(3, '0')
+                    return String(n + 4).padStart(4, '0')
                 },
             }),
         ]
@@ -175,7 +179,7 @@ export default defineComponent({
             addLineReadOnly,
             lineNumbers({
                 formatNumber: (n, s) => {
-                    return String(n + this.lineOffset).padStart(3, '0')
+                    return String(n + this.lineOffset).padStart(4, '0')
                 },
             }),
         ]
@@ -186,47 +190,46 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="container" v-if="isReady">
-        <div class="space-between">
-            <a-space>
-                <a-button
-                    a-button
-                    type="primary"
-                    ghost
-                    :style="{ width: '70px' }"
-                    @click="runCpp"
-                    :loading="isLoading">
-                    <template #icon><CaretRightOutlined /></template>
-                </a-button>
-                <a-button :style="{ width: '70px' }" danger @click="stopCpp">
-                    <template #icon>
-                        <svg
-                            width="10"
-                            height="10"
-                            fill="currentColor"
-                            aria-hidden="true"
-                            focusable="false">
-                            <rect width="10" height="10" rx="1" ry="1" />
-                        </svg>
-                    </template>
-                </a-button>
-                <a-popconfirm
-                    placement="left"
-                    :title="`Sicuro di voler procedere al reset?`"
-                    @confirm="reset()">
-                    <a-button :style="{ width: '70px' }">
-                        <template #icon><ClearOutlined /></template>
+    <a-layout
+        v-if="isReady"
+        :style="{ background: 'transparent', height: '85vh' }">
+        <a-layout-header style="padding: 0 10px">
+            <div class="space-between">
+                <a-space>
+                    <a-button
+                        a-button
+                        type="primary"
+                        ghost
+                        :style="{ width: '70px' }"
+                        @click="runCpp"
+                        :loading="isLoading">
+                        <CaretRightOutlined />
                     </a-button>
-                </a-popconfirm>
-            </a-space>
-            <div v-show="results && results.length > 0" style="width: 100px">
-                <a-progress
-                    stroke-linecap="square"
-                    :percent="results.filter((x) => x).length" />
+                    <a-button
+                        :style="{ width: '70px' }"
+                        danger
+                        @click="stopCpp">
+                        <StopOutlined />
+                    </a-button>
+                    <a-popconfirm
+                        placement="left"
+                        :title="`Sicuro di voler procedere al reset?`"
+                        @confirm="reset()">
+                        <a-button :style="{ width: '70px' }">
+                            <ClearOutlined />
+                        </a-button>
+                    </a-popconfirm>
+                </a-space>
+                <div
+                    v-show="results && results.length > 0"
+                    style="width: 100px">
+                    <a-progress
+                        stroke-linecap="square"
+                        :percent="results.filter((x) => x).length" />
+                </div>
             </div>
-        </div>
-
-        <div class="editor">
+        </a-layout-header>
+        <a-layout-content style="overflow: scroll">
             <div class="editor_container">
                 <div class="overlay_element"></div>
                 <codemirror
@@ -238,7 +241,6 @@ export default defineComponent({
                     :tab-size="4"
                     @change="(value) => (top = value)" />
             </div>
-
             <codemirror
                 :modelValue="code"
                 :style="{ height: 'auto' }"
@@ -263,35 +265,39 @@ export default defineComponent({
                     :tab-size="4"
                     @change="(value) => (bottom = value)" />
             </div>
-        </div>
-        <div class="console_container">
-            <a-tabs v-model:activeKey="activeTab" style="height: 100%">
-                <a-tab-pane :key="1" force-render>
-                    <template #tab>
-                        Console
-                        <a-badge :dot="!!stdout" />
-                    </template>
-                    <a-textarea
-                        readonly
-                        :value="stdout"
-                        class="console"
-                        :autoSize="false" />
-                </a-tab-pane>
-                <a-tab-pane :key="2">
-                    <template #tab>
-                        Errori
-                        <a-badge :dot="!!stderr" />
-                    </template>
-                    <a-textarea
-                        readonly
-                        :value="stderr"
-                        :style="{ color: 'red' }"
-                        class="console"
-                        :autoSize="false" />
-                </a-tab-pane>
-            </a-tabs>
-        </div>
-    </div>
+        </a-layout-content>
+        <a-layout-footer style="padding: 0px; background: transparent">
+            <div class="container">
+                <div class="console_container">
+                    <a-tabs v-model:activeKey="activeTab" style="height: 100%">
+                        <a-tab-pane :key="1" force-render>
+                            <template #tab>
+                                Output
+                                <a-badge :dot="!!stdout" />
+                            </template>
+                            <a-textarea
+                                readonly
+                                :value="stdout"
+                                class="console"
+                                :autoSize="false" />
+                        </a-tab-pane>
+                        <a-tab-pane :key="2">
+                            <template #tab>
+                                Errori
+                                <a-badge :dot="!!stderr" />
+                            </template>
+                            <a-textarea
+                                readonly
+                                :value="stderr"
+                                :style="{ color: 'red' }"
+                                class="console"
+                                :autoSize="false" />
+                        </a-tab-pane>
+                    </a-tabs>
+                </div>
+            </div>
+        </a-layout-footer>
+    </a-layout>
 </template>
 
 <style scoped lang="scss">
@@ -337,7 +343,7 @@ export default defineComponent({
         background-color: #282c34;
     }
     .console_container {
-        height: 200px;
+        height: 250px;
     }
 
     .console {

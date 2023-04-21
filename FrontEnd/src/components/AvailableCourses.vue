@@ -1,9 +1,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { URL } from '../scripts/router'
-import { Course } from 'shared/dto/course'
+import { Course } from 'shared/dist/dto/course'
 import { LoadingOutlined, SearchOutlined } from '@ant-design/icons-vue'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 import { POPUP_TYPE } from '../models/popup'
 import { mapActions } from 'pinia'
 import { useSessionStore } from '../scripts/store'

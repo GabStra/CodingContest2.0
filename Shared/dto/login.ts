@@ -1,4 +1,4 @@
-import { IsNotEmpty, MaxLength, IsEmail, IsDefined } from "class-validator";
+import { IsNotEmpty, MaxLength, IsEmail } from "class-validator";
 
 export class Login {
   @MaxLength(100)

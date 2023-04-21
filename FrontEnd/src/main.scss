@@ -1,26 +1,20 @@
 @font-face {
-  font-family: "Modeseven";
-  font-style: normal;
-  src: local("Modeseven"),
-    url(@/assets/fonts/Modeseven-L3n5.ttf) format("truetype");
+    font-family: 'Modeseven';
+    font-style: normal;
+    src: local('Modeseven'),
+        url(@/assets/fonts/Modeseven-L3n5.ttf) format('truetype');
 }
 
 @font-face {
-  font-family: "Modenine";
-  font-style: normal;
-  src: local("ModeNine"),
-    url(@/assets/fonts/Modenine-2OPd.ttf) format("truetype");
+    font-family: 'Modenine';
+    font-style: normal;
+    src: local('ModeNine'),
+        url(@/assets/fonts/Modenine-2OPd.ttf) format('truetype');
 }
 
 @font-face {
-  font-family: "DroidSans";
-  font-style: normal;
-  src: local("DroidSans"), url(@/assets/fonts/DroidSans.ttf) format("truetype");
-}
-
-@font-face {
-  font-family: "DroidSans";
-  font-style: bold;
-  src: local("DroidSans-Bold"),
-    url(@/assets/fonts/DroidSans-Bold.ttf) format("truetype");
+    font-family: 'DroidSans';
+    font-style: normal;
+    src: local('DroidSans'),
+        url(@/assets/fonts/DroidSans.ttf) format('truetype');
 }

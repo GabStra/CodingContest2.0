@@ -4,13 +4,13 @@ import {
   isLoggedIn,
   isTeacher,
 } from "../helper/middleware";
-import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
-import { Tag } from "shared/dto/tag";
+import { validate, VALIDATION_LANGUAGE } from "shared/dist/utils/validator";
+import { Tag } from "shared/dist/dto/tag";
 import { getRepository } from "../database/datasource";
 import { AuthRequestWithCourseId } from "../dto/AuthRequest";
 import { TblTags } from "../database/entities/TblTags";
-import { ListElement } from "shared/dto/ListElement";
-import { ENDPOINTS } from "shared/constants/endpoints";
+import { ListElement } from "shared/dist/dto/ListElement";
+import { ENDPOINTS } from "shared/dist/constants/endpoints";
 const router = express.Router();
 
 router.get(

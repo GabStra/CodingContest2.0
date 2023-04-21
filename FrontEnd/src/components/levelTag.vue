@@ -18,6 +18,7 @@ export default defineComponent({
             color: color,
             borderColor: color,
             backgroundColor: lighterColor,
+            whiteSpace: 'nowrap',
         }"
         class="tag">
         <slot></slot>

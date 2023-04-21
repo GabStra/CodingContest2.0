@@ -9,18 +9,18 @@ import {
   AuthRequestWithCourseId,
   AuthRequestWithTitleAndCourseId,
 } from "../dto/AuthRequest";
-import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
-import { ENDPOINTS } from "shared/constants/endpoints";
-import { Exercise } from "shared/dto/exercise";
+import { validate, VALIDATION_LANGUAGE } from "shared/dist/utils/validator";
+import { ENDPOINTS } from "shared/dist/constants/endpoints";
+import { Exercise } from "shared/dist/dto/exercise";
 import { TblEsercizi } from "../database/entities/TblEsercizi";
 import { getRepository } from "../database/datasource";
-import { ListElement } from "shared/dto/ListElement";
+import { ListElement } from "shared/dist/dto/ListElement";
 import Keyv from "@keyvhq/core";
 import { TableTasks } from "../database/entities/TableTasks";
 import { TblSubmissions } from "../database/entities/TblSubmissions";
 import { getCurrentTotalScore } from "../helper/utils";
-import { fromTotalScoreToLevel } from "shared/utils/mixed";
-import { ExerciseTableRow } from "shared/dto/exerciseTableRow";
+import { fromTotalScoreToLevel } from "shared/dist/utils/mixed";
+import { ExerciseTableRow } from "shared/dist/dto/exerciseTableRow";
 
 import hash from "hash-it";
 import { In } from "typeorm";

@@ -1,50 +1,45 @@
-import express, { Request, response, Response } from "express";
-import { AccessTokenPayload } from "shared/dto/accessTokenPayload";
-import { ROLES } from "shared/constants/roles";
-import { Login } from "shared/dto/login";
-import { PasswordRecovery } from "shared/dto/PasswordRecovery";
+import express from "express";
+
+import { Login } from "shared/dist/dto/login";
+import { PasswordRecovery } from "shared/dist/dto/PasswordRecovery";
 import { getRepository } from "../database/datasource";
 import { TblUsers } from "../database/entities/TblUsers";
 import bcrypt from "bcrypt";
-import { getRoleFromUser } from "../helper/role";
 import {
   ACCESS_TOKEN_PAYLOAD,
   ACCESS_TOKEN_SIGNATURE,
   buildAccessToken,
   createAccessTokenCookies,
   decodeAccessToken,
-  hasAccessToken,
-  verifyJwt,
 } from "../helper/cookie";
-import Keyv from "@keyvhq/core";
+
 import { v4 as uuidv4 } from "uuid";
-import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
+import { validate, VALIDATION_LANGUAGE } from "shared/dist/utils/validator";
 import dayjs from "dayjs";
-import { UserData as UserDataDTO } from "shared/dto/userData";
 import {
   NewPassword,
   NewPasswordResponse,
   NEW_PASSWORD_STATUS,
-} from "shared/dto/newPassword";
+} from "shared/dist/dto/newPassword";
 import { sendPasswordRecoveryEmail, sendVerifyEmail } from "../helper/mail";
 
 import {
-  Registration,
+  User,
   REGISTRATION_STATUS,
   RegistrationResponse,
-} from "shared/dto/registration";
+} from "shared/dist/dto/user";
 
-import { Verify, VerifyResponse, VERIFY_STATUS } from "shared/dto/verify";
-import { UserData } from "../dto/UserData";
+import { Verify, VerifyResponse, VERIFY_STATUS } from "shared/dist/dto/verify";
+import { UserSessionData } from "../dto/userSessionData";
 import { AuthRequest } from "../dto/AuthRequest";
-import { TblAssocStudenti } from "../database/entities/TblAssocStudenti";
-import { TblAssocDocenti } from "../database/entities/TblAssocDocenti";
-import { AuthRequestWithCourseId } from "../dto/AuthRequest";
+import { isLoggedIn } from "../helper/middleware";
+import { ENDPOINTS } from "shared/dist/constants/endpoints";
+import { LoginResponse } from "shared/dist/dto/loginResponse";
+import { sessionCache } from "../../index";
 
 const router = express.Router();
-export const cache = new Keyv();
 
-router.post("/login", async function (req: Request, res: Response) {
+router.post(ENDPOINTS.LOGIN, async function (req, res) {
   try {
     let login = new Login(req.body);
     let errors = await validate(login, VALIDATION_LANGUAGE.IT);
@@ -72,57 +67,65 @@ router.post("/login", async function (req: Request, res: Response) {
       return;
     }
 
+    if (userData.userStatus !== "Y") {
+      res.sendStatus(403);
+      return;
+    }
+
     let studentCourseIds = userData.assocStudenti
       .filter((assocStudente) => assocStudente.attivo == 1)
       .map((item) => item.idCorso);
 
     let teacherCourseIds = userData.assocDocenti.map((item) => item.idCorso);
-
-    let role = getRoleFromUser(userData);
+    let isAdmin = !!userData.admin;
     let expirationDate = +dayjs().add(15, login.rememberMe ? "d" : "m");
     let sessionId = uuidv4();
-    await cache.set(
+    await sessionCache.set(
       sessionId,
       {
         id: userData.id,
         userName: userData.userName,
         userId: userData.userId,
-        role: role,
+        isAdmin: isAdmin,
         studentCourseIds: studentCourseIds,
         teacherCourseIds: teacherCourseIds,
-      } as UserData,
+      } as UserSessionData,
       expirationDate
     );
-    createAccessTokenCookies(res, sessionId, role, login.rememberMe);
+    createAccessTokenCookies(res, sessionId, isAdmin, login.rememberMe);
 
     res.status(200);
     res.send({
       userId: userData.userId,
       userName: userData.userName,
       avatar: userData.avatar,
-      role: role,
-    } as UserDataDTO);
+      isAdmin: isAdmin,
+    } as LoginResponse);
   } catch (err) {
     console.log(err);
     res.sendStatus(401);
   }
 });
 
-router.post("/logout", async function (req: Request, res: Response) {
-  try {
-    let jwt = buildAccessToken(req);
-    let accessToken = decodeAccessToken(jwt);
-    let result = await cache.has(accessToken.sessionId);
-    if (result) await cache.delete(accessToken.sessionId);
-    res.clearCookie(ACCESS_TOKEN_PAYLOAD);
-    res.clearCookie(ACCESS_TOKEN_SIGNATURE);
-    res.sendStatus(200);
-  } catch (err) {
-    res.sendStatus(400);
+router.post(
+  ENDPOINTS.LOGOUT,
+  isLoggedIn,
+  async function (req: AuthRequest, res) {
+    try {
+      let jwt = buildAccessToken(req);
+      let accessToken = decodeAccessToken(jwt);
+      let result = await sessionCache.has(accessToken.sessionId);
+      if (result) await sessionCache.delete(accessToken.sessionId);
+      res.clearCookie(ACCESS_TOKEN_PAYLOAD);
+      res.clearCookie(ACCESS_TOKEN_SIGNATURE);
+      res.sendStatus(200);
+    } catch (err) {
+      res.sendStatus(400);
+    }
   }
-});
+);
 
-router.post("/password-reset", async function (req: Request, res: Response) {
+router.post(ENDPOINTS.PASSWORD_RESET, async function (req, res) {
   try {
     let passwordRecovery = new PasswordRecovery(req.body);
     let errors = await validate(passwordRecovery, VALIDATION_LANGUAGE.IT);
@@ -160,42 +163,39 @@ router.post("/password-reset", async function (req: Request, res: Response) {
   }
 });
 
-router.post(
-  "/new-password-check",
-  async function (req: Request, res: Response) {
-    try {
-      let newPassword = new NewPassword(req.body);
-      let errors = await validate(newPassword, VALIDATION_LANGUAGE.IT);
-      console.log(errors);
-      if (errors.length > 1) {
-        res.sendStatus(400);
-        return;
-      }
-
-      let userRepo = await getRepository<TblUsers>(TblUsers);
-      let userData = await userRepo.findOne({
-        where: {
-          tokenCode: newPassword.token,
-        },
-      });
-      if (!userData) {
-        res.send({
-          status: NEW_PASSWORD_STATUS.FAIL,
-        } as NewPasswordResponse);
-        return;
-      }
-
-      res.send({
-        status: NEW_PASSWORD_STATUS.SUCCESS,
-      } as NewPasswordResponse);
-    } catch (err) {
-      console.log(err);
+router.post(ENDPOINTS.NEW_PASSWORD_CHECK, async function (req, res) {
+  try {
+    let newPassword = new NewPassword(req.body);
+    let errors = await validate(newPassword, VALIDATION_LANGUAGE.IT);
+    console.log(errors);
+    if (errors.length > 1) {
       res.sendStatus(400);
+      return;
     }
-  }
-);
 
-router.post("/new-password", async function (req: Request, res: Response) {
+    let userRepo = await getRepository<TblUsers>(TblUsers);
+    let userData = await userRepo.findOne({
+      where: {
+        tokenCode: newPassword.token,
+      },
+    });
+    if (!userData) {
+      res.send({
+        status: NEW_PASSWORD_STATUS.FAIL,
+      } as NewPasswordResponse);
+      return;
+    }
+
+    res.send({
+      status: NEW_PASSWORD_STATUS.SUCCESS,
+    } as NewPasswordResponse);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400);
+  }
+});
+
+router.post(ENDPOINTS.NEW_PASSWORD, async function (req, res) {
   try {
     let newPassword = new NewPassword(req.body);
     let errors = await validate(newPassword, VALIDATION_LANGUAGE.IT);
@@ -231,10 +231,10 @@ router.post("/new-password", async function (req: Request, res: Response) {
   }
 });
 
-router.post("/registration", async function (req: Request, res: Response) {
+router.post(ENDPOINTS.REGISTRATION, async function (req, res) {
   try {
-    let registration = new Registration(req.body);
-    let errors = await validate(registration, VALIDATION_LANGUAGE.IT);
+    let user = new User(req.body);
+    let errors = await validate(user, VALIDATION_LANGUAGE.IT);
     if (errors.length !== 0) {
       res.sendStatus(400);
       return;
@@ -244,7 +244,7 @@ router.post("/registration", async function (req: Request, res: Response) {
     if (
       !!(await userRepo.findOne({
         where: {
-          userId: registration.userId,
+          userId: user.userId,
         },
       }))
     ) {
@@ -257,7 +257,7 @@ router.post("/registration", async function (req: Request, res: Response) {
     if (
       !!(await userRepo.findOne({
         where: {
-          userEmail: registration.userEmail,
+          userEmail: user.userEmail,
         },
       }))
     ) {
@@ -270,22 +270,22 @@ router.post("/registration", async function (req: Request, res: Response) {
     let token = uuidv4();
     let link = `${process.env.FRONTEND_HOST}/verifica?token=${token}`;
 
-    let hash = await bcrypt.hash(registration.userPass, +process.env.SECRET);
+    let hash = await bcrypt.hash(user.userPass, +process.env.SECRET);
     let userData = new TblUsers();
 
-    userData.userId = registration.userId;
-    userData.userEmail = registration.userEmail;
-    userData.userName = registration.userName;
+    userData.userId = user.userId;
+    userData.userEmail = user.userEmail;
+    userData.userName = user.userName;
     userData.userPass = hash;
     userData.tokenCode = "";
 
     let expirationDate = +dayjs().add(15, "m");
     let userDataJSON = JSON.stringify(userData);
-    await cache.set(token, userDataJSON, expirationDate);
+    await sessionCache.set(token, userDataJSON, expirationDate);
 
     await sendVerifyEmail({
-      userEmail: registration.userEmail,
-      userName: registration.userName,
+      userEmail: user.userEmail,
+      userName: user.userName,
       verifyLink: link,
     });
 
@@ -298,7 +298,7 @@ router.post("/registration", async function (req: Request, res: Response) {
   }
 });
 
-router.post("/verify", async function (req: Request, res: Response) {
+router.post(ENDPOINTS.VERIFY, async function (req, res) {
   try {
     let verify = new Verify(req.body);
     let errors = await validate(verify, VALIDATION_LANGUAGE.IT);
@@ -308,14 +308,14 @@ router.post("/verify", async function (req: Request, res: Response) {
       return;
     }
 
-    if (!(await cache.has(verify.token))) {
+    if (!(await sessionCache.has(verify.token))) {
       res.send({
         status: VERIFY_STATUS.FAIL,
       } as VerifyResponse);
     }
 
     let userRepo = await getRepository<TblUsers>(TblUsers);
-    let userDataJSON = await cache.get(verify.token);
+    let userDataJSON = await sessionCache.get(verify.token);
     let userData = JSON.parse(userDataJSON);
     userData.tokenCode = "";
     userData.userStatus = "Y";

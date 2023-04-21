@@ -1,14 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { LEVEL, LEVEL_LABELS } from 'shared/constants/levels'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { LEVEL, LEVEL_LABELS } from 'shared/dist/constants/levels'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 import { LoadingOutlined } from '@ant-design/icons-vue'
-import { ExerciseTableRow } from 'shared/dto/exerciseTableRow'
+import { ExerciseTableRow } from 'shared/dist/dto/exerciseTableRow'
 import { getColorFromLevel } from '../utils/gradient'
 import {
     fromTotalScoreToLevel,
     fromLevelToTotalScore,
-} from 'shared/utils/mixed'
+} from 'shared/dist/utils/mixed'
 import LevelTag from './levelTag.vue'
 
 export default defineComponent({

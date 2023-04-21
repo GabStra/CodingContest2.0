@@ -1,53 +1,44 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { router, URL } from '../scripts/router'
-import { Course } from 'shared/dist/dto/course'
-import {
-    LoadingOutlined,
-    CheckOutlined,
-    CloseOutlined,
-    EditOutlined,
-    DeleteOutlined,
-} from '@ant-design/icons-vue'
+import { LoadingOutlined } from '@ant-design/icons-vue'
 import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 import { POPUP_TYPE } from '../models/popup'
+import { ListElement } from 'shared/dist/dto/listElement'
 
 export default defineComponent({
     components: {
         LoadingOutlined,
-        CheckOutlined,
-        CloseOutlined,
-        EditOutlined,
-        DeleteOutlined,
     },
     data() {
         return {
-            courses: [] as Course[],
+            users: [] as ListElement<number, string>[],
             isLoading: false,
+            searchValue: '' as string,
         }
     },
     methods: {
-        onLoadCourses: async function () {
+        onLoadUsers: async function () {
             this.isLoading = true
-            await this.loadCourses()
+            await this.loadUsers()
             this.isLoading = false
         },
-        loadCourses: async function () {
-            let response = await this.$api.get<Course[]>(
-                ENDPOINTS.COURSES,
+        loadUsers: async function () {
+            let response = await this.$api.get<ListElement<number, string>[]>(
+                ENDPOINTS.USERS_LIST,
                 null,
                 true
             )
             if (response === null) return
-            this.courses = response.data
+            this.users = response.data
         },
-        handleEdit(courseId: number) {
+        handleEdit(userId: number) {
             router.push({
                 path: URL.MANAGE_COURSE,
-                query: { id: courseId },
+                query: { id: userId },
             })
         },
-        deleteCourse: async function (id: number) {
+        deleteUser: async function (id: number) {
             let response = await this.$api.delete<any>(
                 ENDPOINTS.DELETE_COURSE,
                 { course: id },
@@ -58,36 +49,16 @@ export default defineComponent({
                 type: POPUP_TYPE.SUCCESS,
                 message: 'Corso eliminato',
             })
-            this.onLoadCourses()
+            this.onLoadUsers()
         },
     },
     setup() {
         const columns = [
             {
-                title: 'Nome',
-                dataIndex: 'nome',
-                key: 'nome',
+                title: 'Nome utente',
+                dataIndex: 'data',
+                key: 'data',
                 width: 'auto',
-            },
-            {
-                title: 'Docenti',
-                dataIndex: 'nomiDocenti',
-                key: 'nomiDocenti',
-                width: 'auto',
-                slots: { customRender: 'docenti' },
-            },
-            {
-                title: 'Iscritti',
-                dataIndex: 'numeroIscritti',
-                key: 'numeroIscritti',
-                width: '70px',
-            },
-            {
-                title: 'Attivo',
-                dataIndex: 'attivo',
-                key: 'attivo',
-                width: '70px',
-                slots: { customRender: 'attivo' },
             },
             {
                 title: '',
@@ -104,16 +75,16 @@ export default defineComponent({
     },
     computed: {
         datasource() {
-            return this.courses.map((course, index) => {
-                return {
-                    key: index,
-                    ...course,
-                }
-            })
+            let currentUsers = !!this.searchValue
+                ? this.users.filter((user) =>
+                      user.data.includes(this.searchValue)
+                  )
+                : this.users
+            return currentUsers
         },
     },
     beforeMount() {
-        this.onLoadCourses()
+        this.onLoadUsers()
     },
 })
 </script>
@@ -133,25 +104,16 @@ export default defineComponent({
         <div class="fill" v-show="!isLoading">
             <a-table :columns="columns" :data-source="datasource">
                 <template #title>
-                    <a-button
-                        @click="
-                            () => $router.push({ path: URL.MANAGE_COURSE })
-                        ">
-                        Aggiungi
-                    </a-button></template
-                >
-                <template #attivo="{ record }">
-                    <div class="center">
-                        <CheckOutlined v-if="record.attivo" />
-                        <CloseOutlined v-else />
-                    </div>
+                    <a-input
+                        v-model:value="searchValue"
+                        placeholder="Nome utente"
+                        class="search-input">
+                        <template #prefix>
+                            <SearchOutlined />
+                        </template>
+                    </a-input>
                 </template>
-                <template #docenti="{ record }">
-                    <div v-for="(item, index) in record.nomiDocenti">
-                        {{ item }}
-                    </div>
-                </template>
-                <template #actions="{ record }">
+                <template v-slot:actions="{ record }">
                     <div class="center">
                         <a-space>
                             <a @click="handleEdit(record.id)">Modifica</a>
@@ -159,8 +121,8 @@ export default defineComponent({
                             <a-popconfirm
                                 v-if="datasource.length"
                                 placement="left"
-                                :title="`Sicuro di voler cancellare ${record.nome}?`"
-                                @confirm="deleteCourse(record.id)">
+                                :title="`Sicuro di voler cancellare ${record.data}?`"
+                                @confirm="deleteUser(record.id)">
                                 <a>Cancella</a>
                             </a-popconfirm>
                         </a-space>

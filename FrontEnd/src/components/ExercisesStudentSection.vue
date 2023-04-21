@@ -1,11 +1,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 import { LoadingOutlined, LockOutlined } from '@ant-design/icons-vue'
 import { URL } from '../scripts/router'
-import { ExerciseTableRow } from 'shared/dto/exerciseTableRow'
+import { ExerciseTableRow } from 'shared/dist/dto/exerciseTableRow'
 import { getColorFromLevel } from '../utils/gradient'
 import LevelTag from './levelTag.vue'
+
 export default defineComponent({
     components: {
         LoadingOutlined,
@@ -50,7 +51,7 @@ export default defineComponent({
         },
     },
     computed: {
-        datasource() {
+        datasource(): ExerciseTableRow[] {
             return this.exercises
         },
     },
@@ -123,11 +124,9 @@ export default defineComponent({
                     </template>
                 </template>
                 <template #level="{ record }">
-                    <div class="center">
-                        <LevelTag :color="getColorFromLevel(record.level)">
-                            Livello {{ record.level }}
-                        </LevelTag>
-                    </div>
+                    <LevelTag :color="getColorFromLevel(record.level)">
+                        Livello {{ record.level }}
+                    </LevelTag>
                 </template>
                 <template #score="{ record }">
                     <template v-if="!!record.score">

@@ -1,26 +1,26 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import {
-    Registration,
+    User,
     RegistrationResponse,
     REGISTRATION_STATUS,
-} from 'shared/dto/registration'
+} from 'shared/dist/dto/user'
 import {
     validate,
     VALIDATION_LANGUAGE,
     parseValidationErrorsToMap,
-} from 'shared/utils/validator'
+} from 'shared/dist/utils/validator'
 import { mapStores } from 'pinia'
 import { useSessionStore } from '../scripts/store'
 import { POPUP_TYPE } from '../models/popup'
 import { router, URL } from '../scripts/router'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 
 export default defineComponent({
     emit: ['onSuccess', 'onError'],
     data() {
         return {
-            registrationData: new Registration(),
+            userData: new User(),
             errors: new Map<string, string>(),
             isLoading: false,
         }
@@ -41,16 +41,13 @@ export default defineComponent({
         },
 
         registration: async function () {
-            let errors = await validate(
-                this.registrationData,
-                VALIDATION_LANGUAGE.IT
-            )
+            let errors = await validate(this.userData, VALIDATION_LANGUAGE.IT)
             parseValidationErrorsToMap(this.errors, errors)
             if (errors.length !== 0) return
-            let response = await this.$api.post<
-                RegistrationResponse,
-                Registration
-            >(ENDPOINTS.REGISTRATION, this.registrationData)
+            let response = await this.$api.post<RegistrationResponse, User>(
+                ENDPOINTS.REGISTRATION,
+                this.userData
+            )
             if (response === null) return
             this.manageNotification(response.data)
             if (response.data.status === REGISTRATION_STATUS.Success) {
@@ -89,7 +86,7 @@ export default defineComponent({
 </script>
 <template>
     <div class="element_container">
-        <a-form layout="vertical" :model="registrationData">
+        <a-form layout="vertical" :model="userData">
             <div class="center">
                 <h1>Registrazione</h1>
             </div>
@@ -100,14 +97,14 @@ export default defineComponent({
                 name="userId"
                 :validateStatus="errors.has('userId') ? 'error' : undefined"
                 :help="errors.get('userId')">
-                <a-input v-model:value="registrationData.userId" />
+                <a-input v-model:value="userData.userId" />
             </a-form-item>
             <a-form-item
                 label="Nome e Cognome"
                 name="userName"
                 :validateStatus="errors.has('userName') ? 'error' : undefined"
                 :help="errors.get('userName')">
-                <a-input v-model:value="registrationData.userName" />
+                <a-input v-model:value="userData.userName" />
             </a-form-item>
 
             <a-form-item
@@ -115,7 +112,7 @@ export default defineComponent({
                 name="userEmail"
                 :validateStatus="errors.has('userEmail') ? 'error' : undefined"
                 :help="errors.get('userEmail')">
-                <a-input v-model:value="registrationData.userEmail" />
+                <a-input v-model:value="userData.userEmail" />
             </a-form-item>
 
             <a-form-item
@@ -123,7 +120,7 @@ export default defineComponent({
                 name="userPass"
                 :validateStatus="errors.has('userPass') ? 'error' : undefined"
                 :help="errors.get('userPass')">
-                <a-input-password v-model:value="registrationData.userPass" />
+                <a-input-password v-model:value="userData.userPass" />
             </a-form-item>
 
             <div class="center" style="margin-top: 20px">

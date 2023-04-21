@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Exercise } from 'shared/dto/exercise'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { Exercise } from 'shared/dist/dto/exercise'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 import { POPUP_TYPE } from '../models/popup'
 import { LoadingOutlined, ArrowLeftOutlined } from '@ant-design/icons-vue'
 import LevelTag from './levelTag.vue'
@@ -9,8 +9,8 @@ import { getColorFromLevel } from '../utils/gradient'
 import { mapState } from 'pinia'
 import { useSessionStore } from '../scripts/store'
 import { URL } from '../scripts/router'
-import { LEVEL_LABELS } from 'shared/constants/levels'
-import { LEVEL } from 'shared/constants/levels'
+import { LEVEL_LABELS } from 'shared/dist/constants/levels'
+import { LEVEL } from 'shared/dist/constants/levels'
 import ExercisePage from './Exercise.vue'
 
 export default defineComponent({
@@ -122,41 +122,39 @@ export default defineComponent({
 })
 </script>
 <template>
-    <div style="max-height: 100%">
+    <div>
         <template v-if="isLoading">
             <LoadingOutlined spin />
         </template>
         <template v-else>
-            <a-space>
-                <ArrowLeftOutlined
-                    :style="{ fontSize: '1.5em' }"
-                    @click="goToCourseStudent(courseId)" />
-                <a-breadcrumb>
-                    <a-breadcrumb-item>{{ courseTitle }}</a-breadcrumb-item>
-                    <a-breadcrumb-item>{{
-                        exerciseData.title
-                    }}</a-breadcrumb-item>
-                </a-breadcrumb>
-            </a-space>
+            <div class="space-between">
+                <a-space>
+                    <ArrowLeftOutlined
+                        :style="{ fontSize: '1.5em' }"
+                        @click="goToCourseStudent(courseId)" />
+                    <a-breadcrumb>
+                        <a-breadcrumb-item>{{ courseTitle }}</a-breadcrumb-item>
+                        <a-breadcrumb-item>{{
+                            exerciseData.title
+                        }}</a-breadcrumb-item>
+                    </a-breadcrumb>
+                </a-space>
+                <LevelTag :color="getColorFromLevel(exerciseData.level)">
+                    Livello {{ exerciseData.level }} -
+                    {{ levelLabel }}
+                </LevelTag>
+            </div>
+
             <a-divider style="margin-top: 12px; margin-bottom: 12px" />
             <div>
                 <a-row :gutter="16" style="height: 100%">
-                    <a-col :xs="24" :md="12">
+                    <a-col :sm="24" :md="12">
                         <a-space direction="vertical" style="width: 100%">
-                            <div class="space-between">
-                                <h2>
-                                    <a-typography-text strong>
-                                        {{ exerciseData.title }}
-                                    </a-typography-text>
-                                </h2>
-                                <LevelTag
-                                    :color="
-                                        getColorFromLevel(exerciseData.level)
-                                    ">
-                                    Livello {{ exerciseData.level }} -
-                                    {{ levelLabel }}
-                                </LevelTag>
-                            </div>
+                            <h2>
+                                <a-typography-text strong>
+                                    {{ exerciseData.title }}
+                                </a-typography-text>
+                            </h2>
                             <template v-if="exerciseData.titoloEsteso">
                                 <div>
                                     <a-typography-text type="secondary">{{
@@ -187,7 +185,7 @@ export default defineComponent({
                             </div>
                         </a-space>
                     </a-col>
-                    <a-col :xs="24" :md="12">
+                    <a-col :sm="24" :md="12">
                         <ExercisePage />
                     </a-col>
                 </a-row>

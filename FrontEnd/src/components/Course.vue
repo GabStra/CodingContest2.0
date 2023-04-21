@@ -1,13 +1,13 @@
 <script lang="ts">
-import { Tag } from "shared/dto/tag"
+import { Tag } from "shared/dist/dto/tag"
 import { defineComponent } from "vue"
-import { ENDPOINTS } from "shared/constants/endpoints"
+import { ENDPOINTS } from "shared/dist/constants/endpoints"
 import { LoadingOutlined } from "@ant-design/icons-vue"
 import {
     parseValidationErrorsToMap,
     validate,
     VALIDATION_LANGUAGE,
-} from "shared/utils/validator"
+} from "shared/dist/utils/validator"
 import { POPUP_TYPE } from "../models/popup"
 
 export default defineComponent({

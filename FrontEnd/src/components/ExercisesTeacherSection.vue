@@ -1,7 +1,7 @@
 <script lang="ts">
-import { Exercise } from 'shared/dto/exercise'
+import { Exercise } from 'shared/dist/dto/exercise'
 import { defineComponent } from 'vue'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 import {
     LoadingOutlined,
     CheckOutlined,

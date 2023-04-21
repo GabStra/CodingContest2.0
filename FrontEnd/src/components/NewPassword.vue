@@ -1,21 +1,21 @@
 <script lang="ts">
 import { createVNode, defineComponent } from 'vue'
-import { NewPassword } from 'shared/dto/newPassword'
+import { NewPassword } from 'shared/dist/dto/newPassword'
 import {
     validate,
     VALIDATION_LANGUAGE,
     parseValidationErrorsToMap,
-} from 'shared/utils/validator'
+} from 'shared/dist/utils/validator'
 import { Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { POPUP_TYPE } from '../models/popup'
 import {
     NewPasswordResponse,
     NEW_PASSWORD_STATUS,
-} from 'shared/dto/newPassword'
+} from 'shared/dist/dto/newPassword'
 import { router, URL } from '../scripts/router'
 import { LoadingOutlined } from '@ant-design/icons-vue'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 
 export default defineComponent({
     emit: ['onSuccess', 'onError'],

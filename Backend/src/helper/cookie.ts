@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
-import { AccessTokenPayload } from "shared/dto/accessTokenPayload";
-import { ROLES } from "shared/constants/roles";
+import { AccessTokenPayload } from "shared/dist/dto/accessTokenPayload";
 import jsonwebtoken, { SignOptions, Algorithm } from "jsonwebtoken";
 import fs from "fs";
 import { Request, Response } from "express";
@@ -57,13 +56,14 @@ export function clearAccessToken(res: Response) {
 export function createAccessTokenCookies(
   res: Response,
   sessionId: string,
-  role: ROLES,
+  isAdmin: boolean,
   rememberMe: boolean
 ) {
   let accessTokenPayload = {
     sessionId: sessionId,
-    role: role,
+    isAdmin: isAdmin,
   } as AccessTokenPayload;
+
   let jwt = jsonwebtoken.sign(accessTokenPayload, privateKey, {
     algorithm: "RS256",
     expiresIn: "15" + (rememberMe ? "d" : "m"),
@@ -73,6 +73,7 @@ export function createAccessTokenCookies(
   let expirationDate = dayjs()
     .add(15, rememberMe ? "d" : "m")
     .toDate();
+
   res.cookie(ACCESS_TOKEN_PAYLOAD, payload, {
     sameSite: true,
     httpOnly: false,

@@ -4,27 +4,40 @@ import {
   IsEmail,
   IsAlphanumeric,
   IsDefined,
+  IsOptional,
 } from "class-validator";
 
-export class Registration {
+export class User {
+  @IsOptional({
+    groups: ["changePassword", "changeEmail", "changeName"],
+  })
   @IsDefined()
   @MaxLength(20)
   @IsNotEmpty()
   @IsAlphanumeric()
   userId: string;
 
+  @IsOptional({
+    groups: ["changePassword", "changeEmail"],
+  })
   @IsDefined()
   @MaxLength(100)
   @IsNotEmpty()
   @IsAlphanumeric()
   userName: string;
 
+  @IsOptional({
+    groups: ["changePassword", "changeName"],
+  })
   @IsDefined()
   @MaxLength(100)
   @IsEmail()
   @IsNotEmpty()
   userEmail: string;
 
+  @IsOptional({
+    groups: ["changeEmail", "changeName"],
+  })
   @IsDefined()
   @MaxLength(100)
   @IsNotEmpty()

@@ -3,7 +3,7 @@ import {
   CppRequest,
   CppResponse,
   CppResponse_TaskStatus,
-} from "shared/compiled_proto/cpp";
+} from "shared/dist/compiled_proto/cpp";
 import { PortMessage, Recipient } from "./message/port_sharing";
 import {
   TaskManagerMessage,

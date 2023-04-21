@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "module": "CommonJS",
-    "declaration": true,
+    "module": "commonjs",
     "target": "ESNext",
+    "declaration": true,
     "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

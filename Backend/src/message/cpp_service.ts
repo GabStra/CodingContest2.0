@@ -1,4 +1,4 @@
-import { CppRequest } from "shared/compiled_proto/cpp";
+import { CppRequest } from "shared/dist/compiled_proto/cpp";
 
 export enum CppServiceMessageType {
   StartTask,

@@ -1,8 +1,6 @@
 {
   "name": "shared",
   "version": "1.0.0",
-  "main": "./dist/index.js",
-  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -11,6 +9,11 @@
     "class-validator-multi-lang": "^0.130.201",
     "nice-grpc": "^2.1.0"
   },
+  "bundledDependencies": [
+    "class-validator",
+    "class-validator-multi-lang",
+    "nice-grpc"
+  ],
   "devDependencies": {
     "typescript": "^4.9.5"
   }

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 
 export interface Response<T> {
     statusCode: number

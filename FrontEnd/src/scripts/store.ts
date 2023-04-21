@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
-import { UserData } from 'shared/dto/userData'
+import { LoginResponse } from 'shared/dist/dto/loginResponse'
 import { Popup } from '../models/popup'
-import { ListElement } from 'shared/dto/ListElement'
+import { ListElement } from 'shared/dist/dto/listElement'
 import { api } from './api'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 
 export const useSessionStore = defineStore('session', {
     state: () => ({
-        userData: null as UserData | null,
+        userData: null as LoginResponse | null,
         popups: [] as Popup[],
         courses_student: [] as ListElement<number, string>[],
         courses_teacher: [] as ListElement<number, string>[],

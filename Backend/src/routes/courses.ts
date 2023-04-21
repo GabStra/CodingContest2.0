@@ -6,16 +6,15 @@ import { TblCorsi } from "../database/entities/TblCorsi";
 import { AuthRequest, AuthRequestWithCourseId } from "../dto/AuthRequest";
 import {
   hasCourseQueryParam,
-  isAdmin,
   isLoggedIn,
   isTeacher,
 } from "../helper/middleware";
-import { Course } from "shared/dto/course";
-import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
+import { Course } from "shared/dist/dto/course";
+import { validate, VALIDATION_LANGUAGE } from "shared/dist/utils/validator";
 import { TblAssocDocenti } from "../database/entities/TblAssocDocenti";
-import { ListElement } from "shared/dto/ListElement";
-import { ENDPOINTS } from "shared/constants/endpoints";
-import { CourseRegistrationManager } from "shared/dto/courseRegistrationManager";
+import { ListElement } from "shared/dist/dto/ListElement";
+import { ENDPOINTS } from "shared/dist/constants/endpoints";
+import { CourseRegistrationManager } from "shared/dist/dto/courseRegistrationManager";
 import { TblEsercizi } from "../database/entities/TblEsercizi";
 import { TblSubmissions } from "../database/entities/TblSubmissions";
 

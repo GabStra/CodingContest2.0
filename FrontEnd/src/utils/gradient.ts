@@ -1,5 +1,5 @@
 import interpolate from 'color-interpolate'
-import { LEVEL, LEVEL_LABELS } from 'shared/constants/levels'
+import { LEVEL, LEVEL_LABELS } from 'shared/dist/constants/levels'
 import colorString from 'color-string'
 
 const colorGradient = interpolate(['#41fc03', '#fcf003', '#fc0303'])

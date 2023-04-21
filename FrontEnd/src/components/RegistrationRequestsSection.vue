@@ -1,8 +1,8 @@
 <script lang="ts">
-import { ListElement } from 'shared/dto/listElement'
-import { CourseRegistrationManager } from 'shared/dto/courseRegistrationManager'
+import { ListElement } from 'shared/dist/dto/listElement'
+import { CourseRegistrationManager } from 'shared/dist/dto/courseRegistrationManager'
 import { defineComponent } from 'vue'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 import { LoadingOutlined, SearchOutlined } from '@ant-design/icons-vue'
 import { POPUP_TYPE } from '../models/popup'
 import { URL } from '../scripts/router'

@@ -1,7 +1,7 @@
 import { Lock } from "async-await-mutex-lock";
 import { Worker } from "worker_threads";
 import { WaitForMs } from "../helper/utils";
-import { CppRequest } from "shared/compiled_proto/cpp";
+import { CppRequest } from "shared/dist/compiled_proto/cpp";
 import { MessagePort, parentPort } from "worker_threads";
 import { PortMessage, Recipient } from "../message/port_sharing";
 import {

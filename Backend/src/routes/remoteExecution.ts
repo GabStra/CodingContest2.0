@@ -1,7 +1,10 @@
 import express from "express";
 import fsAsync from "fs/promises";
 import { CppService } from "../cpp_service";
-import { CppRequest, CppResponse_TaskStatus } from "shared/compiled_proto/cpp";
+import {
+  CppRequest,
+  CppResponse_TaskStatus,
+} from "shared/dist/compiled_proto/cpp";
 import {
   isLoggedIn,
   isStudent,
@@ -19,11 +22,11 @@ import {
   getExerciseTaskCount,
   getExerciseScore,
 } from "../helper/exercise";
-import { RemoteExecutionRequest } from "shared/dto/remoteExecutionRequest";
-import { RemoteExecutionResult } from "shared/dto/remoteExecutionResult";
-import { RemoteExecutionBase } from "shared/dto/remoteExecutionBase";
-import { ENDPOINTS } from "shared/constants/endpoints";
-import { VALIDATION_LANGUAGE, validate } from "shared/utils/validator";
+import { RemoteExecutionRequest } from "shared/dist/dto/remoteExecutionRequest";
+import { RemoteExecutionResult } from "shared/dist/dto/remoteExecutionResult";
+import { RemoteExecutionBase } from "shared/dist/dto/remoteExecutionBase";
+import { ENDPOINTS } from "shared/dist/constants/endpoints";
+import { VALIDATION_LANGUAGE, validate } from "shared/dist/utils/validator";
 import { getRepository } from "../database/datasource";
 import { TblSubmissions } from "../database/entities/TblSubmissions";
 

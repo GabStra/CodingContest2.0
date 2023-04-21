@@ -4,14 +4,18 @@ import cors from "cors";
 import corsGate from "cors-gate";
 import fs from "fs";
 import cookieParser from "cookie-parser";
-import { remoteExecutionRouter } from "./src/routes/remoteExecution";
+import appRootPath from "app-root-path";
+import https from "https";
+import { exercisesRouter } from "./src/routes/exercises";
 import { authRouter } from "./src/routes/auth";
 import { coursesRouter } from "./src/routes/courses";
 import { usersRouter } from "./src/routes/users";
 import { tagsRouter } from "./src/routes/tags";
-import appRootPath from "app-root-path";
-import https from "https";
-import { exercisesRouter } from "./src/routes/exercises";
+import { remoteExecutionRouter } from "./src/routes/remoteExecution";
+import Keyv from "@keyvhq/core";
+
+export const sessionCache = new Keyv();
+
 dotenv.config();
 const app: Express = express();
 const port = Number(process.env.PORT);

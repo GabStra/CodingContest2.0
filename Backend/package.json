@@ -5,7 +5,8 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
+    "prepare": "relative-deps"
   },
   "keywords": [],
   "author": "",
@@ -43,8 +44,10 @@
     "nodemailer-smtp-transport": "^2.4.2",
     "p-event": "^5.0.1",
     "reflect-metadata": "^0.1.13",
+    "relative-deps": "^1.0.7",
     "round-robin-js": "^3.0.5",
     "salted-sha1": "^1.0.5",
+    "shared": "^0.2.0",
     "typed-rest-client": "^1.8.9",
     "typeorm": "^0.3.12",
     "uuid": "^9.0.0",
@@ -57,5 +60,8 @@
     "concurrently": "^7.6.0",
     "nodemon": "^2.0.20",
     "typescript": "^4.9.5"
+  },
+  "relativeDependencies": {
+    "shared": "../Shared"
   }
 }

@@ -25,12 +25,9 @@ export default defineComponent({
     },
     watch: {
         '$route.meta'() {
-            console.log(this.$route.meta)
-            if (!!this.$route.meta.menuCollapse) {
+            if (!!this.$route.meta.menuCollapse && !this.isVisible) {
                 this.isVisible = true
                 this.menuCollapsed = true
-            } else {
-                this.isVisible = false
             }
         },
     },
@@ -61,8 +58,8 @@ export default defineComponent({
 
                 <h3 style="margin-bottom: 0px">
                     <a-typography-text strong
-                        >CodingContest 2.0</a-typography-text
-                    >
+                        >CodingContest 2.0
+                    </a-typography-text>
                 </h3>
             </a-layout-header>
         </a-layout>
@@ -83,7 +80,7 @@ export default defineComponent({
                 </div>
                 <a-divider style="margin-top: 12px; margin-bottom: 12px" />
                 <UserInfo />
-                <a-divider style="margin-top: 12px; margin-bottom: 12px" />
+                <a-divider style="margin-bottom: 12px" />
                 <Menu />
             </a-layout-sider>
             <a-layout-sider class="menu" v-show="!menuCollapsed">

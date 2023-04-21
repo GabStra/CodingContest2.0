@@ -22,11 +22,6 @@ export default defineConfig({
             },
         },
     },
-    build: {
-        commonjsOptions: {
-            exclude: ['node_modules/shared'],
-        },
-    },
     resolve: {
         alias: [
             { find: /^~/, replacement: '' },

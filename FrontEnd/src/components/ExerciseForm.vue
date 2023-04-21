@@ -1,17 +1,17 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Exercise } from 'shared/dto/exercise'
+import { Exercise } from 'shared/dist/dto/exercise'
 import { LabeledValue } from 'ant-design-vue/es/select'
 import {
     validate,
     VALIDATION_LANGUAGE,
     parseValidationErrorsToMap,
-} from 'shared/utils/validator'
-import { ListElement } from 'shared/dto/ListElement'
+} from 'shared/dist/utils/validator'
+import { ListElement } from 'shared/dist/dto/listElement'
 import { LoadingOutlined } from '@ant-design/icons-vue'
-import { ENDPOINTS } from 'shared/constants/endpoints'
+import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 import { POPUP_TYPE } from '../models/popup'
-import { LEVEL, LEVEL_LABELS } from 'shared/constants/levels'
+import { LEVEL, LEVEL_LABELS } from 'shared/dist/constants/levels'
 import { URL } from '../scripts/router'
 
 export default defineComponent({
