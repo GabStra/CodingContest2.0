@@ -1,6 +1,6 @@
 import { validate as cv_validate } from "class-validator-multi-lang";
-import * as it from "class-validator-multi-lang/i18n/it.json";
-import * as en from "class-validator-multi-lang/i18n/en.json";
+import it from "class-validator-multi-lang/i18n/it.json";
+import en from "class-validator-multi-lang/i18n/en.json";
 import { ValidationError } from "class-validator";
 
 export enum VALIDATION_LANGUAGE {
@@ -18,7 +18,7 @@ const ErrorMessagesByLangId = new Map<
 ErrorMessagesByLangId.set(VALIDATION_LANGUAGE.IT, it);
 ErrorMessagesByLangId.set(VALIDATION_LANGUAGE.EN, en);
 
-export async function validate(
+export function validate(
   model: object,
   lang: VALIDATION_LANGUAGE = VALIDATION_LANGUAGE.EN
 ) {

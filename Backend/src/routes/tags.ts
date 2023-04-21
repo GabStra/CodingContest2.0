@@ -1,5 +1,9 @@
 import express from "express";
-import { isLoggedIn, isTeacher } from "../helper/middleware";
+import {
+  hasCourseQueryParam,
+  isLoggedIn,
+  isTeacher,
+} from "../helper/middleware";
 import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
 import { Tag } from "shared/dto/tag";
 import { getRepository } from "../database/datasource";
@@ -81,7 +85,7 @@ router.delete(
       res.sendStatus(404);
       return;
     }
-    await tagsRepo.delete(tagId);
+    await tagsRepo.remove(tagData);
     res.sendStatus(200);
   }
 );
@@ -89,11 +93,15 @@ router.delete(
 router.get(
   ENDPOINTS.TAGS_LIST,
   isLoggedIn,
-  isTeacher,
+  hasCourseQueryParam,
   async function (req: AuthRequestWithCourseId, res) {
     try {
       let tagsRepo = await getRepository<TblTags>(TblTags);
-      let results = await tagsRepo.find();
+      let results = await tagsRepo.find({
+        where: {
+          idCorso: req.courseId,
+        },
+      });
 
       let response = results.map(
         (item) =>

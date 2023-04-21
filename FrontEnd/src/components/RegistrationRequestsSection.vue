@@ -3,11 +3,7 @@ import { ListElement } from 'shared/dto/listElement'
 import { CourseRegistrationManager } from 'shared/dto/courseRegistrationManager'
 import { defineComponent } from 'vue'
 import { ENDPOINTS } from 'shared/constants/endpoints'
-import {
-    LoadingOutlined,
-    CheckOutlined,
-    CloseOutlined,
-} from '@ant-design/icons-vue'
+import { LoadingOutlined, SearchOutlined } from '@ant-design/icons-vue'
 import { POPUP_TYPE } from '../models/popup'
 import { URL } from '../scripts/router'
 import { useSessionStore } from '../scripts/store'
@@ -16,6 +12,7 @@ import { mapActions, mapState } from 'pinia'
 export default defineComponent({
     components: {
         LoadingOutlined,
+        SearchOutlined,
     },
     data() {
         return {
@@ -26,6 +23,7 @@ export default defineComponent({
             }[],
             isLoading: false,
             selectAll: false,
+            searchValue: '' as string,
         }
     },
     watch: {
@@ -46,7 +44,16 @@ export default defineComponent({
     computed: {
         ...mapState(useSessionStore, ['hasRequestsByCourseId']),
         selectedItems() {
-            return this.data.filter((item) => item.selected)
+            return this.datasource.filter((item) => item.selected)
+        },
+        datasource() {
+            this.selectAll = false
+            let processedData = !!this.searchValue
+                ? this.data.filter((item) =>
+                      item.userName.includes(this.searchValue)
+                  )
+                : this.data
+            return processedData
         },
     },
     methods: {
@@ -196,15 +203,25 @@ export default defineComponent({
             </div>
         </div>
         <div class="fill" v-if="!isLoading">
-            <a-table :columns="columns" :data-source="data">
+            <a-table :columns="columns" :data-source="datasource">
                 <template #title>
-                    <a-space v-show="selectedItems.length > 0">
-                        <a-button @click="approveSelectedRequest"
-                            >Approva selezionate</a-button
-                        >
-                        <a-button @click="rejectSelectedRequest"
-                            >Rifiuta selezionate</a-button
-                        >
+                    <a-space>
+                        <a-input
+                            v-model:value="searchValue"
+                            placeholder="Nome utente"
+                            class="search-input">
+                            <template #prefix>
+                                <SearchOutlined />
+                            </template>
+                        </a-input>
+                        <template v-if="selectedItems.length > 0">
+                            <a-button @click="approveSelectedRequest"
+                                >Approva selezionate</a-button
+                            >
+                            <a-button @click="rejectSelectedRequest"
+                                >Rifiuta selezionate</a-button
+                            >
+                        </template>
                     </a-space>
                 </template>
                 <template #headerCell="{ column }">

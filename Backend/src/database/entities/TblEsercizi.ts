@@ -1,5 +1,6 @@
-import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from "typeorm";
 import { TblTags } from "./TblTags";
+import { TblSubmissions } from "./TblSubmissions";
 
 @Entity("tbl_esercizi", { schema: "codingcontest2" })
 export class TblEsercizi {
@@ -90,4 +91,8 @@ export class TblEsercizi {
 
   @Column("varchar", { name: "prop", length: 40, default: () => "'0'" })
   prop: string;
+
+  @OneToOne(() => TblTags)
+  @JoinColumn({ name: "id_categoria", referencedColumnName: "id" })
+  tag: TblTags;
 }

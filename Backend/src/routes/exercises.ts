@@ -1,6 +1,14 @@
 import express from "express";
-import { isLoggedIn, isStudent, isTeacher } from "../helper/middleware";
-import { AuthRequestWithCourseId } from "../dto/AuthRequest";
+import {
+  hasTitleQueryParam,
+  isLoggedIn,
+  isStudent,
+  isTeacher,
+} from "../helper/middleware";
+import {
+  AuthRequestWithCourseId,
+  AuthRequestWithTitleAndCourseId,
+} from "../dto/AuthRequest";
 import { validate, VALIDATION_LANGUAGE } from "shared/utils/validator";
 import { ENDPOINTS } from "shared/constants/endpoints";
 import { Exercise } from "shared/dto/exercise";
@@ -8,9 +16,26 @@ import { TblEsercizi } from "../database/entities/TblEsercizi";
 import { getRepository } from "../database/datasource";
 import { ListElement } from "shared/dto/ListElement";
 import Keyv from "@keyvhq/core";
+import { TableTasks } from "../database/entities/TableTasks";
+import { TblSubmissions } from "../database/entities/TblSubmissions";
+import { getCurrentTotalScore } from "../helper/utils";
+import { fromTotalScoreToLevel } from "shared/utils/mixed";
+import { ExerciseTableRow } from "shared/dto/exerciseTableRow";
+
+import hash from "hash-it";
+import { In } from "typeorm";
 
 const router = express.Router();
-const keyv = new Keyv();
+const userTotalScoreCache = new Keyv();
+
+async function getUserLevel(userId: number, courseId) {
+  let key = hash({ userId: userId, courseId: courseId });
+  let result = await userTotalScoreCache.get(key.toString());
+  if (result) return fromTotalScoreToLevel(result);
+  let totalScore = await getCurrentTotalScore(userId, courseId);
+  await userTotalScoreCache.set(key.toString(), totalScore);
+  return fromTotalScoreToLevel(totalScore);
+}
 
 router.get(
   ENDPOINTS.EXERCISE_TEACHER,
@@ -26,14 +51,31 @@ router.get(
     }
 
     let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
-    console.log(title, req.courseId);
+
     let esercizio = await eserciziRepo.findOne({
       where: {
         title: title,
         idCorso: req.courseId,
       },
     });
-    res.send(esercizio);
+
+    if (!esercizio) {
+      res.sendStatus(404);
+      return;
+    }
+
+    let tasksRepo = await getRepository<TableTasks>(TableTasks);
+    let task = await tasksRepo.findOne({
+      where: {
+        title: title,
+      },
+    });
+
+    res.send({
+      ...esercizio,
+      taskInput: task.taskInput,
+      taskOutput: task.taskOutput,
+    });
   }
 );
 
@@ -82,7 +124,14 @@ async function manageExercise(
 
   Object.assign(exerciseData, exercise);
   await eserciziRepo.save(exerciseData);
-  console.log(exerciseData);
+
+  let tasksData = new TableTasks();
+  tasksData.title = exerciseData.title;
+  tasksData.taskInput = exercise.taskInput;
+  tasksData.taskOutput = exercise.taskOutput;
+  let tasksRepo = await getRepository<TableTasks>(TableTasks);
+  await tasksRepo.save(tasksData);
+
   res.send(exerciseData);
 }
 
@@ -129,6 +178,13 @@ router.delete(
       return;
     }
     await eserciziRepo.remove(exerciseData);
+    let tasksRepo = await getRepository<TableTasks>(TableTasks);
+    await tasksRepo.delete({ title: title });
+    let submissionsRepo = await getRepository<TblSubmissions>(TblSubmissions);
+    await submissionsRepo.delete({
+      exerciseTitle: title,
+      idCorso: req.courseId,
+    });
     res.sendStatus(200);
   }
 );
@@ -174,7 +230,57 @@ router.get(
   ENDPOINTS.TOTAL_SCORE,
   isLoggedIn,
   isStudent,
-  async function (req: AuthRequestWithCourseId, res) {}
+  async function (req: AuthRequestWithCourseId, res) {
+    let key = hash({ userId: req.userData.id, courseId: req.courseId });
+    let currentLevel = await getCurrentTotalScore(
+      req.userData.id,
+      req.courseId
+    );
+    await userTotalScoreCache.set(key.toString(), currentLevel);
+    res.send(currentLevel.toString());
+  }
+);
+
+router.get(
+  ENDPOINTS.EXERCISE_STUDENT,
+  isLoggedIn,
+  isStudent,
+  hasTitleQueryParam,
+  async function (req: AuthRequestWithTitleAndCourseId, res) {
+    let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
+    let esercizio = await eserciziRepo.findOne({
+      select: [
+        "title",
+        "titoloEsteso",
+        "introduzione",
+        "specifiche",
+        "input",
+        "output",
+        "note",
+        "esempio",
+        "level",
+      ],
+      where: {
+        pubblicato: true,
+        idCorso: req.courseId,
+        title: req.title,
+      },
+    });
+
+    if (!esercizio) {
+      res.sendStatus(404);
+      return;
+    }
+
+    let userLevel = await getUserLevel(req.userData.id, req.courseId);
+
+    if (userLevel < esercizio.level) {
+      res.sendStatus(403);
+      return;
+    }
+
+    res.send(esercizio);
+  }
 );
 
 router.get(
@@ -184,12 +290,55 @@ router.get(
   async function (req: AuthRequestWithCourseId, res) {
     try {
       let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
-      let response = await eserciziRepo.find({
-        select: ["title", "level", "pubblicato"],
-        where: { idCorso: req.courseId },
+
+      let submissionsRepo = await getRepository<TblSubmissions>(TblSubmissions);
+
+      let results = await eserciziRepo.find({
+        select: {
+          title: true,
+          level: true,
+          tag: {
+            tag: true,
+          },
+        },
+        where: {
+          pubblicato: true,
+          idCorso: req.courseId,
+        },
+        relations: {
+          tag: true,
+        },
       });
+
+      let submissions = await submissionsRepo.find({
+        select: {
+          score: true,
+          exerciseTitle: true,
+        },
+        where: {
+          idCorso: req.courseId,
+          userId: req.userData.id,
+        },
+      });
+
+      let userLevel = await getUserLevel(req.userData.id, req.courseId);
+
+      let response = results.map((item) => {
+        let submission = submissions.filter(
+          (submission) => submission.exerciseTitle === item.title
+        )[0];
+        return {
+          title: item.title,
+          level: item.level,
+          tag: item.tag?.tag,
+          score: submission?.score,
+          unlocked: userLevel >= item.level,
+        } as ExerciseTableRow;
+      });
+
       res.send(response);
-    } catch {
+    } catch (err) {
+      console.log(err);
       res.send([]);
     }
   }

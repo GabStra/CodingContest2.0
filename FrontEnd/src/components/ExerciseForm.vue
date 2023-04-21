@@ -110,10 +110,13 @@ export default defineComponent({
             ]
         },
         isEdit() {
+            console.log(this.$route.meta)
             return (
                 !!this.$route.query.titoloEsercizio &&
-                Object.hasOwn(this.$route.meta, 'copy') &&
-                !this.$route.meta.copy
+                ((Object.hasOwn(this.$route.meta, 'edit') &&
+                    this.$route.meta.edit) ||
+                    (Object.hasOwn(this.$route.meta, 'copy') &&
+                        this.$route.meta.copy))
             )
         },
     },
@@ -306,6 +309,22 @@ export default defineComponent({
                 </a-form-item>
 
                 <a-form-item
+                    label="Dati di input"
+                    name="input"
+                    :validateStatus="errors.has('input') ? 'error' : undefined"
+                    :help="errors.get('input')">
+                    <a-textarea v-model:value="exerciseData.input" :rows="4" />
+                </a-form-item>
+
+                <a-form-item
+                    label="Dati di output"
+                    name="output"
+                    :validateStatus="errors.has('output') ? 'error' : undefined"
+                    :help="errors.get('output')">
+                    <a-textarea v-model:value="exerciseData.output" :rows="4" />
+                </a-form-item>
+
+                <a-form-item
                     label="Note"
                     name="note"
                     :validateStatus="errors.has('note') ? 'error' : undefined"
@@ -325,21 +344,33 @@ export default defineComponent({
                         :rows="4" />
                 </a-form-item>
 
+                <a-divider />
+
                 <a-form-item
                     label="Input"
-                    name="input"
-                    :validateStatus="errors.has('input') ? 'error' : undefined"
-                    :help="errors.get('input')">
-                    <a-textarea v-model:value="exerciseData.input" :rows="4" />
+                    name="taskInput"
+                    :validateStatus="
+                        errors.has('taskInput') ? 'error' : undefined
+                    "
+                    :help="errors.get('taskInput')">
+                    <a-textarea
+                        v-model:value="exerciseData.taskInput"
+                        :rows="4" />
                 </a-form-item>
 
                 <a-form-item
                     label="Output"
-                    name="output"
-                    :validateStatus="errors.has('output') ? 'error' : undefined"
-                    :help="errors.get('output')">
-                    <a-textarea v-model:value="exerciseData.output" :rows="4" />
+                    name="taskOutput"
+                    :validateStatus="
+                        errors.has('taskOutput') ? 'error' : undefined
+                    "
+                    :help="errors.get('taskOutput')">
+                    <a-textarea
+                        v-model:value="exerciseData.taskOutput"
+                        :rows="4" />
                 </a-form-item>
+
+                <a-divider />
 
                 <div class="center" v-show="isTagsListLoading">
                     <LoadingOutlined spin />

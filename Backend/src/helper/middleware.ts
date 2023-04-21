@@ -80,6 +80,7 @@ export async function isStudent(req: AuthRequestWithCourseId, res, next) {
 export async function hasTitleQueryParam(req, res, next) {
   try {
     if (!req.query.title) throw "invalid";
+    req.title = String(req.query.title);
     next();
   } catch {
     res.status(400);

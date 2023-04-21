@@ -82,3 +82,18 @@
     -webkit-user-select: none;
     -ms-user-select: none;
 }
+
+.search-input {
+    width: 200px;
+    color: #e1e1e1;
+}
+
+.space-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ant-tabs-content {
+    height: 100%;
+}

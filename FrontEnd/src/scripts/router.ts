@@ -3,7 +3,7 @@ import Home from '../pages/Home.vue'
 import Main from '../pages/Main.vue'
 import Login from '../components/Login.vue'
 import PasswordRecovery from '../components/PasswordRecovery.vue'
-import Exercise from '../pages/Exercise.vue'
+import Exercise from '../components/Exercise.vue'
 import NewPassword from '../components/NewPassword.vue'
 import Verify from '../components/Verify.vue'
 import Registration from '../components/Registration.vue'
@@ -14,6 +14,7 @@ import AvailableCourses from '../components/AvailableCourses.vue'
 import CourseStudent from '../components/CourseStudent.vue'
 import CourseTeacher from '../components/CourseTeacher.vue'
 import ExerciseForm from '../components/ExerciseForm.vue'
+import ExecuteExercise from '../components/ExecuteExercise.vue'
 
 export enum URL {
     MAIN = '/main',
@@ -28,10 +29,12 @@ export enum URL {
     COURSES = '/gestione-corsi',
     MANAGE_COURSE = '/gestisci-corso',
     MANAGE_EXERCISE_COPY = '/docente/gestisci-esercizio/copia',
+    MANAGE_EXERCISE_EDIT = '/docente/gestisci-esercizio/modifica',
     MANAGE_EXERCISE = '/docente/gestisci-esercizio',
     STUDENT_COURSE = '/studente/corso',
     TEACHER_COURSE = '/docente/corso',
     OFFLINE = '/offline',
+    EXECUTE_EXERCISE = '/studente/esercitazione',
 }
 
 const HomeRoute: RouteRecordRaw = {
@@ -44,8 +47,11 @@ const HomeRoute: RouteRecordRaw = {
             component: AvailableCourses,
         },
         {
-            path: URL.EXERCISE,
-            component: Exercise,
+            path: URL.EXECUTE_EXERCISE,
+            component: ExecuteExercise,
+            meta: {
+                menuCollapse: true,
+            },
         },
         {
             path: URL.COURSES,
@@ -68,6 +74,13 @@ const HomeRoute: RouteRecordRaw = {
             component: ExerciseForm,
             meta: {
                 copy: true,
+            },
+        },
+        {
+            path: URL.MANAGE_EXERCISE_EDIT,
+            component: ExerciseForm,
+            meta: {
+                edit: true,
             },
         },
         {

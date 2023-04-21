@@ -6,4 +6,8 @@ export interface AuthRequest extends Request {
 }
 
 export type AuthRequestWithCourseId = AuthRequest & { courseId: number };
-export type AuthRequestWithTitle = AuthRequest & { userId: number };
+export type AuthRequestWithTitle = AuthRequest & { title: string };
+export type AuthRequestWithTitleAndCourseId = AuthRequest & {
+  title: string;
+  courseId: number;
+};

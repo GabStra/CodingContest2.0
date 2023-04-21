@@ -61,7 +61,7 @@ export default defineComponent({
         },
         handleEdit(title: string) {
             this.$router.push({
-                path: URL.MANAGE_EXERCISE,
+                path: URL.MANAGE_EXERCISE_EDIT,
                 query: {
                     idCorso: Number(this.$route.query.id),
                     titoloEsercizio: title,

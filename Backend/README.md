@@ -1,13 +1,15 @@
 TO ADD:
 
-CREATE TABLE `tbl_submissions` (
-`userId` INT NOT NULL,
-`exerciseId` INT NOT NULL,
-`code` LONGTEXT NOT NULL,
-`score` INT NOT NULL DEFAULT '0',
-`submissionTime` TEXT NOT NULL,
-`submissionTime` TEXT NOT NULL,
-`submissionCounter` INT NOT NULL DEFAULT '0'
+CREATE TABLE tbl_submissions (
+id INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+userId INT NOT NULL,
+code LONGTEXT,
+score INT NOT NULL,
+submissionTime TEXT,
+executionTime TEXT,
+submissionCounter INT NOT NULL,
+exercise_title VARCHAR(50) NOT NULL,
+id_corso INT NOT NULL
 ) ENGINE=MyISAM;
 
 ALTER TABLE tbl_tags ADD COLUMN idCorso INT;

@@ -23,6 +23,17 @@ export default defineComponent({
     setup() {
         return { URL, router }
     },
+    watch: {
+        '$route.meta'() {
+            console.log(this.$route.meta)
+            if (!!this.$route.meta.menuCollapse) {
+                this.isVisible = true
+                this.menuCollapsed = true
+            } else {
+                this.isVisible = false
+            }
+        },
+    },
     methods: {
         toggleCollapsed() {
             this.menuCollapsed = !this.menuCollapsed

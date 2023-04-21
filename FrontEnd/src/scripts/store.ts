@@ -12,6 +12,7 @@ export const useSessionStore = defineStore('session', {
         courses_student: [] as ListElement<number, string>[],
         courses_teacher: [] as ListElement<number, string>[],
         hasRequestsByCourseId: {} as Record<number, boolean>,
+        totalScoreByCourseId: {} as Record<number, number>,
         refreshMyCourses: false,
     }),
     actions: {

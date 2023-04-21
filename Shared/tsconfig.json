@@ -3,10 +3,11 @@
     "outDir": "./dist",
     "module": "CommonJS",
     "declaration": true,
-    "target": "ES6",
+    "target": "ESNext",
     "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true
   }
 }

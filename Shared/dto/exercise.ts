@@ -34,6 +34,12 @@ export class Exercise {
   @IsNotEmpty()
   output: string;
 
+  @IsNotEmpty()
+  taskInput: string;
+
+  @IsNotEmpty()
+  taskOutput: string;
+
   pronto: boolean;
 
   pubblicato: boolean;

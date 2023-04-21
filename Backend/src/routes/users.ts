@@ -9,6 +9,7 @@ import { ListElement } from "shared/dto/ListElement";
 import { UserFilter } from "shared/dto/userFilter";
 import { In, Like } from "typeorm";
 import { ROLES } from "shared/constants/roles";
+import { ENDPOINTS } from "shared/constants/endpoints";
 const router = express.Router();
 
 router.use(isLoggedIn);
@@ -33,59 +34,27 @@ router.get("/user", async function (req: AuthRequest, res) {
   res.send(result);
 });
 
-router.post("/users-by-filter", async function (req: AuthRequest, res) {
-  try {
-    if (req.userData.role === ROLES.USER) {
-      res.sendStatus(401);
-      return;
-    }
+router.get(
+  ENDPOINTS.USERS_LIST,
+  isLoggedIn,
+  async function (req: AuthRequest, res) {
+    try {
+      let userRepo = await getRepository<TblUsers>(TblUsers);
+      let results = await userRepo.find({
+        where: {
+          userStatus: "Y",
+        },
+      });
 
-    let filter = new UserFilter(req.body);
-    let userRepo = await getRepository<TblUsers>(TblUsers);
-    let results = await userRepo.find({
-      select: {
-        userId: true,
-        userName: true,
-      },
-      where: {
-        userId: !!filter.ids ? In(filter.ids) : null,
-        userName: !!filter.name ? Like(filter.name) : null,
-      },
-    });
-
-    let response = {
-      data: results.map(
+      let response = results.map(
         (user) =>
-          ({ id: user.userId, data: user.userName } as ListElement<
-            string,
-            string
-          >)
-      ),
-    } as Response<ListElement<string, string>[]>;
-    res.send(response);
-  } catch {
-    res.send({ data: [] } as Response<ListElement<string, string>[]>);
+          ({ id: user.id, data: user.userName } as ListElement<number, string>)
+      );
+      res.send(response);
+    } catch {
+      res.send([]);
+    }
   }
-});
-
-router.get("/users-list", async function (req: AuthRequest, res) {
-  try {
-    // if (req.userData.role === ROLES.USER) {
-    //   res.sendStatus(401);
-    //   return;
-    // }
-
-    let userRepo = await getRepository<TblUsers>(TblUsers);
-    let results = await userRepo.find();
-
-    let response = results.map(
-      (user) =>
-        ({ id: user.id, data: user.userName } as ListElement<number, string>)
-    );
-    res.send(response);
-  } catch {
-    res.send([]);
-  }
-});
+);
 
 export { router as usersRouter };

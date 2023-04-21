@@ -5,16 +5,21 @@ import { Codemirror } from 'vue-codemirror'
 import { cpp } from '@codemirror/lang-cpp'
 import { oneDark } from '@codemirror/theme-one-dark'
 
-import { CaretRightOutlined } from '@ant-design/icons-vue'
+import { CaretRightOutlined, ClearOutlined } from '@ant-design/icons-vue'
 import { classname } from '@uiw/codemirror-extensions-classname'
 import readOnlyRangesExtension from 'codemirror-readonly-ranges'
 import { CppRequest } from 'shared/compiled_proto/cpp'
 import { EditorState } from '@codemirror/state'
+import { ENDPOINTS } from 'shared/constants/endpoints'
+import { RemoteExecutionRequest } from 'shared/dto/remoteExecutionRequest'
+import { RemoteExecutionResult } from 'shared/dto/remoteExecutionResult'
+import { RemoteExecutionBase } from 'shared/dto/remoteExecutionBase'
 
 export default defineComponent({
     components: {
         Codemirror,
         CaretRightOutlined,
+        ClearOutlined,
     },
 
     data() {
@@ -33,6 +38,11 @@ export default defineComponent({
             extensionsBottom: [] as any[],
             isReady: false,
             refresh: 0,
+            remoteExecutionBase: null as RemoteExecutionBase | null,
+            stdout: '',
+            stderr: '',
+            activeTab: 1,
+            results: [] as boolean[],
         }
     },
     computed: {
@@ -42,20 +52,42 @@ export default defineComponent({
                 this.top.split(/\r\n|\r|\n/).length
             )
         },
+        title() {
+            return this.$route.query.titoloEsercizio
+        },
+    },
+    watch: {
+        stderr: function (value) {
+            if (this.stderr) this.activeTab = 2
+        },
+        stdout: function (value) {
+            if (this.stdout && !this.stderr) this.activeTab = 1
+        },
     },
     methods: {
         handleReady(payload: any) {
             this.editorView = payload.view
         },
-
         toggleRefresh() {
             this.refresh = Number(!this.refresh)
         },
-
+        reset() {
+            this.code = this.remoteExecutionBase!.start
+            this.top = this.remoteExecutionBase!.top
+            this.bottom = this.remoteExecutionBase!.bottom
+            this.stdout = ''
+            this.stderr = ''
+            this.activeTab = 1
+        },
         async loadScript() {
-            let response = await this.axios.get(
-                'http://localhost:60000/get-base-code'
+            let response = await this.$api.get<RemoteExecutionBase>(
+                ENDPOINTS.REMOTE_EXECUTION_DATA,
+                null,
+                true
             )
+            if (response === null) return
+
+            this.remoteExecutionBase = response.data
             this.code = response.data.start
             this.top = response.data.top
             this.bottom = response.data.bottom
@@ -63,25 +95,29 @@ export default defineComponent({
                 response.data.start.split(/\r\n|\r|\n/).length +
                 response.data.top.split(/\r\n|\r|\n/).length
         },
-
         async runCpp() {
             this.isLoading = true
             try {
-                let response = await this.axios.post(
-                    'http://localhost:60000/run-cpp',
+                let response = await this.$api.postWithParams<
+                    RemoteExecutionResult,
+                    RemoteExecutionRequest
+                >(
+                    ENDPOINTS.EXERCISE_RUN,
+                    { code: this.code },
                     {
-                        id: 'pippo',
-                        code: this.code,
-                    } as CppRequest
+                        course: Number(this.$route.query.idCorso),
+                        title: this.$route.query.titoloEsercizio,
+                    },
+                    true
                 )
-
-                this.console =
-                    response.data.stdout + '\n' + response.data.stderr
+                if (response === null) return
+                this.stderr = response.data.stderr
+                this.stdout = response.data.stdout
+                this.results = response.data.results
             } finally {
                 this.isLoading = false
             }
         },
-
         async stopCpp() {
             let response = await this.axios.post(
                 'http://localhost:60000/stop-cpp',
@@ -151,31 +187,45 @@ export default defineComponent({
 
 <template>
     <div class="container" v-if="isReady">
-        <div class="buttonContainer">
-            <a-button
-                type="primary"
-                :style="{ width: '70px' }"
-                @click="runCpp"
-                :loading="isLoading">
-                <template #icon><CaretRightOutlined /></template>
-            </a-button>
-            <a-button
-                type="primary"
-                :style="{ width: '70px' }"
-                danger
-                @click="stopCpp">
-                <template #icon>
-                    <svg
-                        width="10"
-                        height="10"
-                        fill="currentColor"
-                        aria-hidden="true"
-                        focusable="false">
-                        <rect width="10" height="10" rx="1" ry="1" />
-                    </svg>
-                </template>
-            </a-button>
+        <div class="space-between">
+            <a-space>
+                <a-button
+                    a-button
+                    type="primary"
+                    ghost
+                    :style="{ width: '70px' }"
+                    @click="runCpp"
+                    :loading="isLoading">
+                    <template #icon><CaretRightOutlined /></template>
+                </a-button>
+                <a-button :style="{ width: '70px' }" danger @click="stopCpp">
+                    <template #icon>
+                        <svg
+                            width="10"
+                            height="10"
+                            fill="currentColor"
+                            aria-hidden="true"
+                            focusable="false">
+                            <rect width="10" height="10" rx="1" ry="1" />
+                        </svg>
+                    </template>
+                </a-button>
+                <a-popconfirm
+                    placement="left"
+                    :title="`Sicuro di voler procedere al reset?`"
+                    @confirm="reset()">
+                    <a-button :style="{ width: '70px' }">
+                        <template #icon><ClearOutlined /></template>
+                    </a-button>
+                </a-popconfirm>
+            </a-space>
+            <div v-show="results && results.length > 0" style="width: 100px">
+                <a-progress
+                    stroke-linecap="square"
+                    :percent="results.filter((x) => x).length" />
+            </div>
         </div>
+
         <div class="editor">
             <div class="editor_container">
                 <div class="overlay_element"></div>
@@ -215,11 +265,31 @@ export default defineComponent({
             </div>
         </div>
         <div class="console_container">
-            <a-textarea
-                readonly
-                :value="console"
-                class="console"
-                :autoSize="false" />
+            <a-tabs v-model:activeKey="activeTab" style="height: 100%">
+                <a-tab-pane :key="1" force-render>
+                    <template #tab>
+                        Console
+                        <a-badge :dot="!!stdout" />
+                    </template>
+                    <a-textarea
+                        readonly
+                        :value="stdout"
+                        class="console"
+                        :autoSize="false" />
+                </a-tab-pane>
+                <a-tab-pane :key="2">
+                    <template #tab>
+                        Errori
+                        <a-badge :dot="!!stderr" />
+                    </template>
+                    <a-textarea
+                        readonly
+                        :value="stderr"
+                        :style="{ color: 'red' }"
+                        class="console"
+                        :autoSize="false" />
+                </a-tab-pane>
+            </a-tabs>
         </div>
     </div>
 </template>
@@ -251,7 +321,7 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     overflow: hidden;
-    gap: 1%;
+    gap: 10px;
 
     .buttonContainer {
         display: flex;
@@ -264,20 +334,21 @@ export default defineComponent({
         height: 80%;
         display: flex;
         flex-direction: column;
-        overflow: scroll;
         background-color: #282c34;
     }
     .console_container {
-        height: 20%;
-        background-color: #282c34;
+        height: 200px;
     }
 
     .console {
+        height: 150px;
         background-color: #282c34;
-        font-family: 'Roboto';
+        font-family: 'DroidSans';
         color: #fff;
         resize: 'none';
         height: 100%;
+        resize: none;
+        overflow: scroll;
     }
 
     .ant-input:focus {

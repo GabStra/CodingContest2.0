@@ -6,6 +6,8 @@ import { TblAssocDocenti } from "./entities/TblAssocDocenti";
 import { TblAssocStudenti } from "./entities/TblAssocStudenti";
 import { TblTags } from "./entities/TblTags";
 import { TblEsercizi } from "./entities/TblEsercizi";
+import { TblSubmissions } from "./entities/TblSubmissions";
+import { TableTasks } from "./entities/TableTasks";
 import { DataSource, EntityTarget, ObjectLiteral } from "typeorm";
 
 const appDataSource = new DataSource({
@@ -25,6 +27,8 @@ const appDataSource = new DataSource({
     TblAssocStudenti,
     TblTags,
     TblEsercizi,
+    TblSubmissions,
+    TableTasks,
   ],
 });
 

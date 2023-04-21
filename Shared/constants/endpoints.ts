@@ -1,4 +1,4 @@
-export enum ENDPOINTS {
+export const enum ENDPOINTS {
   LOGIN = "/login",
   PASSWORD_RESET = "/password-reset",
   NEW_PASSWORD = "/new-password",
@@ -19,6 +19,7 @@ export enum ENDPOINTS {
   SAVE_TAG = "/save-tag",
   TAGS_LIST = "/tags-list",
   DELETE_TAG = "/delete-tag",
+  EXERCISE_STUDENT = "/exercise-student",
   EXERCISE_TEACHER = "/teacher/exercise",
   EXERCISES_TEACHER = "/teacher/exercises",
   EXERCISES_STUDENT = "/student/exercises",

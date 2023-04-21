@@ -11,7 +11,7 @@ export * from "./compiled_proto/cpp";
 
 //DTO
 export * from "./dto/course";
-export * from "./dto/exerciseCard";
+export * from "./dto/exerciseTableRow";
 export * from "./dto/exercise";
 export * from "./dto/login";
 export * from "./dto/listElement";
@@ -26,4 +26,5 @@ export * from "./dto/userFilter";
 export * from "./dto/verify";
 export * from "./dto/accessTokenPayload";
 export * from "./dto/remoteExecutionResult";
+export * from "./dto/remoteExecutionBase";
 export * from "./dto/courseRegistrationManager";

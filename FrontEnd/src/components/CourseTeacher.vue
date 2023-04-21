@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import TagsSection from './TagsSection.vue'
-import ExercisesSection from './ExercisesSection.vue'
+import ExercisesTeacherSection from './ExercisesTeacherSection.vue'
 import { useSessionStore } from '../scripts/store'
 import { mapActions, mapState } from 'pinia'
 import RegistrationRequestsSection from './RegistrationRequestsSection.vue'
@@ -9,7 +9,7 @@ import RegistrationRequestsSection from './RegistrationRequestsSection.vue'
 export default defineComponent({
     components: {
         TagsSection,
-        ExercisesSection,
+        ExercisesTeacherSection,
         RegistrationRequestsSection,
     },
     watch: {
@@ -70,7 +70,7 @@ export default defineComponent({
                 <RegistrationRequestsSection />
             </a-tab-pane>
             <a-tab-pane :key="2" tab="Esercizi">
-                <ExercisesSection />
+                <ExercisesTeacherSection />
             </a-tab-pane>
             <a-tab-pane :key="3" tab="Categorie" force-render>
                 <TagsSection />

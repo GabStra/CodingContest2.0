@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 import { TblAssocDocenti } from "./TblAssocDocenti";
 import { TblAssocStudenti } from "./TblAssocStudenti";
+import { TblEsercizi } from "./TblEsercizi";
 
 @Entity("tbl_corsi", { schema: "codingcontest2" })
 export class TblCorsi {

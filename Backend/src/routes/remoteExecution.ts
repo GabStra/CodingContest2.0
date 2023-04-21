@@ -8,7 +8,10 @@ import {
   hasTitleQueryParam,
 } from "../helper/middleware";
 
-import { AuthRequestWithCourseId } from "../dto/AuthRequest";
+import {
+  AuthRequestWithCourseId,
+  AuthRequestWithTitleAndCourseId,
+} from "../dto/AuthRequest";
 import Keyv from "@keyvhq/core";
 import hash from "hash-it";
 import {
@@ -16,8 +19,13 @@ import {
   getExerciseTaskCount,
   getExerciseScore,
 } from "../helper/exercise";
+import { RemoteExecutionRequest } from "shared/dto/remoteExecutionRequest";
 import { RemoteExecutionResult } from "shared/dto/remoteExecutionResult";
+import { RemoteExecutionBase } from "shared/dto/remoteExecutionBase";
 import { ENDPOINTS } from "shared/constants/endpoints";
+import { VALIDATION_LANGUAGE, validate } from "shared/utils/validator";
+import { getRepository } from "../database/datasource";
+import { TblSubmissions } from "../database/entities/TblSubmissions";
 
 const router = express.Router();
 const cppService = new CppService();
@@ -27,15 +35,55 @@ function getKey(req: AuthRequestWithCourseId) {
   return String(hash([req.userData.id, req.courseId]));
 }
 
+async function updateSubmission(
+  userId: number,
+  title: string,
+  courseId: number,
+  score
+) {
+  let submissionsRepo = await getRepository<TblSubmissions>(TblSubmissions);
+
+  let submission = await submissionsRepo.findOne({
+    where: {
+      exerciseTitle: title,
+      idCorso: courseId,
+      userId: userId,
+    },
+  });
+
+  if (!submission) {
+    submission = new TblSubmissions();
+    submission.exerciseTitle = title;
+    submission.idCorso = courseId;
+    submission.userId = userId;
+    submission.score = score;
+    submission.submissionCounter = 0;
+  }
+
+  submission.score = score;
+  submission.submissionCounter++;
+  submission.submissionTime = new Date().toISOString();
+  await submissionsRepo.save(submission);
+}
+
 router.post(
   ENDPOINTS.EXERCISE_RUN,
   isLoggedIn,
   isStudent,
   hasTitleQueryParam,
-  async (req: AuthRequestWithCourseId, res) => {
+  async (req: AuthRequestWithTitleAndCourseId, res) => {
     const key = getKey(req);
 
-    if (!(await keyv.get(key))) {
+    let remoteExecutionRequest = new RemoteExecutionRequest(req.body);
+
+    let errors = await validate(remoteExecutionRequest, VALIDATION_LANGUAGE.IT);
+    if (errors.length !== 0) {
+      res.sendStatus(400);
+      return;
+    }
+
+    let session = await keyv.get(key);
+    if (session) {
       cppService.stopTask(key);
       res.sendStatus(403);
       return;
@@ -52,23 +100,28 @@ router.post(
 
     let cppRequest: CppRequest = {
       id: key,
-      code: req.body.code,
+      code: remoteExecutionRequest.code,
       input: input,
     };
 
     let result = await cppService.runCpp(cppRequest);
+    await keyv.delete(key);
     let results = [];
     if (result.taskStatus === CppResponse_TaskStatus.SUCCEDED) {
       await keyv.delete(key);
       results = getExerciseScore(result.output, output, tasks);
+      await updateSubmission(
+        req.userData.id,
+        req.title,
+        req.courseId,
+        results.filter((x) => x).length
+      );
     }
-    res.send(
-      new RemoteExecutionResult({
-        stdout: result.output,
-        stderr: result.stderr,
-        results: results,
-      })
-    );
+    res.send({
+      stdout: result.stdout,
+      stderr: result.stderr,
+      results: results,
+    } as RemoteExecutionResult);
   }
 );
 
@@ -84,21 +137,16 @@ router.post(
   }
 );
 
-router.get(
-  ENDPOINTS.REMOTE_EXECUTION_DATA,
-  isLoggedIn,
-  isStudent,
-  async (req, res) => {
-    let top = await fsAsync.readFile("static/top.cpp", "utf8");
-    let bottom = await fsAsync.readFile("static/bottom.cpp", "utf8");
-    let start = await fsAsync.readFile("static/start.cpp", "utf8");
+router.get(ENDPOINTS.REMOTE_EXECUTION_DATA, isLoggedIn, async (req, res) => {
+  let top = await fsAsync.readFile("static/top.cpp", "utf8");
+  let bottom = await fsAsync.readFile("static/bottom.cpp", "utf8");
+  let start = await fsAsync.readFile("static/start.cpp", "utf8");
 
-    res.send({
-      start: start,
-      top: top,
-      bottom: bottom,
-    });
-  }
-);
+  res.send({
+    start: start,
+    top: top,
+    bottom: bottom,
+  } as RemoteExecutionBase);
+});
 
 export { router as remoteExecutionRouter };

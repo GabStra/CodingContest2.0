@@ -16,6 +16,8 @@ import { TblAssocDocenti } from "../database/entities/TblAssocDocenti";
 import { ListElement } from "shared/dto/ListElement";
 import { ENDPOINTS } from "shared/constants/endpoints";
 import { CourseRegistrationManager } from "shared/dto/courseRegistrationManager";
+import { TblEsercizi } from "../database/entities/TblEsercizi";
+import { TblSubmissions } from "../database/entities/TblSubmissions";
 
 const router = express.Router();
 
@@ -124,7 +126,6 @@ router.post(
 router.delete(
   ENDPOINTS.DELETE_COURSE,
   isLoggedIn,
-  isAdmin,
   hasCourseQueryParam,
   async function (req: AuthRequestWithCourseId, res) {
     let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
@@ -138,7 +139,19 @@ router.delete(
       res.sendStatus(404);
       return;
     }
-    await coursesRepo.delete(courseData);
+    await coursesRepo.remove(courseData);
+    let assocDocentiRepo = await getRepository<TblAssocDocenti>(
+      TblAssocDocenti
+    );
+    await assocDocentiRepo.delete({ idCorso: req.courseId });
+    let assocStudentiRepo = await getRepository<TblAssocStudenti>(
+      TblAssocStudenti
+    );
+    await assocStudentiRepo.delete({ idCorso: req.courseId });
+    let eserciziRepo = await getRepository<TblEsercizi>(TblEsercizi);
+    await eserciziRepo.delete({ idCorso: req.courseId });
+    let submissionsRepo = await getRepository<TblSubmissions>(TblSubmissions);
+    await submissionsRepo.delete({ idCorso: req.courseId });
     res.sendStatus(200);
   }
 );
@@ -200,7 +213,7 @@ router.get(
     let response = assocStudenti.map<ListElement<number, string>>((element) => {
       return {
         id: element.idCorso,
-        data: element.corso.nome,
+        data: element.corso?.nome,
       } as ListElement<number, string>;
     });
 
@@ -215,7 +228,7 @@ router.get(
     let assocDocentiRepo = await getRepository<TblAssocDocenti>(
       TblAssocDocenti
     );
-    let assocStudenti = await assocDocentiRepo.find({
+    let assocDocenti = await assocDocentiRepo.find({
       relations: {
         corso: true,
       },
@@ -224,10 +237,10 @@ router.get(
       },
     });
 
-    let response = assocStudenti.map<ListElement<number, string>>((element) => {
+    let response = assocDocenti.map<ListElement<number, string>>((element) => {
       return {
         id: element.idCorso,
-        data: element.corso.nome,
+        data: element.corso?.nome,
       } as ListElement<number, string>;
     });
 

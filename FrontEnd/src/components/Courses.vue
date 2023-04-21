@@ -50,7 +50,7 @@ export default defineComponent({
         deleteCourse: async function (id: number) {
             let response = await this.$api.delete<any>(
                 ENDPOINTS.DELETE_COURSE,
-                { course: Number(this.$route.query.id) },
+                { course: id },
                 true
             )
             if (response === null) return
@@ -159,7 +159,7 @@ export default defineComponent({
                             <a-popconfirm
                                 v-if="datasource.length"
                                 placement="left"
-                                :title="`Sicuro di voler cancellare ${record.nome}?`" 
+                                :title="`Sicuro di voler cancellare ${record.nome}?`"
                                 @confirm="deleteCourse(record.id)">
                                 <a>Cancella</a>
                             </a-popconfirm>

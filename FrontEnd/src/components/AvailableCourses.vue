@@ -83,7 +83,7 @@ export default defineComponent({
                 title: '',
                 key: 'actions',
                 dataIndex: 'tags',
-                width: '50px',
+                width: '110px',
                 slots: { customRender: 'actions' },
             },
         ]
@@ -170,38 +170,23 @@ export default defineComponent({
                     </div>
                 </template>
                 <template #actions="{ record }">
-                    <div class="center">
-                        <template v-if="!record.isRegistered">
-                            <a-popconfirm
-                                v-if="datasource.length"
-                                placement="left"
-                                :title="`Sicuro di volerti iscrivere al corso ${record.nome}?`"
-                                @confirm="register(record)">
-                                <a> Iscriviti </a>
-                            </a-popconfirm>
+                    <template v-if="!record.isRegistered">
+                        <a-popconfirm
+                            v-if="datasource.length"
+                            placement="left"
+                            :title="`Sicuro di volerti iscrivere al corso ${record.nome}?`"
+                            @confirm="register(record)">
+                            <a> Iscriviti </a>
+                        </a-popconfirm>
+                    </template>
+                    <template v-else>
+                        <template v-if="record.isRegistrationActive">
+                            Iscritto
                         </template>
-                        <template v-else>
-                            <template v-if="record.isRegistrationActive">
-                                <a-tag color="green" style="padding: 4px 15px">
-                                    Iscritto
-                                </a-tag>
-                            </template>
-                            <template v-else>
-                                <a-tag color="orange" style="padding: 4px 15px">
-                                    In Attesa
-                                </a-tag>
-                            </template>
-                        </template>
-                    </div>
+                        <template v-else> In Attesa </template>
+                    </template>
                 </template>
             </a-table>
         </div>
     </div>
 </template>
-
-<style scoped>
-.search-input {
-    width: 200px;
-    color: #e1e1e1;
-}
-</style>
