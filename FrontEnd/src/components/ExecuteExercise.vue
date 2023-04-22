@@ -164,7 +164,7 @@ export default defineComponent({
                                     }}</a-typography-text>
                                 </div>
                             </template>
-                            <div style="overflow: auto; height: 75vh">
+                            <div style="overflow: auto; height: 900px">
                                 <template v-for="item in items">
                                     <template v-if="!!item">
                                         <div>

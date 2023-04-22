@@ -52,9 +52,9 @@ export default defineComponent({
                         max-width: 100px;
                         text-overflow: ellipsis;
                         overflow: hidden;
-                    "
-                    >{{ sessionStore.userData?.userName }}</span
-                >
+                    ">
+                    {{ sessionStore.userData?.userName }}
+                </span>
             </div>
         </div>
     </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { router, URL } from '../scripts/router'
-import { LoadingOutlined } from '@ant-design/icons-vue'
+import { LoadingOutlined, SearchOutlined } from '@ant-design/icons-vue'
 import { ENDPOINTS } from 'shared/dist/constants/endpoints'
 import { POPUP_TYPE } from '../models/popup'
 import { ListElement } from 'shared/dist/dto/listElement'
@@ -9,6 +9,7 @@ import { ListElement } from 'shared/dist/dto/listElement'
 export default defineComponent({
     components: {
         LoadingOutlined,
+        SearchOutlined,
     },
     data() {
         return {
@@ -92,7 +93,7 @@ export default defineComponent({
     <div>
         <div class="center">
             <h2>
-                <a-typography-text strong> Corsi </a-typography-text>
+                <a-typography-text strong>Utenti</a-typography-text>
             </h2>
         </div>
         <a-divider />

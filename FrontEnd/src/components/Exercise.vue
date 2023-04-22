@@ -192,7 +192,7 @@ export default defineComponent({
 <template>
     <a-layout
         v-if="isReady"
-        :style="{ background: 'transparent', height: '85vh' }">
+        :style="{ background: 'transparent', height: '1000px' }">
         <a-layout-header style="padding: 0 10px">
             <div class="space-between">
                 <a-space>
@@ -242,6 +242,7 @@ export default defineComponent({
                     @change="(value) => (top = value)" />
             </div>
             <codemirror
+                class="code-mirror-editor"
                 :modelValue="code"
                 :style="{ height: 'auto' }"
                 :extensions="extensions"
@@ -300,7 +301,11 @@ export default defineComponent({
     </a-layout>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
+.cm-editor {
+    max-height: 400px;
+}
+
 .editor_container {
     position: relative;
     height: auto;
@@ -321,48 +326,26 @@ export default defineComponent({
     top: 0;
     right: 0;
 }
-.container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    gap: 10px;
 
-    .buttonContainer {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        height: auto;
-    }
+.console_container {
+    height: 250px;
+}
 
-    .editor {
-        height: 80%;
-        display: flex;
-        flex-direction: column;
-        background-color: #282c34;
-    }
-    .console_container {
-        height: 250px;
-    }
+.console {
+    background-color: #282c34;
+    font-family: 'DroidSans';
+    color: #fff;
+    resize: 'none';
+    height: 100% !important;
+    resize: none;
+    overflow: scroll;
+}
 
-    .console {
-        height: 150px;
-        background-color: #282c34;
-        font-family: 'DroidSans';
-        color: #fff;
-        resize: 'none';
-        height: 100%;
-        resize: none;
-        overflow: scroll;
-    }
+.ant-input:focus {
+    border: 1px solid #434343 !important;
+}
 
-    .ant-input:focus {
-        border-color: black !important;
-    }
-
-    .ant-input:hover {
-        border-color: black !important;
-    }
+.ant-input:hover {
+    border: 1px solid #434343 !important;
 }
 </style>

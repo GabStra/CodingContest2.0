@@ -107,7 +107,12 @@ export default defineComponent({
                     <a-typography-text strong>Admin</a-typography-text>
                 </div>
                 <a-menu-item
-                    key="d"
+                    key="ad-1"
+                    @click="() => $router.push({ path: URL.USERS })">
+                    Utenti
+                </a-menu-item>
+                <a-menu-item
+                    key="ad-2"
                     @click="() => $router.push({ path: URL.COURSES })">
                     Gestisci corsi
                 </a-menu-item>

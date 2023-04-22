@@ -66,9 +66,12 @@ export default defineComponent({
 </script>
 <template>
     <div class="element_container">
-        <div class="center" v-show="loadPage">
-            <LoadingOutlined spin />
-        </div>
+        <template v-if="loadPage">
+            <div class="hoz-vert-center">
+                <LoadingOutlined spin />
+            </div>
+        </template>
+
         <div v-show="!loadPage">
             <a-form layout="vertical" :model="loginData">
                 <div class="center">
@@ -140,6 +143,14 @@ export default defineComponent({
     </div>
 </template>
 <style scoped>
+.hoz-vert-center {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
 .element_container {
     width: 350px;
     min-height: 350px;
