@@ -192,7 +192,7 @@ export default defineComponent({
 <template>
     <a-layout
         v-if="isReady"
-        :style="{ background: 'transparent', height: '1000px' }">
+        :style="{ background: 'transparent', 'max-height': '850px' }">
         <a-layout-header style="padding: 0 10px">
             <div class="space-between">
                 <a-space>
@@ -267,10 +267,13 @@ export default defineComponent({
                     @change="(value) => (bottom = value)" />
             </div>
         </a-layout-content>
-        <a-layout-footer style="padding: 0px; background: transparent">
+        <a-layout-footer style="padding: 24px 0px; background: transparent">
             <div class="container">
                 <div class="console_container">
-                    <a-tabs v-model:activeKey="activeTab" style="height: 100%">
+                    <a-tabs
+                        v-model:activeKey="activeTab"
+                        style="height: 100%"
+                        type="card">
                         <a-tab-pane :key="1" force-render>
                             <template #tab>
                                 Output
@@ -302,10 +305,6 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.cm-editor {
-    max-height: 400px;
-}
-
 .editor_container {
     position: relative;
     height: auto;
@@ -339,13 +338,5 @@ export default defineComponent({
     height: 100% !important;
     resize: none;
     overflow: scroll;
-}
-
-.ant-input:focus {
-    border: 1px solid #434343 !important;
-}
-
-.ant-input:hover {
-    border: 1px solid #434343 !important;
 }
 </style>

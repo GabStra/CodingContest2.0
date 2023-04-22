@@ -7,7 +7,7 @@ export default defineComponent({})
     <div class="container">
         <div class="page">
             <router-view v-slot="{ Component }">
-                <transition name="fade" mode="out-in">
+                <transition name="main-fade" mode="out-in">
                     <component
                         :is="Component"
                         @newPopup="(alert:any) =>
@@ -19,13 +19,13 @@ export default defineComponent({})
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
+.main-fade-enter-active,
+.main-fade-leave-active {
     transition: opacity 0.5s ease;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.main-fade-enter-from,
+.main-fade-leave-to {
     opacity: 0;
 }
 

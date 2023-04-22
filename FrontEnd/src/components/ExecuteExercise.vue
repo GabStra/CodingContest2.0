@@ -24,6 +24,7 @@ export default defineComponent({
         return {
             exerciseData: new Exercise(),
             isLoading: false,
+            activeTab: 1,
         }
     },
     setup() {
@@ -146,50 +147,47 @@ export default defineComponent({
             </div>
 
             <a-divider style="margin-top: 12px; margin-bottom: 12px" />
-            <div>
-                <a-row :gutter="16" style="height: 100%">
-                    <a-col :sm="24" :md="12">
-                        <a-space direction="vertical" style="width: 100%">
-                            <h2>
-                                <a-typography-text strong>
-                                    {{ exerciseData.title }}
-                                </a-typography-text>
-                            </h2>
-                            <template v-if="exerciseData.titoloEsteso">
+            <a-tabs
+                v-model:activeKey="activeTab"
+                style="height: 100%"
+                type="card">
+                <a-tab-pane :key="1" force-render>
+                    <template #tab> Consegna </template>
+                    <a-space direction="vertical" style="width: 100%">
+                        <h2>
+                            <a-typography-text strong>
+                                {{ exerciseData.title }}
+                            </a-typography-text>
+                        </h2>
+                        <template v-if="exerciseData.titoloEsteso">
+                            <div>
+                                <a-typography-text type="secondary">{{
+                                    replaceEndlineWithBr(
+                                        exerciseData.titoloEsteso
+                                    )
+                                }}</a-typography-text>
+                            </div>
+                        </template>
+                        <template v-for="item in items">
+                            <template v-if="!!item">
                                 <div>
-                                    <a-typography-text type="secondary">{{
-                                        replaceEndlineWithBr(
-                                            exerciseData.titoloEsteso
-                                        )
+                                    <a-typography-text strong>{{
+                                        capitalizeFirstLetter(item.title)
                                     }}</a-typography-text>
+                                    <p
+                                        v-html="
+                                            replaceEndlineWithBr(item.content)
+                                        "></p>
                                 </div>
                             </template>
-                            <div style="overflow: auto; height: 900px">
-                                <template v-for="item in items">
-                                    <template v-if="!!item">
-                                        <div>
-                                            <a-typography-text strong>{{
-                                                capitalizeFirstLetter(
-                                                    item.title
-                                                )
-                                            }}</a-typography-text>
-                                            <p
-                                                v-html="
-                                                    replaceEndlineWithBr(
-                                                        item.content
-                                                    )
-                                                "></p>
-                                        </div>
-                                    </template>
-                                </template>
-                            </div>
-                        </a-space>
-                    </a-col>
-                    <a-col :sm="24" :md="12">
-                        <ExercisePage />
-                    </a-col>
-                </a-row>
-            </div>
+                        </template>
+                    </a-space>
+                </a-tab-pane>
+                <a-tab-pane :key="2">
+                    <template #tab> Svolgimento </template>
+                    <ExercisePage />
+                </a-tab-pane>
+            </a-tabs>
         </template>
     </div>
 </template>

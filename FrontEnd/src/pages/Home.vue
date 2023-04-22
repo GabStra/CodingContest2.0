@@ -90,11 +90,9 @@ export default defineComponent({
             </a-layout-sider>
             <a-layout-content>
                 <div class="content">
-                    <transition name="fade" mode="out-in">
-                        <router-view
-                            @newPopup="(alert: any) =>
+                    <router-view
+                        @newPopup="(alert: any) =>
                         $emit('newPopup', alert)" />
-                    </transition>
                 </div>
             </a-layout-content>
         </a-layout>
@@ -102,16 +100,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.5s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
-
 .menu_button {
     font-size: 1.2em;
 }

@@ -6,6 +6,7 @@ import { TblCorsi } from "../database/entities/TblCorsi";
 import { AuthRequest, AuthRequestWithCourseId } from "../dto/AuthRequest";
 import {
   hasCourseQueryParam,
+  isAdmin,
   isLoggedIn,
   isTeacher,
 } from "../helper/middleware";
@@ -17,6 +18,7 @@ import { ENDPOINTS } from "shared/dist/constants/endpoints";
 import { CourseRegistrationManager } from "shared/dist/dto/courseRegistrationManager";
 import { TblEsercizi } from "../database/entities/TblEsercizi";
 import { TblSubmissions } from "../database/entities/TblSubmissions";
+import { sessionCache } from "../..";
 
 const router = express.Router();
 
@@ -75,7 +77,7 @@ router.get(
 router.post(
   ENDPOINTS.SAVE_COURSE,
   isLoggedIn,
-  //isAdmin,
+  isAdmin,
   async function (req: AuthRequest, res) {
     let course = new Course(req.body);
     let errors = await validate(course, VALIDATION_LANGUAGE.IT);
@@ -125,6 +127,7 @@ router.post(
 router.delete(
   ENDPOINTS.DELETE_COURSE,
   isLoggedIn,
+  isAdmin,
   hasCourseQueryParam,
   async function (req: AuthRequestWithCourseId, res) {
     let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
@@ -269,7 +272,7 @@ router.get(
 router.get(
   ENDPOINTS.COURSE,
   isLoggedIn,
-  isTeacher,
+  isAdmin,
   async function (req: AuthRequestWithCourseId, res) {
     let coursesRepo = await getRepository<TblCorsi>(TblCorsi);
     let course = await coursesRepo.findOne({

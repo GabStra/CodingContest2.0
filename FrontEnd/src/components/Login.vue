@@ -143,6 +143,9 @@ export default defineComponent({
     </div>
 </template>
 <style scoped>
+#form_item_password:focus {
+    border: none !important;
+}
 .hoz-vert-center {
     margin: 0;
     position: absolute;
