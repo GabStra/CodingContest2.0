@@ -33,22 +33,17 @@ export default defineComponent({
             if (response === null) return
             this.users = response.data
         },
-        handleEdit(userId: number) {
-            router.push({
-                path: URL.MANAGE_COURSE,
-                query: { id: userId },
-            })
-        },
-        deleteUser: async function (id: number) {
+        handleEdit(userId: number) {},
+        deleteUser: async function (userId: number) {
             let response = await this.$api.delete<any>(
-                ENDPOINTS.DELETE_COURSE,
-                { course: id },
+                ENDPOINTS.DELETE_USER,
+                { id: userId },
                 true
             )
             if (response === null) return
             this.$emit('newPopup', {
                 type: POPUP_TYPE.SUCCESS,
-                message: 'Corso eliminato',
+                message: 'Utente eliminato',
             })
             this.onLoadUsers()
         },

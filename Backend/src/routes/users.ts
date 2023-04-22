@@ -56,8 +56,10 @@ router.delete(
   isLoggedIn,
   isAdmin,
   async function (req: AuthRequest, res) {
-    let id = req.query.id;
-    if (!(typeof id === "string" || id instanceof String)) {
+    let userId;
+    try {
+      userId = Number(req.query.id);
+    } catch {
       res.sendStatus(400);
       return;
     }
@@ -65,7 +67,7 @@ router.delete(
     let userRepo = await getRepository<TblUsers>(TblUsers);
     let user = await userRepo.findOne({
       where: {
-        userId: id as string,
+        id: userId,
       },
     });
 
